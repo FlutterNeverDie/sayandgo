@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
+import { LEGAL, type LegalKind } from './legal/content';
 
 export function NotFoundPage() {
   const { t } = useTranslation();
@@ -20,9 +21,9 @@ export function NotFoundPage() {
   );
 }
 
-/** 약관 · 정책 문서 틀. 본문은 다음 단계에서 채운다. */
-export function LegalPage({ kind }: { kind: 'terms' | 'privacy' | 'policy' | 'rights' }) {
-  const { t } = useTranslation();
+/** 약관 · 정책 문서 (본문은 legal/content.tsx, 한국어본이 기준) */
+export function LegalPage({ kind }: { kind: LegalKind }) {
+  const { t, i18n } = useTranslation();
   return (
     <>
       <PublicTopbar />
@@ -30,7 +31,8 @@ export function LegalPage({ kind }: { kind: 'terms' | 'privacy' | 'policy' | 'ri
         <div className="title-row">
           <h1 className="title">{t(`legal.${kind}`)}</h1>
         </div>
-        <p className="subtitle grow">{t('legal.koreanOnly')}</p>
+        {i18n.resolvedLanguage !== 'ko' && <p className="notice" style={{ marginBottom: 16 }}>{t('legal.koreanOnly')}</p>}
+        <article className="legal grow">{LEGAL[kind]}</article>
         <Footer />
       </main>
     </>

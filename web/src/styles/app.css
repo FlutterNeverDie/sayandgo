@@ -635,3 +635,18 @@ body.white .topbar { background: #ffffff; }
 .compose__text::placeholder { color: var(--faint); }
 .compose__meta { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-top: 8px; font-size: 13px; }
 .compose__meta .num { white-space: nowrap; flex: none; }
+
+/* 피드백 쓰기: 입력칸이 남는 높이를 채우고, 보내기는 화면 아래에 */
+.compose { max-width: var(--max); margin: 0 auto; padding: 4px var(--gutter) 0; }
+.compose__form { display: flex; flex-direction: column; min-height: calc(100dvh - 56px); }
+.compose .kind-chips { margin-bottom: 12px; }
+.compose__text { flex: 1 1 auto; min-height: 140px !important; }
+.compose__dock {
+  position: sticky; bottom: 0; background: var(--ground);
+  padding: 10px 0 calc(12px + env(safe-area-inset-bottom)); margin-top: 8px;
+}
+.compose__meta { margin-top: 0; margin-bottom: 8px; }
+.compose__warn { color: #9c3418; font-weight: 600; }
+.compose__anon { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--mint-ink); font-weight: 600; margin-bottom: 10px; }
+.compose__consent { margin-top: 10px; font-size: 12px; color: var(--faint); line-height: 1.5; }
+.compose__consent a { color: var(--muted); }

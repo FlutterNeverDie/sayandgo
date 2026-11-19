@@ -275,15 +275,20 @@ export function fetchInboxPage(code: string, tab: InboxTab, cursor: QueryDocumen
   return fetchPage(code, inboxConstraints(tab), cursor);
 }
 
+/** 답변을 고칠 수 있는 시간 (보안 규칙과 같다) */
+export const ANSWER_EDIT_MS = 10 * 60_000;
+
+export function canEditAnswer(q: Question): boolean {
+  return !q.answer || !q.answer.at || Date.now() - q.answer.at.getTime() < ANSWER_EDIT_MS;
+}
+
 export async function saveAnswer(code: string, q: Question, body: string) {
-  await updateDoc(qdoc(code, q.id), {
-    answer: {
-      body,
-      at: q.answer?.at ? Timestamp.fromDate(q.answer.at) : serverTimestamp(),
-      editedAt: q.answer ? serverTimestamp() : null,
-    },
-    status: 'answered',
-  });
+  if (q.answer) {
+    // 고칠 때는 본문만 바꾼다 (첫 답변 시각은 그대로 → 규칙이 10분 제한을 건다)
+    await updateDoc(qdoc(code, q.id), { 'answer.body': body, 'answer.editedAt': serverTimestamp() });
+  } else {
+    await updateDoc(qdoc(code, q.id), { answer: { body, at: serverTimestamp(), editedAt: null }, status: 'answered' });
+  }
 }
 
 export async function removeAnswer(code: string, id: string) {

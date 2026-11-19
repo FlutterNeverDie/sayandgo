@@ -305,6 +305,21 @@ describe('사장님 관리', () => {
     await assertSucceeds(updateDoc(q1(owner()), { answer: { body: '네 팝니다', at: serverTimestamp(), editedAt: null }, status: 'answered' }));
     await assertSucceeds(updateDoc(q1(owner()), { answer: null, status: 'open' }));
   });
+  it('답변은 10분 안에만 고칠 수 있다', async () => {
+    await assertSucceeds(updateDoc(q1(owner()), { answer: { body: '처음', at: serverTimestamp(), editedAt: null }, status: 'answered' }));
+    await assertSucceeds(updateDoc(q1(owner()), { 'answer.body': '고침', 'answer.editedAt': serverTimestamp() }));
+    await seed(async (db) =>
+      updateDoc(doc(db, `stores/${CODE}/questions/q1`), { answer: { body: '오래된 답', at: Timestamp.fromMillis(Date.now() - 11 * 60_000), editedAt: null } }),
+    );
+    await assertFails(updateDoc(q1(owner()), { 'answer.body': '몰래 고침', 'answer.editedAt': serverTimestamp() }));
+    await assertSucceeds(updateDoc(q1(owner()), { hidden: true, hiddenBy: 'owner' })); // 숨기기는 언제든
+    await assertSucceeds(updateDoc(q1(owner()), { answer: null, status: 'open' })); // 지우기도 언제든
+  });
+  it('답변 시각은 바꿀 수 없다', async () => {
+    await assertFails(updateDoc(q1(owner()), { answer: { body: '답', at: Timestamp.fromMillis(Date.now() + 86400_000), editedAt: null }, status: 'answered' }));
+    await assertSucceeds(updateDoc(q1(owner()), { answer: { body: '답', at: serverTimestamp(), editedAt: null }, status: 'answered' }));
+    await assertFails(updateDoc(q1(owner()), { 'answer.at': Timestamp.fromMillis(Date.now() + 86400_000) }));
+  });
   it('답변 있는데 status open이면 거부', async () => {
     await assertFails(updateDoc(q1(owner()), { answer: { body: '네', at: serverTimestamp(), editedAt: null }, status: 'open' }));
   });

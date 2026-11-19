@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './i18n';
 import './styles/app.css';
 import { AuthProvider } from './app/auth';
+import { UpdateWatcher } from './app/UpdateWatcher';
 import { ToastProvider } from './components/ui/Overlay';
 import { Loading } from './components/ui/States';
 import { StorePage } from './pages/StorePage';
@@ -36,6 +37,7 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <ToastProvider>
           <BrowserRouter>
+            <UpdateWatcher />
             <Suspense fallback={<Loading />}>
               <Routes>
                 <Route path="/" element={<LandingPage />} />

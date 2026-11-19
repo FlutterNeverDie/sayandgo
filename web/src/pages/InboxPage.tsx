@@ -9,7 +9,9 @@ import { OwnerShell } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
 import { ErrorBox, TicketSkeleton } from '../components/ui/States';
 import {
+  ANSWER_EDIT_MS,
   blockAuthor,
+  canEditAnswer,
   deleteQuestions,
   fetchInboxPage,
   fetchOwnerCounts,
@@ -413,14 +415,27 @@ function Inbox({ store }: { store: Store }) {
       {menuFor && (
         <Sheet onClose={() => setMenuFor(null)}>
           <div className="menu-list">
-            <button
-              onClick={() => {
-                setEditing(menuFor.id);
-                setMenuFor(null);
-              }}
-            >
-              {menuFor.answer ? t('inbox.editAnswer') : t('inbox.answer')}
-            </button>
+            {canEditAnswer(menuFor) ? (
+              <button
+                onClick={() => {
+                  setEditing(menuFor.id);
+                  setMenuFor(null);
+                }}
+              >
+                {menuFor.answer ? t('inbox.editAnswer') : t('inbox.answer')}
+              </button>
+            ) : (
+              <button
+                onClick={async () => {
+                  const q = menuFor;
+                  setMenuFor(null);
+                  await run(() => removeAnswer(store.code, q.id), t('inbox.answerRemoved'));
+                  patchMore(q.id, (x) => ({ ...x, status: 'open', answer: null }));
+                }}
+              >
+                {t('inbox.removeAnswer')}
+              </button>
+            )}
             {menuFor.hiddenBy !== 'admin' && (
               <button
                 onClick={() => {
@@ -515,6 +530,9 @@ function AnswerSheet({ q, onSave, onClose, onRemove }: { q: Question; onSave: (b
         </p>
       )}
       <p className="qitem__quote">{q.body}</p>
+      <p className="field__hint" style={{ marginBottom: 10 }}>
+        {q.answer ? t('inbox.editLeft', { m: Math.max(1, Math.ceil((ANSWER_EDIT_MS - (Date.now() - (q.answer.at?.getTime() ?? Date.now()))) / 60_000)) }) : t('inbox.editRule')}
+      </p>
       <form
         onSubmit={(e) => {
           e.preventDefault();

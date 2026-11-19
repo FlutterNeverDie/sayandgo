@@ -108,8 +108,8 @@ function ComposeForm({ store, onBack }: { store: Store; onBack: () => void }) {
         </div>
       </header>
 
-      <main className="page compose">
-        <form onSubmit={onSubmit} noValidate>
+      <main className="compose">
+        <form onSubmit={onSubmit} noValidate className="compose__form">
           <div className="kind-chips" role="radiogroup" aria-label={t('store.label')}>
             {QUESTION_KINDS.map((k) => (
               <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => setKind(k)}>
@@ -135,40 +135,32 @@ function ComposeForm({ store, onBack }: { store: Store; onBack: () => void }) {
             aria-invalid={!!error}
             aria-describedby="q-err q-hint"
           />
-          <div className="compose__meta">
-            {error ? (
-              <p className="field__error" id="q-err" role="alert">
-                {t(error)}
-              </p>
-            ) : (
-              <span className="no-delete" style={{ margin: 0, textAlign: 'left' }}>
-                {wait > 0 ? t('store.wait', { s: wait }) : t('store.noDelete')}
+
+          {/* 아래 고정: 안내 · 글자 수 · 보내기 */}
+          <div className="compose__dock">
+            <div className="compose__meta">
+              {error ? (
+                <p className="field__error" id="q-err" role="alert">
+                  {t(error)}
+                </p>
+              ) : (
+                <span className="compose__warn">{wait > 0 ? t('store.wait', { s: wait }) : t('store.noDeleteShort')}</span>
+              )}
+              <span className="num" style={{ color: length > LIMITS.questionMax ? 'var(--negative)' : 'var(--faint)' }}>
+                {length} / {LIMITS.questionMax}
               </span>
-            )}
-            <span className="num" style={{ color: length > LIMITS.questionMax ? 'var(--negative)' : 'var(--faint)' }}>
-              {length} / {LIMITS.questionMax}
-            </span>
-          </div>
-
-          <button className="btn btn--black btn--block btn--lg" style={{ marginTop: 16 }} disabled={!canSend}>
-            {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
-          </button>
-
-          <div className="anon-box">
-            <p className="anon-box__title">
-              <LockIcon />
-              {t('store.anonTitle')}
+            </div>
+            <p className="compose__anon">
+              <LockIcon size={14} />
+              {t('store.anonLine')}
             </p>
-            <ul>
-              <li>{t('store.anon1')}</li>
-              <li>{t('store.anon2')}</li>
-              <li>{t('store.anon3')}</li>
-            </ul>
+            <button className="btn btn--black btn--block btn--lg" disabled={!canSend}>
+              {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
+            </button>
+            <p className="compose__consent" id="q-hint">
+              <Trans i18nKey="store.consent" components={{ 1: <Link to="/policy" /> }} />
+            </p>
           </div>
-
-          <p className="field__hint" id="q-hint" style={{ marginTop: 12 }}>
-            <Trans i18nKey="store.consent" components={{ 1: <Link to="/policy" /> }} />
-          </p>
         </form>
       </main>
     </>

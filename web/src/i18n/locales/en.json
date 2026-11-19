@@ -256,7 +256,9 @@
     "shareText": "{{name}} answered: {{q}}",
     "noDelete": "Once sent, it can't be edited or deleted. Please check before sending.",
     "invite": "It's anonymous, so be honest. We read every word, even the harsh ones, and use it to become a better place.",
-    "sendShort": "Send"
+    "sendShort": "Send",
+    "noDeleteShort": "Can't be edited or deleted once sent",
+    "anonLine": "Nobody can tell who sent it · no sign-in, contact or IP"
   },
   "report": {
     "title": "Report",
@@ -329,7 +331,10 @@
     "answerTitle": "Write a reply",
     "pausedNotice": "Feedback is paused. Guests see a notice.",
     "resume": "Resume",
-    "privateNote": "Only you can see this note. Your reply stays private too."
+    "privateNote": "Only you can see this note. Your reply stays private too.",
+    "editRule": "You can edit a reply for 10 minutes after posting.",
+    "editLeft": "You can edit this for {{m}} more min.",
+    "answerRemoved": "Reply removed"
   },
   "share": {
     "title": "Link · QR",

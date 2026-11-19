@@ -97,7 +97,14 @@ service cloud.firestore {
             && changes(['answer', 'status', 'hidden', 'hiddenBy', 'pinned'])
             && (d().answer == null
                   ? d().status == 'open'
-                  : (str(d().answer.body, 1, 1000) && d().status == 'answered'))
+                  : (str(d().answer.body, 1, 1000) && d().status == 'answered'
+                     && (resource.data.answer == null
+                           // 새 답변: 답변 시각은 서버 시각
+                           ? d().answer.at == request.time
+                           // 기존 답변: 시각은 그대로, 본문은 첫 답변 후 10분까지만 고칠 수 있다
+                           : (d().answer.at == resource.data.answer.at
+                              && (d().answer.body == resource.data.answer.body
+                                  || request.time < resource.data.answer.at + duration.value(10, 'm'))))))
             && d().hidden is bool && d().pinned is bool
             && (d().hidden == false ? d().hiddenBy == null : d().hiddenBy in ['owner', 'report']))
           // 손님 신고: 한 사람당 한 번, 3건부터 자동 가림

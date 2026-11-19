@@ -48,7 +48,7 @@ export function LandingPage() {
             {t('landing.sampleTitle')}
           </h2>
           <div className="feed" style={{ borderTop: '1px solid var(--rule)' }}>
-            <QuestionItem q={sample} storeName={t('landing.sampleStore')} defaultOpen />
+            <QuestionItem q={sample} storeName={t('landing.sampleStore')} />
             <QuestionItem q={{ ...sample, id: 'sample2', body: t('landing.sampleQ2'), status: 'open', answer: null, createdAt: new Date() }} storeName={t('landing.sampleStore')} />
           </div>
         </section>

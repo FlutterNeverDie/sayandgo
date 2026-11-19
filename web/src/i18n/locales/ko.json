@@ -152,8 +152,8 @@
     "suspendedDesc": "운영정책 위반으로 지금은 이 가게 페이지를 이용할 수 없어요.",
     "powered": "큐플레이스로 내 가게 질문함 만들기",
     "sentHidden": "보냈어요. 사장님이 답변하면 이 페이지에 보여요.",
-    "anonymousQ": "익명 질문",
-    "waiting": "답변을 기다리고 있어요",
+    "anonymousQ": "익명님의 질문",
+    "waiting": "아직 답변 전이에요",
     "ask": "질문하기",
     "askTitle": "익명으로 질문하기",
     "statsQ": "질문",
@@ -161,7 +161,11 @@
     "tabAll": "전체",
     "tabAnswered": "답변 완료",
     "shareStore": "공유",
-    "end": "모든 질문을 봤어요"
+    "end": "모든 질문을 봤어요",
+    "moreText": "더보기",
+    "less": "접기",
+    "editInfo": "정보 편집",
+    "qrShare": "QR · 공유"
   },
   "report": {
     "title": "신고하기",
@@ -182,16 +186,14 @@
   "inbox": {
     "title": "받은 질문",
     "tabs": {
-      "open": "새 질문",
-      "answered": "답변함",
-      "hidden": "숨김",
-      "all": "전체"
+      "answered": "답변",
+      "open": "질문",
+      "hidden": "숨김"
     },
     "empty": {
-      "open": "답변을 기다리는 질문이 없어요.",
-      "answered": "아직 답변한 질문이 없어요.",
-      "hidden": "숨긴 질문이 없어요.",
-      "all": "아직 받은 질문이 없어요."
+      "open": "새로 들어온 질문이 없어요.",
+      "answered": "아직 답변한 질문이 없어요. 질문 탭에서 골라 답해 보세요.",
+      "hidden": "숨긴 질문이 없어요."
     },
     "firstRunTitle": "첫 질문을 받을 준비가 됐어요",
     "firstRunDesc": "QR을 저장해 테이블이나 카운터에 붙여 보세요. 손님이 질문하면 여기에 바로 나타나요.",
@@ -233,7 +235,9 @@
     "blocked": "차단했어요",
     "blockFailed": "이 질문은 작성자 정보가 없어 차단할 수 없어요.",
     "pinLimit": "고정은 3개까지 할 수 있어요.",
-    "answerTitle": "답변 쓰기"
+    "answerTitle": "답변 쓰기",
+    "pausedNotice": "질문 받기를 멈췄어요. 손님 화면에 안내가 보여요.",
+    "resume": "다시 받기"
   },
   "share": {
     "title": "링크 · QR",

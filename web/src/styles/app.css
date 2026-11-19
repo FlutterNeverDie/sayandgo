@@ -108,7 +108,7 @@ a { color: var(--mint-ink); text-underline-offset: 3px; }
 .tabbar a[aria-current='page']::after {
   content: ''; position: absolute; top: 0; left: 30%; right: 30%; height: 2px; background: var(--text);
 }
-.tabbar .badge { position: absolute; top: 8px; margin-left: 46px; }
+.tabbar .badge { position: absolute; top: 6px; left: calc(50% + 30px); }
 
 @media (min-width: 720px) {
   .tabbar { display: none; }
@@ -243,34 +243,37 @@ a { color: var(--mint-ink); text-underline-offset: 3px; }
 
 /* ---------- 질문 피드 ---------- */
 .feed { margin: 0 calc(var(--gutter) * -1); }
-.qitem { padding: 16px var(--gutter); border-bottom: 1px solid var(--rule); }
-.qitem__head { display: flex; align-items: center; gap: 8px; min-height: 24px; font-size: var(--fs-12); color: var(--muted); }
-.qitem__head .who { font-weight: 600; color: var(--text); font-size: var(--fs-14); }
+.qitem { display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 16px var(--gutter); border-bottom: 1px solid var(--rule); }
+.qitem__side { display: flex; justify-content: center; padding-top: 2px; }
+.qitem__side .avatar { width: 40px; height: 40px; font-size: 17px; }
+.qitem__main { min-width: 0; }
+.qitem__head { display: flex; align-items: center; gap: 6px; min-height: 24px; font-size: var(--fs-14); color: var(--muted); }
+.qitem__head .who { font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qitem__head time { white-space: nowrap; }
 .qitem__head .spacer { flex: 1; }
-.qitem__bubble {
-  margin-top: 8px; background: var(--raised); border-radius: 14px; padding: 12px 14px;
-  font-size: var(--fs-16); white-space: pre-wrap;
+.qitem__bubble { margin-top: 8px; background: var(--raised); border-radius: 18px; padding: 12px 16px 14px; }
+.qitem__bubble-label { display: flex; align-items: center; gap: 8px; font-size: var(--fs-14); color: var(--muted); font-weight: 600; }
+.qitem__bubble-time { font-weight: 400; margin-left: auto; font-size: var(--fs-12); }
+.qitem__anon {
+  width: 22px; height: 22px; border-radius: 50%; background: #c9d1cc; flex: none; position: relative;
 }
-.qitem__answer {
-  margin-top: 12px; width: 100%; background: none; border: 0; padding: 0; text-align: left; cursor: pointer;
-  display: grid; grid-template-columns: 28px 1fr 20px; gap: 2px 10px; align-items: start;
+.qitem__anon::after { /* 익명 표시: 얼굴 없는 동그라미 + 물음표 대신 점 두 개 */
+  content: ''; position: absolute; left: 6px; top: 8px; width: 3px; height: 3px; border-radius: 50%;
+  background: #fff; box-shadow: 7px 0 0 #fff;
 }
-.qitem__answer .avatar { grid-row: 1 / span 2; grid-column: 1; }
-.qitem__answer-who { font-size: var(--fs-12); color: var(--muted); }
-.qitem__answer-who b { color: var(--mint-ink); font-weight: 700; margin-right: 4px; }
-.qitem__answer-text { grid-column: 2; white-space: pre-wrap; }
-.qitem__answer[aria-expanded='false'] .qitem__answer-text {
-  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; color: var(--muted);
-}
-.qitem__chev { grid-column: 3; grid-row: 1; color: var(--muted); transition: transform 180ms var(--ease); }
-.qitem__answer[aria-expanded='true'] .qitem__chev { transform: rotate(180deg); }
+.qitem__bubble-text { margin-top: 6px; font-size: var(--fs-16); white-space: pre-wrap; }
+.qitem__answer { margin-top: 12px; font-size: var(--fs-16); white-space: pre-wrap; }
+.qitem__answer--clamp { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.qitem__more { background: none; border: 0; padding: 4px 0; color: var(--muted); font-size: var(--fs-14); cursor: pointer; }
+.qitem__more:hover { color: var(--text); }
+.qitem__edited { font-size: var(--fs-12); color: var(--muted); margin-top: 4px; }
 .qitem__waiting { margin-top: 10px; font-size: var(--fs-14); color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .qitem__waiting::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #e3a008; }
-.qitem--hidden .qitem__bubble { color: var(--muted); }
+.qitem--hidden .qitem__bubble-text, .qitem--hidden .qitem__answer { color: var(--muted); }
 .qitem--selected { background: var(--mint-soft); }
-.qitem__select { width: 22px; height: 22px; accent-color: var(--text); margin: 0; }
-.qitem__actions { display: flex; gap: 4px; margin: 10px 0 -6px -10px; }
-.qitem__quote { background: var(--raised); border-radius: 12px; padding: 10px 12px; margin-bottom: 16px; white-space: pre-wrap; color: var(--muted); }
+.qitem__select { width: 22px; height: 22px; accent-color: var(--text); margin: 9px 0 0; }
+.qitem__actions { display: flex; gap: 4px; margin: 8px 0 -6px -10px; }
+.qitem__quote { background: var(--raised); border-radius: 14px; padding: 10px 14px; margin-bottom: 16px; white-space: pre-wrap; color: var(--muted); }
 
 /* 새로 들어온 항목 */
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }

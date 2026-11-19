@@ -1,10 +1,9 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { RequireOwner } from '../app/auth';
-import { QuestionItem } from '../components/question/QuestionItem';
-import { Switch } from '../components/ui/Fields';
+import { Avatar, QuestionItem } from '../components/question/QuestionItem';
 import { OwnerShell } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
 import { ErrorBox, TicketSkeleton } from '../components/ui/States';
@@ -12,6 +11,7 @@ import {
   blockAuthor,
   deleteQuestions,
   fetchInboxPage,
+  fetchOwnerCounts,
   removeAnswer,
   saveAnswer,
   setHidden,
@@ -19,12 +19,11 @@ import {
   type InboxTab,
   type Page,
 } from '../lib/questions';
-import { storeUrl } from '../lib/storeCode';
 import { updateStore } from '../lib/stores';
 import type { Question, Store } from '../lib/types';
 import { checkAnswer, LIMITS, tidyText } from '../lib/validation';
 
-const TABS: InboxTab[] = ['open', 'answered', 'hidden', 'all'];
+const TABS: InboxTab[] = ['answered', 'open', 'hidden'];
 const UNDO_MS = 5000;
 
 export function InboxPage() {
@@ -89,8 +88,10 @@ function useInboxList(code: string, tab: InboxTab) {
   }, [head, more]);
 
   /** "더 보기"로 불러온 항목은 실시간이 아니라서 직접 고친다 */
-  const patchMore = (id: string, fn: (q: Question) => Question | null) =>
-    setMore((m) => m.flatMap((q) => (q.id === id ? (fn(q) ? [fn(q)!] : []) : [q])));
+  const patchMore = useCallback(
+    (id: string, fn: (q: Question) => Question | null) => setMore((m) => m.flatMap((q) => (q.id === id ? (fn(q) ? [fn(q)!] : []) : [q]))),
+    [],
+  );
 
   return {
     items,
@@ -108,9 +109,17 @@ function Inbox({ store }: { store: Store }) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<InboxTab>('open');
-  const list = useInboxList(store.code, tab);
-  const openList = useInboxList(store.code, 'open'); // 같은 쿼리는 SDK가 한 번만 구독한다
+  const counts = useQuery({
+    queryKey: ['ownerCounts', store.code],
+    queryFn: () => fetchOwnerCounts(store.code),
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
+  });
+  const [tab, setTab] = useState<InboxTab | null>(null);
+  // 처음엔 답할 질문이 있으면 "질문" 탭, 없으면 "답변" 탭
+  const activeTab: InboxTab = tab ?? (counts.data ? (counts.data.open > 0 ? 'open' : 'answered') : 'open');
+  const list = useInboxList(store.code, activeTab);
+  const refreshCounts = () => qc.invalidateQueries({ queryKey: ['ownerCounts', store.code] });
 
   const [menuFor, setMenuFor] = useState<Question | null>(null);
   const [blockFor, setBlockFor] = useState<Question | null>(null);
@@ -122,7 +131,7 @@ function Inbox({ store }: { store: Store }) {
   const pendingIdsRef = useRef<Set<string>>(new Set());
   const [, force] = useState(0);
   const timers = useRef<Map<number, { ids: string[]; timer: ReturnType<typeof setTimeout> }>>(new Map());
-  const openCount = openList.items.filter((q) => !pendingIdsRef.current.has(q.id)).length;
+  const { patchMore } = list;
 
   const commitDelete = useCallback(
     (key: number) => {
@@ -131,14 +140,17 @@ function Inbox({ store }: { store: Store }) {
       clearTimeout(entry.timer);
       timers.current.delete(key);
       deleteQuestions(store.code, entry.ids)
-        .then(() => entry.ids.forEach((id) => list.patchMore(id, () => null)))
+        .then(() => {
+          entry.ids.forEach((id) => patchMore(id, () => null));
+          qc.invalidateQueries({ queryKey: ['ownerCounts', store.code] });
+        })
         .catch(() => toast(t('errors.generic')))
         .finally(() => {
           entry.ids.forEach((id) => pendingIdsRef.current.delete(id));
           force((n) => n + 1);
         });
     },
-    [store.code, list, toast, t],
+    [store.code, patchMore, qc, toast, t],
   );
 
   useEffect(() => {
@@ -173,19 +185,23 @@ function Inbox({ store }: { store: Store }) {
     });
   }
 
+  const openCount = counts.data?.open ?? 0;
   useEffect(() => {
-    document.title = openCount ? `(${openCount >= 10 ? '10+' : openCount}) ${t('app.name')}` : t('app.name');
+    document.title = openCount ? `(${openCount}) ${t('app.name')}` : t('app.name');
     return () => {
       document.title = t('app.name');
     };
   }, [openCount, t]);
 
   const visibleItems = list.items.filter((q) => !pendingIdsRef.current.has(q.id));
+  const editingQ = editing ? list.items.find((q) => q.id === editing) ?? null : null;
+  const selectedIds = [...selected].filter((id) => visibleItems.some((q) => q.id === id));
 
   async function run(action: () => Promise<unknown>, okText?: string) {
     try {
       await action();
       if (okText) toast(okText);
+      refreshCounts();
     } catch {
       toast(t('errors.generic'));
     }
@@ -194,7 +210,7 @@ function Inbox({ store }: { store: Store }) {
   async function toggleHidden(q: Question) {
     const next = !q.hidden;
     await run(() => setHidden(store.code, [q.id], next), next ? t('inbox.hidden') : undefined);
-    list.patchMore(q.id, (x) => ({ ...x, hidden: next, hiddenBy: next ? 'owner' : null }));
+    patchMore(q.id, () => null); // 탭 조건에서 빠지므로 목록에서 뺀다
   }
 
   async function doBlock(q: Question, alsoDelete: boolean) {
@@ -208,22 +224,57 @@ function Inbox({ store }: { store: Store }) {
     }
   }
 
-  async function togglePause(on: boolean) {
-    qc.setQueryData<Store>(['store', store.code], { ...store, acceptingQuestions: on });
-    await run(() => updateStore(store.code, { acceptingQuestions: on }));
+  async function resume() {
+    qc.setQueryData<Store>(['store', store.code], { ...store, acceptingQuestions: true });
+    await run(() => updateStore(store.code, { acceptingQuestions: true }));
   }
-
-  const editingQ = editing ? list.items.find((q) => q.id === editing) ?? null : null;
-  const selectedIds = [...selected].filter((id) => visibleItems.some((q) => q.id === id));
 
   return (
     <OwnerShell storeName={store.storeName} openCount={openCount}>
       <main className="page">
-        <div className="title-row">
-          <h1 className="title">{t('inbox.title')}</h1>
+        <header className="profile">
+          <h1 className="profile__name">{store.storeName}</h1>
+          <Avatar name={store.storeName} />
+          {store.intro && <p className="profile__intro">{store.intro}</p>}
+          <div className="profile__actions">
+            <Link to="/settings" className="btn" style={{ flex: 1 }}>
+              {t('store.editInfo')}
+            </Link>
+            <Link to="/share" className="btn btn--primary" style={{ flex: 1 }}>
+              {t('store.qrShare')}
+            </Link>
+          </div>
+        </header>
+
+        {!store.acceptingQuestions && (
+          <div className="notice" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span style={{ flex: 1 }}>{t('inbox.pausedNotice')}</span>
+            <button className="btn btn--sm" onClick={resume}>
+              {t('inbox.resume')}
+            </button>
+          </div>
+        )}
+
+        <div className="uline-tabs" role="tablist">
+          {TABS.map((k) => (
+            <button
+              key={k}
+              role="tab"
+              aria-selected={activeTab === k}
+              onClick={() => {
+                setTab(k);
+                setSelected(new Set());
+              }}
+            >
+              {t(`inbox.tabs.${k}`)}
+              {counts.data && <span className="num"> {counts.data[k]}</span>}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 0' }}>
           <button
             className="btn btn--text btn--sm"
-            style={{ marginLeft: 'auto' }}
             onClick={() => {
               setSelecting((s) => !s);
               setSelected(new Set());
@@ -234,89 +285,66 @@ function Inbox({ store }: { store: Store }) {
           </button>
         </div>
 
-        <LinkPanel store={store} />
-
-        <div className="panel" style={{ marginTop: 12, padding: '0 16px' }}>
-          <div className="switch-row">
-            <div className="switch-row__text">
-              <p className="switch-row__title">{t('inbox.pauseTitle')}</p>
-              <p className="switch-row__desc">{store.acceptingQuestions ? t('inbox.pauseOn') : t('inbox.pauseOff')}</p>
-            </div>
-            <Switch checked={store.acceptingQuestions} onChange={togglePause} label={t('inbox.pauseTitle')} />
-          </div>
-        </div>
-
-        <div className="section">
-          <div className="uline-tabs" role="tablist">
-            {TABS.map((k) => (
-              <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>
-                {t(`inbox.tabs.${k}`)}
-                {k === 'open' && openCount > 0 && <span className="num"> {openCount >= 10 ? '10+' : openCount}</span>}
-              </button>
-            ))}
-          </div>
-
-          <div className="feed">
-            {list.loading && (
-              <>
-                <TicketSkeleton />
-                <TicketSkeleton />
-              </>
-            )}
-            {list.error && (
-              <div style={{ padding: 16 }}>
-                <ErrorBox onRetry={list.retry} />
-              </div>
-            )}
-            {!list.loading && !list.error && visibleItems.length === 0 && (
-              <div style={{ padding: 16 }}>
-                <EmptyInbox tab={tab} store={store} />
-              </div>
-            )}
-
-            {visibleItems.map((q) => (
-              <QuestionItem
-                key={q.id}
-                q={q}
-                storeName={store.storeName}
-                owner
-                selected={selected.has(q.id)}
-                onMenu={selecting ? undefined : () => setMenuFor(q)}
-                leading={
-                  selecting && (
-                    <input
-                      type="checkbox"
-                      className="qitem__select"
-                      checked={selected.has(q.id)}
-                      aria-label={t('inbox.select')}
-                      onChange={(e) =>
-                        setSelected((s) => {
-                          const n = new Set(s);
-                          if (e.target.checked) n.add(q.id);
-                          else n.delete(q.id);
-                          return n;
-                        })
-                      }
-                    />
-                  )
-                }
-                actions={
-                  !selecting && !q.answer ? (
-                    <button className="btn btn--text btn--sm" style={{ color: 'var(--mint-ink)', fontWeight: 700 }} onClick={() => setEditing(q.id)}>
-                      {t('inbox.answer')}
-                    </button>
-                  ) : undefined
-                }
-              />
-            ))}
-          </div>
-
-          {list.hasMore && (
-            <button className="btn btn--block" style={{ marginTop: 16 }} onClick={list.loadMore} disabled={list.loadingMore}>
-              {list.loadingMore ? t('common.loading') : t('common.more')}
-            </button>
+        <div className="feed" style={{ borderTop: '1px solid var(--rule)' }}>
+          {list.loading && (
+            <>
+              <TicketSkeleton />
+              <TicketSkeleton />
+            </>
           )}
+          {list.error && (
+            <div style={{ padding: 16 }}>
+              <ErrorBox onRetry={list.retry} />
+            </div>
+          )}
+          {!list.loading && !list.error && visibleItems.length === 0 && (
+            <div style={{ padding: 16 }}>
+              <EmptyInbox tab={activeTab} store={store} />
+            </div>
+          )}
+
+          {visibleItems.map((q) => (
+            <QuestionItem
+              key={q.id}
+              q={q}
+              storeName={store.storeName}
+              owner
+              selected={selected.has(q.id)}
+              onMenu={selecting ? undefined : () => setMenuFor(q)}
+              leading={
+                selecting ? (
+                  <input
+                    type="checkbox"
+                    className="qitem__select"
+                    checked={selected.has(q.id)}
+                    aria-label={t('inbox.select')}
+                    onChange={(e) =>
+                      setSelected((s) => {
+                        const n = new Set(s);
+                        if (e.target.checked) n.add(q.id);
+                        else n.delete(q.id);
+                        return n;
+                      })
+                    }
+                  />
+                ) : undefined
+              }
+              actions={
+                !selecting && !q.answer ? (
+                  <button className="btn btn--sm btn--primary" style={{ marginLeft: 10 }} onClick={() => setEditing(q.id)}>
+                    {t('inbox.answer')}
+                  </button>
+                ) : undefined
+              }
+            />
+          ))}
         </div>
+
+        {list.hasMore && (
+          <button className="btn btn--block" style={{ marginTop: 16 }} onClick={list.loadMore} disabled={list.loadingMore}>
+            {list.loadingMore ? t('common.loading') : t('common.more')}
+          </button>
+        )}
       </main>
 
       {editingQ && (
@@ -325,15 +353,17 @@ function Inbox({ store }: { store: Store }) {
           onClose={() => setEditing(null)}
           onSave={async (body) => {
             await saveAnswer(store.code, editingQ, body);
-            list.patchMore(editingQ.id, (x) => ({ ...x, status: 'answered', answer: { body, at: x.answer?.at ?? new Date(), editedAt: x.answer ? new Date() : null } }));
+            patchMore(editingQ.id, (x) => ({ ...x, status: 'answered', answer: { body, at: x.answer?.at ?? new Date(), editedAt: x.answer ? new Date() : null } }));
             setEditing(null);
+            refreshCounts();
           }}
           onRemove={
             editingQ.answer
               ? async () => {
                   await removeAnswer(store.code, editingQ.id);
-                  list.patchMore(editingQ.id, (x) => ({ ...x, status: 'open', answer: null }));
+                  patchMore(editingQ.id, (x) => ({ ...x, status: 'open', answer: null }));
                   setEditing(null);
+                  refreshCounts();
                 }
               : undefined
           }
@@ -343,21 +373,24 @@ function Inbox({ store }: { store: Store }) {
       {selecting && selectedIds.length > 0 && (
         <div className="selection-bar" role="region" aria-label={t('inbox.selectedN', { n: selectedIds.length })}>
           <span style={{ fontSize: 14 }}>{t('inbox.selectedN', { n: selectedIds.length })}</span>
-          <button
-            className="btn btn--sm"
-            style={{ marginLeft: 'auto' }}
-            onClick={async () => {
-              const ids = selectedIds.filter((id) => visibleItems.find((q) => q.id === id)?.hiddenBy !== 'admin');
-              await run(() => setHidden(store.code, ids, true), t('inbox.hidden'));
-              ids.forEach((id) => list.patchMore(id, (x) => ({ ...x, hidden: true, hiddenBy: 'owner' })));
-              setSelected(new Set());
-              setSelecting(false);
-            }}
-          >
-            {t('inbox.hideN')}
-          </button>
+          {activeTab !== 'hidden' && (
+            <button
+              className="btn btn--sm"
+              style={{ marginLeft: 'auto' }}
+              onClick={async () => {
+                const ids = selectedIds.filter((id) => visibleItems.find((q) => q.id === id)?.hiddenBy !== 'admin');
+                await run(() => setHidden(store.code, ids, true), t('inbox.hidden'));
+                ids.forEach((id) => patchMore(id, () => null));
+                setSelected(new Set());
+                setSelecting(false);
+              }}
+            >
+              {t('inbox.hideN')}
+            </button>
+          )}
           <button
             className="btn btn--sm btn--danger"
+            style={activeTab === 'hidden' ? { marginLeft: 'auto' } : undefined}
             onClick={() => {
               scheduleDelete(selectedIds);
               setSelected(new Set());
@@ -431,40 +464,10 @@ function Inbox({ store }: { store: Store }) {
   );
 }
 
-function LinkPanel({ store }: { store: Store }) {
-  const { t } = useTranslation();
-  const toast = useToast();
-  const url = storeUrl(store.code);
-  return (
-    <div className="panel" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 10px 10px 16px' }}>
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <p className="field__hint">{t('inbox.myLink')}</p>
-        <a href={url} target="_blank" rel="noreferrer" style={{ fontSize: 14, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {url.replace(/^https?:\/\//, '')}
-        </a>
-      </div>
-      <button
-        className="btn btn--sm"
-        onClick={() =>
-          navigator.clipboard
-            .writeText(url)
-            .then(() => toast(t('common.copied')))
-            .catch(() => toast(t('errors.generic')))
-        }
-      >
-        {t('common.copy')}
-      </button>
-      <Link to="/share" className="btn btn--sm btn--primary">
-        {t('inbox.getQr')}
-      </Link>
-    </div>
-  );
-}
-
 function EmptyInbox({ tab, store }: { tab: InboxTab; store: Store }) {
   const { t } = useTranslation();
   const isNew = !!store.createdAt && Date.now() - store.createdAt.getTime() < 3 * 86400_000;
-  if ((tab === 'open' || tab === 'all') && isNew) {
+  if (tab === 'open' && isNew) {
     return (
       <div className="empty" style={{ textAlign: 'left' }}>
         <strong>{t('inbox.firstRunTitle')}</strong>
@@ -523,7 +526,11 @@ function AnswerSheet({ q, onSave, onClose, onRemove }: { q: Question; onSave: (b
           aria-invalid={!!error}
           style={{ resize: 'none' }}
         />
-        {error && <p className="field__error" style={{ marginTop: 8 }}>{t(error)}</p>}
+        {error && (
+          <p className="field__error" style={{ marginTop: 8 }}>
+            {t(error)}
+          </p>
+        )}
         <div className="btn-row" style={{ marginTop: 12 }}>
           {onRemove && (
             <button type="button" className="btn btn--text btn--sm" onClick={() => act(onRemove)} disabled={busy}>

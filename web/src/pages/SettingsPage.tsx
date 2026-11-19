@@ -46,7 +46,14 @@ function Settings({ store }: { store: Store }) {
         </div>
         <StoreInfo store={store} onSave={save} />
         <section className="section">
-          <div className="panel" style={{ padding: '0 16px' }}>
+          <div className="panel divided" style={{ padding: '0 16px' }}>
+            <div className="switch-row">
+              <div className="switch-row__text">
+                <p className="switch-row__title">{t('inbox.pauseTitle')}</p>
+                <p className="switch-row__desc">{store.acceptingQuestions ? t('inbox.pauseOn') : t('inbox.pauseOff')}</p>
+              </div>
+              <Switch checked={store.acceptingQuestions} onChange={(v) => save({ acceptingQuestions: v })} label={t('inbox.pauseTitle')} />
+            </div>
             <div className="switch-row">
               <div className="switch-row__text">
                 <p className="switch-row__title">{t('settings.showUnanswered')}</p>

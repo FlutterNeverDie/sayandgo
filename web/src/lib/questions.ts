@@ -201,13 +201,19 @@ export async function reportStore(code: string, reason: ReportReason, detail: st
 
 // ---------- 사장님 ----------
 
-export type InboxTab = 'open' | 'answered' | 'hidden' | 'all';
+export type InboxTab = 'open' | 'answered' | 'hidden';
 
 function inboxConstraints(tab: InboxTab): QueryConstraint[] {
-  if (tab === 'open') return [where('status', '==', 'open')];
-  if (tab === 'answered') return [where('status', '==', 'answered')];
   if (tab === 'hidden') return [where('hidden', '==', true)];
-  return [];
+  return [where('hidden', '==', false), where('status', '==', tab)];
+}
+
+/** 사장님 탭의 "답변 N · 질문 N · 숨김 N" (count() 3회) */
+export async function fetchOwnerCounts(code: string): Promise<Record<InboxTab, number>> {
+  const [open, answered, hidden] = await Promise.all(
+    (['open', 'answered', 'hidden'] as InboxTab[]).map((tab) => getCountFromServer(query(qcol(code), ...inboxConstraints(tab)))),
+  );
+  return { open: open.data().count, answered: answered.data().count, hidden: hidden.data().count };
 }
 
 /** 첫 10개만 실시간 구독 (처음 이후엔 바뀐 문서만 과금) */

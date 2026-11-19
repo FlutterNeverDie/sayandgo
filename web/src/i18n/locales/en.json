@@ -152,8 +152,8 @@
     "suspendedDesc": "It's unavailable due to a policy violation.",
     "powered": "Make a question box for your shop with Q Place",
     "sentHidden": "Sent. It will appear here once the owner replies.",
-    "anonymousQ": "Anonymous",
-    "waiting": "Waiting for a reply",
+    "anonymousQ": "Anonymous asked",
+    "waiting": "Not answered yet",
     "ask": "Ask a question",
     "askTitle": "Ask anonymously",
     "statsQ": "questions",
@@ -161,7 +161,11 @@
     "tabAll": "All",
     "tabAnswered": "Answered",
     "shareStore": "Share",
-    "end": "You're all caught up"
+    "end": "You're all caught up",
+    "moreText": "More",
+    "less": "Less",
+    "editInfo": "Edit info",
+    "qrShare": "QR · Share"
   },
   "report": {
     "title": "Report",
@@ -182,16 +186,14 @@
   "inbox": {
     "title": "Questions",
     "tabs": {
-      "open": "New",
       "answered": "Answered",
-      "hidden": "Hidden",
-      "all": "All"
+      "open": "Questions",
+      "hidden": "Hidden"
     },
     "empty": {
-      "open": "Nothing waiting for a reply.",
-      "answered": "No answered questions yet.",
-      "hidden": "No hidden questions.",
-      "all": "No questions yet."
+      "open": "No new questions.",
+      "answered": "No replies yet. Pick one from the Questions tab.",
+      "hidden": "No hidden questions."
     },
     "firstRunTitle": "Ready for your first question",
     "firstRunDesc": "Save the QR code and put it on a table or the counter. New questions appear here right away.",
@@ -233,7 +235,9 @@
     "blocked": "Blocked",
     "blockFailed": "This question has no sender record, so it can't be blocked.",
     "pinLimit": "You can pin up to 3.",
-    "answerTitle": "Write a reply"
+    "answerTitle": "Write a reply",
+    "pausedNotice": "Questions are paused. Guests see a notice.",
+    "resume": "Resume"
   },
   "share": {
     "title": "Link · QR",

@@ -35,4 +35,11 @@ if (usingEmulator) {
   const host = typeof location !== 'undefined' ? location.hostname : '127.0.0.1';
   connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
   connectFirestoreEmulator(db, host, 8080);
+
+  // 에뮬레이터 전용: ?devLogin=1 이면 샘플 사장님으로 로그인 (scripts/seed-emulator.mjs의 계정)
+  if (typeof location !== 'undefined' && new URLSearchParams(location.search).has('devLogin')) {
+    import('firebase/auth').then(({ signInWithEmailAndPassword }) =>
+      signInWithEmailAndPassword(auth, 'demo@qplace.test', 'coffee2024').catch(() => undefined),
+    );
+  }
 }

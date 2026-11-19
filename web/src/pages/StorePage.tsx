@@ -218,14 +218,13 @@ function ActiveStore({ store }: { store: Store }) {
               <p>{answeredOnly ? t('store.emptyAnsweredDesc') : t('store.emptyDesc')}</p>
             </div>
           )}
-          {items.map((q, i) => (
+          {items.map((q) => (
             <QuestionItem
               key={q.id}
               q={q}
               storeName={store.storeName}
               mine={mine.has(q.id)}
               fresh={q.id === freshId}
-              defaultOpen={i === 0}
               onMenu={() => setMenuFor(q)}
             />
           ))}

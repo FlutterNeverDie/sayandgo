@@ -841,5 +841,6 @@ body.warm .topbar { background: #f3f2ef; }
 .contact-topics { margin: 4px 0 24px; padding-left: 20px; display: grid; gap: 6px; color: var(--text); font-size: var(--fs-16); }
 
 /* 홈: 서비스 공유 */
-.home-share { margin-top: 32px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 18px 20px; border-radius: 18px; background: var(--surface); }
-.home-share p { font-weight: 700; font-size: var(--fs-16); }
+.home-share { margin-top: 32px; display: grid; gap: 12px; padding: 18px 20px 20px; border-radius: 18px; background: var(--surface); }
+.home-share p { font-weight: 700; font-size: var(--fs-16); text-align: center; }
+.home-share .btn { width: 100%; justify-content: center; }

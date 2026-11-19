@@ -31,8 +31,8 @@ export function Loading({ error, onRetry }: { error?: boolean; onRetry?: () => v
 
 export function TicketSkeleton() {
   return (
-    <div className="ticket ticket--skeleton" aria-hidden="true">
-      <div className="ticket__q">
+    <div className="qitem qitem--skeleton" aria-hidden="true">
+      <div>
         <div className="skeleton" style={{ width: 72, height: 12 }} />
         <div className="skeleton" style={{ width: '90%' }} />
         <div className="skeleton" style={{ width: '60%' }} />

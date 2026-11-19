@@ -5,9 +5,9 @@
 :root {
   color-scheme: light;
 
-  --ground: #f4f6f3;
+  --ground: #ffffff;
   --surface: #ffffff;
-  --raised: #eef1ed;
+  --raised: #f1f4f2;
   --border: #e3e7e2;
   --rule: #eef0ec;
   --control: #cdd3ce;
@@ -219,34 +219,58 @@ a { color: var(--mint-ink); text-underline-offset: 3px; }
   font-size: 11px; font-weight: 700; display: inline-grid; place-items: center;
 }
 
-/* ---------- 질문 전표 ---------- */
-.ticket {
-  --notch: 9px;
-  position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+/* ---------- 가게 머리 (프로필) ---------- */
+.profile { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; align-items: start; padding: 24px 0 20px; }
+.profile__name { font-size: var(--fs-24); font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; }
+.profile__intro { color: var(--muted); grid-column: 1; }
+.profile__stats { grid-column: 1; font-size: var(--fs-14); color: var(--muted); }
+.profile__stats b { color: var(--text); font-weight: 700; margin-right: 2px; }
+.profile__actions { grid-column: 1 / -1; display: flex; gap: 8px; margin-top: 12px; }
+.profile__actions .btn--primary { flex: 1; }
+.avatar {
+  width: 60px; height: 60px; border-radius: 50%; background: var(--mint); color: var(--text);
+  display: grid; place-items: center; font-weight: 700; font-size: 24px; grid-row: 1 / span 3; grid-column: 2; flex: none;
 }
-.ticket + .ticket { margin-top: 12px; }
-.ticket__q { padding: 16px 16px 14px; }
-.ticket__meta { display: flex; align-items: center; gap: 8px; font-size: var(--fs-12); color: var(--muted); margin-bottom: 8px; min-height: 22px; }
-.ticket__meta .spacer { flex: 1; }
-.ticket__body { font-size: var(--fs-16); white-space: pre-wrap; }
-.ticket__a {
-  position: relative; background: var(--mint-soft); padding: 14px 16px 16px;
-  border-radius: 0 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px);
+.avatar--sm { width: 28px; height: 28px; font-size: 13px; }
+
+/* 밑줄 탭 */
+.uline-tabs { display: flex; border-bottom: 1px solid var(--border); margin: 0 calc(var(--gutter) * -1); padding: 0 var(--gutter); }
+.uline-tabs button {
+  flex: 1; height: 46px; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  color: var(--muted); font-size: var(--fs-14); cursor: pointer;
 }
-/* 전표 홈: 질문과 답변 경계 양옆의 반원 */
-.ticket__a::before, .ticket__a::after {
-  content: ''; position: absolute; top: calc(var(--notch) * -1); width: calc(var(--notch) * 2); height: calc(var(--notch) * 2);
-  border-radius: 50%; background: var(--ground); border: 1px solid var(--border);
+.uline-tabs button[aria-selected='true'] { color: var(--text); border-bottom-color: var(--text); font-weight: 700; }
+
+/* ---------- 질문 피드 ---------- */
+.feed { margin: 0 calc(var(--gutter) * -1); }
+.qitem { padding: 16px var(--gutter); border-bottom: 1px solid var(--rule); }
+.qitem__head { display: flex; align-items: center; gap: 8px; min-height: 24px; font-size: var(--fs-12); color: var(--muted); }
+.qitem__head .who { font-weight: 600; color: var(--text); font-size: var(--fs-14); }
+.qitem__head .spacer { flex: 1; }
+.qitem__bubble {
+  margin-top: 8px; background: var(--raised); border-radius: 14px; padding: 12px 14px;
+  font-size: var(--fs-16); white-space: pre-wrap;
 }
-.ticket__a::before { left: calc(var(--notch) * -1 - 1px); clip-path: inset(0 0 0 50%); }
-.ticket__a::after { right: calc(var(--notch) * -1 - 1px); clip-path: inset(0 50% 0 0); }
-.ticket__a-label { font-size: var(--fs-12); font-weight: 700; color: var(--mint-ink); margin-bottom: 4px; }
-.ticket__a-body { white-space: pre-wrap; }
-.ticket__a-meta { font-size: var(--fs-12); color: var(--muted); margin-top: 6px; }
-.ticket--hidden .ticket__body { color: var(--muted); }
-.ticket--selected { border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
-.ticket__select { width: 22px; height: 22px; accent-color: var(--text); margin: 0; }
-.ticket__actions { display: flex; gap: 4px; padding: 0 8px 8px; flex-wrap: wrap; }
+.qitem__answer {
+  margin-top: 12px; width: 100%; background: none; border: 0; padding: 0; text-align: left; cursor: pointer;
+  display: grid; grid-template-columns: 28px 1fr 20px; gap: 2px 10px; align-items: start;
+}
+.qitem__answer .avatar { grid-row: 1 / span 2; grid-column: 1; }
+.qitem__answer-who { font-size: var(--fs-12); color: var(--muted); }
+.qitem__answer-who b { color: var(--mint-ink); font-weight: 700; margin-right: 4px; }
+.qitem__answer-text { grid-column: 2; white-space: pre-wrap; }
+.qitem__answer[aria-expanded='false'] .qitem__answer-text {
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; color: var(--muted);
+}
+.qitem__chev { grid-column: 3; grid-row: 1; color: var(--muted); transition: transform 180ms var(--ease); }
+.qitem__answer[aria-expanded='true'] .qitem__chev { transform: rotate(180deg); }
+.qitem__waiting { margin-top: 10px; font-size: var(--fs-14); color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.qitem__waiting::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #e3a008; }
+.qitem--hidden .qitem__bubble { color: var(--muted); }
+.qitem--selected { background: var(--mint-soft); }
+.qitem__select { width: 22px; height: 22px; accent-color: var(--text); margin: 0; }
+.qitem__actions { display: flex; gap: 4px; margin: 10px 0 -6px -10px; }
+.qitem__quote { background: var(--raised); border-radius: 12px; padding: 10px 12px; margin-bottom: 16px; white-space: pre-wrap; color: var(--muted); }
 
 /* 새로 들어온 항목 */
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
@@ -254,7 +278,7 @@ a { color: var(--mint-ink); text-underline-offset: 3px; }
 
 /* ---------- 상태 ---------- */
 .skeleton { background: var(--rule); border-radius: 4px; }
-.ticket--skeleton .skeleton { height: 16px; margin: 8px 0; }
+.qitem--skeleton .skeleton { height: 14px; margin: 8px 0; }
 .empty {
   border: 1px dashed var(--control); border-radius: var(--radius); padding: 28px 16px; text-align: center;
   color: var(--muted); font-size: var(--fs-14);

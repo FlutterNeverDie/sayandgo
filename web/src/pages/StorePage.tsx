@@ -1,8 +1,8 @@
 import { useInfiniteQuery, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { QuestionTicket } from '../components/question/QuestionTicket';
+import { Avatar, QuestionItem } from '../components/question/QuestionItem';
 import { ReportSheet } from '../components/question/ReportSheet';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
@@ -11,6 +11,7 @@ import { currentLang } from '../i18n';
 import {
   alreadyReported,
   deleteMyQuestion,
+  fetchCounts,
   fetchPublicPage,
   myQuestionIds,
   postQuestion,
@@ -18,8 +19,8 @@ import {
   reportStore,
   type Page,
 } from '../lib/questions';
+import { CODE_RE, storeUrl } from '../lib/storeCode';
 import { getStore } from '../lib/stores';
-import { CODE_RE } from '../lib/storeCode';
 import type { Question, Store } from '../lib/types';
 import { checkQuestion, LIMITS, tidyText } from '../lib/validation';
 
@@ -62,14 +63,18 @@ function StoreState({ title, desc }: { title: string; desc: string }) {
   );
 }
 
+type Tab = 'all' | 'answered';
+
 function ActiveStore({ store }: { store: Store }) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
-  const answeredOnly = !store.showUnanswered;
+  const [tab, setTab] = useState<Tab>(store.showUnanswered ? 'all' : 'answered');
+  const answeredOnly = tab === 'answered';
   const listKey = ['public', store.code, answeredOnly];
   const [mine, setMine] = useState(() => myQuestionIds(store.code));
   const [freshId, setFreshId] = useState<string | null>(null);
+  const [composing, setComposing] = useState(false);
   const [menuFor, setMenuFor] = useState<Question | null>(null);
   const [reporting, setReporting] = useState<Question | 'store' | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Question | null>(null);
@@ -77,6 +82,8 @@ function ActiveStore({ store }: { store: Store }) {
   useEffect(() => {
     document.title = `${store.storeName} · ${t('app.name')}`;
   }, [store.storeName, t]);
+
+  const counts = useQuery({ queryKey: ['counts', store.code], queryFn: () => fetchCounts(store.code), staleTime: 10 * 60_000 });
 
   // 10개씩, 60초 캐시, 실시간 구독 없음 (읽기 절감)
   const list = useInfiniteQuery({
@@ -88,17 +95,31 @@ function ActiveStore({ store }: { store: Store }) {
   });
   const items = useMemo(() => list.data?.pages.flatMap((p) => p.items) ?? [], [list.data]);
 
+  // 끝에 닿으면 다음 10개 (손님이 실제로 내려 볼 때만 읽는다)
+  const sentinel = useRef<HTMLDivElement>(null);
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = list;
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el || !hasNextPage || isFetchingNextPage) return;
+    const io = new IntersectionObserver((entries) => entries[0].isIntersecting && fetchNextPage(), { rootMargin: '200px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   const setItems = (fn: (pages: Page[]) => Page[]) =>
-    qc.setQueryData<InfiniteData<Page>>(listKey, (old) => (old ? { ...old, pages: fn(old.pages) } : old));
+    qc.setQueryData<InfiniteData<Page>>(['public', store.code, false], (old) => (old ? { ...old, pages: fn(old.pages) } : old));
 
   function onPosted(q: Question) {
+    setComposing(false);
     setMine(myQuestionIds(store.code));
-    if (answeredOnly) {
+    qc.setQueryData<{ total: number; answered: number }>(['counts', store.code], (c) => (c ? { ...c, total: c.total + 1 } : c));
+    if (!store.showUnanswered) {
       toast(t('store.sentHidden'));
       return;
     }
     // 다시 불러오지 않고 맨 위에 끼워 넣는다 (읽기 0)
     setItems((pages) => [{ ...pages[0], items: [q, ...(pages[0]?.items ?? [])] }, ...pages.slice(1)]);
+    setTab('all');
     setFreshId(q.id);
     toast(t('store.sent'));
   }
@@ -107,7 +128,11 @@ function ActiveStore({ store }: { store: Store }) {
     setConfirmDelete(null);
     try {
       await deleteMyQuestion(store.code, q.id);
-      setItems((pages) => pages.map((p) => ({ ...p, items: p.items.filter((i) => i.id !== q.id) })));
+      for (const only of [false, true]) {
+        qc.setQueryData<InfiniteData<Page>>(['public', store.code, only], (old) =>
+          old ? { ...old, pages: old.pages.map((p) => ({ ...p, items: p.items.filter((i) => i.id !== q.id) })) } : old,
+        );
+      }
       setMine(myQuestionIds(store.code));
       toast(t('store.deletedMine'));
     } catch {
@@ -127,25 +152,54 @@ function ActiveStore({ store }: { store: Store }) {
     setReporting(null);
   }
 
+  const url = storeUrl(store.code);
+
   return (
     <>
       <PublicTopbar />
       <main className="page">
-        <header style={{ padding: '28px 0 20px' }}>
-          <h1 className="title">{store.storeName}</h1>
-          {store.intro && <p style={{ marginTop: 6, color: 'var(--muted)' }}>{store.intro}</p>}
+        <header className="profile">
+          <h1 className="profile__name">{store.storeName}</h1>
+          <Avatar name={store.storeName} />
+          {store.intro && <p className="profile__intro">{store.intro}</p>}
+          <p className="profile__stats num">
+            {counts.data ? (
+              <>
+                {t('store.statsQ')} <b>{counts.data.total}</b> · {t('store.statsA')} <b>{counts.data.answered}</b>
+              </>
+            ) : (
+              ' '
+            )}
+          </p>
+          <div className="profile__actions">
+            {store.acceptingQuestions ? (
+              <button className="btn btn--primary" onClick={() => setComposing(true)}>
+                {t('store.ask')}
+              </button>
+            ) : (
+              <p className="notice" style={{ flex: 1 }}>
+                {t('store.paused')}
+              </p>
+            )}
+            {'share' in navigator && (
+              <button className="btn" onClick={() => navigator.share({ title: store.storeName, url }).catch(() => undefined)}>
+                {t('store.shareStore')}
+              </button>
+            )}
+          </div>
         </header>
 
-        {store.acceptingQuestions ? (
-          <Composer store={store} onPosted={onPosted} />
-        ) : (
-          <p className="notice">{t('store.paused')}</p>
+        {store.showUnanswered && (
+          <div className="uline-tabs" role="tablist">
+            {(['all', 'answered'] as Tab[]).map((k) => (
+              <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>
+                {k === 'all' ? t('store.tabAll') : t('store.tabAnswered')}
+              </button>
+            ))}
+          </div>
         )}
 
-        <section className="section" aria-labelledby="list-title">
-          <h2 id="list-title" className="section__title">
-            {t('store.listTitle')}
-          </h2>
+        <section className="feed" aria-label={t('store.listTitle')}>
           {list.isLoading && (
             <>
               <TicketSkeleton />
@@ -153,20 +207,34 @@ function ActiveStore({ store }: { store: Store }) {
               <TicketSkeleton />
             </>
           )}
-          {list.isError && <ErrorBox onRetry={() => list.refetch()} />}
-          {list.isSuccess && items.length === 0 && (
-            <div className="empty">
-              <strong>{t('store.emptyTitle')}</strong>
-              {answeredOnly ? t('store.emptyAnsweredDesc') : t('store.emptyDesc')}
+          {list.isError && (
+            <div style={{ padding: 16 }}>
+              <ErrorBox onRetry={() => list.refetch()} />
             </div>
           )}
-          {items.map((q) => (
-            <QuestionTicket key={q.id} q={q} mine={mine.has(q.id)} fresh={q.id === freshId} onMenu={() => setMenuFor(q)} />
+          {list.isSuccess && items.length === 0 && (
+            <div className="center-state" style={{ padding: '48px 16px' }}>
+              <h2 style={{ fontSize: 16 }}>{t('store.emptyTitle')}</h2>
+              <p>{answeredOnly ? t('store.emptyAnsweredDesc') : t('store.emptyDesc')}</p>
+            </div>
+          )}
+          {items.map((q, i) => (
+            <QuestionItem
+              key={q.id}
+              q={q}
+              storeName={store.storeName}
+              mine={mine.has(q.id)}
+              fresh={q.id === freshId}
+              defaultOpen={i === 0}
+              onMenu={() => setMenuFor(q)}
+            />
           ))}
-          {list.hasNextPage && (
-            <button className="btn btn--block" style={{ marginTop: 16 }} onClick={() => list.fetchNextPage()} disabled={list.isFetchingNextPage}>
-              {list.isFetchingNextPage ? t('common.loading') : t('common.more')}
-            </button>
+          <div ref={sentinel} />
+          {list.isFetchingNextPage && <TicketSkeleton />}
+          {list.isSuccess && items.length > 0 && !list.hasNextPage && (
+            <p className="subtitle" style={{ textAlign: 'center', padding: '24px 0 0' }}>
+              {t('store.end')}
+            </p>
           )}
         </section>
 
@@ -179,6 +247,8 @@ function ActiveStore({ store }: { store: Store }) {
           }
         />
       </main>
+
+      {composing && <ComposeSheet store={store} onClose={() => setComposing(false)} onPosted={onPosted} />}
 
       {menuFor && (
         <Sheet onClose={() => setMenuFor(null)}>
@@ -235,14 +305,20 @@ function readLastPost(): number {
   }
 }
 
-function Composer({ store, onPosted }: { store: Store; onPosted: (q: Question) => void }) {
+/** 질문하기: 버튼을 눌렀을 때만 열리는 시트 (손님이 직접 연 것이라 바로 입력창에 포커스) */
+function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () => void; onPosted: (q: Question) => void }) {
   const { t } = useTranslation();
   const draftKey = `qplace:draft:${store.code}`;
   const [text, setText] = useState(() => sessionStorage.getItem(draftKey) ?? '');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const ref = useRef<HTMLTextAreaElement>(null);
   const wait = Math.max(0, WAIT_SEC - Math.floor((now - readLastPost()) / 1000));
+
+  useEffect(() => {
+    ref.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -268,55 +344,55 @@ function Composer({ store, onPosted }: { store: Store; onPosted: (q: Question) =
       } catch {
         /* 무시 */
       }
-      setNow(Date.now());
-      setText('');
+      sessionStorage.removeItem(draftKey);
       onPosted(q);
     } catch (e2) {
       const code = (e2 as { code?: string }).code;
       setError(code === 'unavailable' ? 'errors.network' : 'errors.cantPost');
-    } finally {
       setBusy(false);
     }
   }
 
   const length = text.trim().length;
   return (
-    <form onSubmit={onSubmit} noValidate className="panel" style={{ padding: 12 }}>
-      <label htmlFor="q-body" className="sr-only">
-        {t('store.label')}
-      </label>
-      <textarea
-        id="q-body"
-        className="textarea"
-        rows={3}
-        maxLength={LIMITS.questionMax + 50}
-        placeholder={t('store.placeholder')}
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          if (error) setError(null);
-        }}
-        aria-invalid={!!error}
-        aria-describedby="q-hint q-err"
-        style={{ border: 0, padding: 4, minHeight: 84, resize: 'none' }}
-      />
-      {error && (
-        <p className="field__error" id="q-err" role="alert" style={{ padding: '0 4px 8px' }}>
-          {t(error)}
+    <Sheet title={t('store.askTitle')} desc={t('store.anonymous')} onClose={onClose}>
+      <form onSubmit={onSubmit} noValidate>
+        <label htmlFor="q-body" className="sr-only">
+          {t('store.label')}
+        </label>
+        <textarea
+          id="q-body"
+          ref={ref}
+          className="textarea"
+          rows={5}
+          maxLength={LIMITS.questionMax + 50}
+          placeholder={t('store.placeholder')}
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            if (error) setError(null);
+          }}
+          aria-invalid={!!error}
+          aria-describedby="q-hint q-err"
+          style={{ resize: 'none', background: 'var(--raised)', border: 0, borderRadius: 14 }}
+        />
+        {error && (
+          <p className="field__error" id="q-err" role="alert" style={{ marginTop: 8 }}>
+            {t(error)}
+          </p>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}>
+          <span className="num" style={{ fontSize: 12, color: length > LIMITS.questionMax ? 'var(--negative)' : 'var(--muted)' }}>
+            {length} / {LIMITS.questionMax}
+          </span>
+          <button className="btn btn--primary" style={{ marginLeft: 'auto', minWidth: 120 }} disabled={busy || wait > 0 || length === 0}>
+            {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
+          </button>
+        </div>
+        <p className="field__hint" id="q-hint" style={{ marginTop: 12 }}>
+          <Trans i18nKey="store.consent" components={{ 1: <Link to="/policy" /> }} />
         </p>
-      )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span className="num" style={{ fontSize: 12, color: length > LIMITS.questionMax ? 'var(--negative)' : 'var(--muted)', paddingLeft: 4 }}>
-          {length} / {LIMITS.questionMax}
-        </span>
-        <button className="btn btn--primary" style={{ marginLeft: 'auto', minWidth: 96 }} disabled={busy || wait > 0 || length === 0}>
-          {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
-        </button>
-      </div>
-      <p className="field__hint" id="q-hint" style={{ padding: '10px 4px 0' }}>
-        {t('store.anonymous')}{' '}
-        <Trans i18nKey="store.consent" components={{ 1: <Link to="/policy" /> }} />
-      </p>
-    </form>
+      </form>
+    </Sheet>
   );
 }

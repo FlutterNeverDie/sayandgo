@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { RequireOwner } from '../app/auth';
-import { QuestionTicket } from '../components/question/QuestionTicket';
+import { QuestionItem } from '../components/question/QuestionItem';
 import { Switch } from '../components/ui/Fields';
 import { OwnerShell } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
@@ -213,6 +213,7 @@ function Inbox({ store }: { store: Store }) {
     await run(() => updateStore(store.code, { acceptingQuestions: on }));
   }
 
+  const editingQ = editing ? list.items.find((q) => q.id === editing) ?? null : null;
   const selectedIds = [...selected].filter((id) => visibleItems.some((q) => q.id === id));
 
   return (
@@ -246,7 +247,7 @@ function Inbox({ store }: { store: Store }) {
         </div>
 
         <div className="section">
-          <div className="tabs" role="tablist">
+          <div className="uline-tabs" role="tablist">
             {TABS.map((k) => (
               <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>
                 {t(`inbox.tabs.${k}`)}
@@ -255,73 +256,60 @@ function Inbox({ store }: { store: Store }) {
             ))}
           </div>
 
-          {list.loading && (
-            <>
-              <TicketSkeleton />
-              <TicketSkeleton />
-            </>
-          )}
-          {list.error && <ErrorBox onRetry={list.retry} />}
-          {!list.loading && !list.error && visibleItems.length === 0 && <EmptyInbox tab={tab} store={store} />}
+          <div className="feed">
+            {list.loading && (
+              <>
+                <TicketSkeleton />
+                <TicketSkeleton />
+              </>
+            )}
+            {list.error && (
+              <div style={{ padding: 16 }}>
+                <ErrorBox onRetry={list.retry} />
+              </div>
+            )}
+            {!list.loading && !list.error && visibleItems.length === 0 && (
+              <div style={{ padding: 16 }}>
+                <EmptyInbox tab={tab} store={store} />
+              </div>
+            )}
 
-          {visibleItems.map((q) => (
-            <QuestionTicket
-              key={q.id}
-              q={q}
-              owner
-              selected={selected.has(q.id)}
-              onMenu={selecting ? undefined : () => setMenuFor(q)}
-              leading={
-                selecting && (
-                  <input
-                    type="checkbox"
-                    className="ticket__select"
-                    checked={selected.has(q.id)}
-                    aria-label={t('inbox.select')}
-                    onChange={(e) =>
-                      setSelected((s) => {
-                        const n = new Set(s);
-                        if (e.target.checked) n.add(q.id);
-                        else n.delete(q.id);
-                        return n;
-                      })
-                    }
-                  />
-                )
-              }
-              answerSlot={
-                editing === q.id ? (
-                  <AnswerEditor
-                    q={q}
-                    onCancel={() => setEditing(null)}
-                    onSave={async (body) => {
-                      await saveAnswer(store.code, q, body);
-                      list.patchMore(q.id, (x) => ({ ...x, status: 'answered', answer: { body, at: x.answer?.at ?? new Date(), editedAt: x.answer ? new Date() : null } }));
-                      setEditing(null);
-                    }}
-                    onRemove={
-                      q.answer
-                        ? async () => {
-                            await removeAnswer(store.code, q.id);
-                            list.patchMore(q.id, (x) => ({ ...x, status: 'open', answer: null }));
-                            setEditing(null);
-                          }
-                        : undefined
-                    }
-                  />
-                ) : undefined
-              }
-              footer={
-                !selecting && !q.answer && editing !== q.id ? (
-                  <div className="ticket__actions">
-                    <button className="btn btn--text btn--sm" style={{ color: 'var(--mint-ink)', fontWeight: 600 }} onClick={() => setEditing(q.id)}>
+            {visibleItems.map((q) => (
+              <QuestionItem
+                key={q.id}
+                q={q}
+                storeName={store.storeName}
+                owner
+                selected={selected.has(q.id)}
+                onMenu={selecting ? undefined : () => setMenuFor(q)}
+                leading={
+                  selecting && (
+                    <input
+                      type="checkbox"
+                      className="qitem__select"
+                      checked={selected.has(q.id)}
+                      aria-label={t('inbox.select')}
+                      onChange={(e) =>
+                        setSelected((s) => {
+                          const n = new Set(s);
+                          if (e.target.checked) n.add(q.id);
+                          else n.delete(q.id);
+                          return n;
+                        })
+                      }
+                    />
+                  )
+                }
+                actions={
+                  !selecting && !q.answer ? (
+                    <button className="btn btn--text btn--sm" style={{ color: 'var(--mint-ink)', fontWeight: 700 }} onClick={() => setEditing(q.id)}>
                       {t('inbox.answer')}
                     </button>
-                  </div>
-                ) : undefined
-              }
-            />
-          ))}
+                  ) : undefined
+                }
+              />
+            ))}
+          </div>
 
           {list.hasMore && (
             <button className="btn btn--block" style={{ marginTop: 16 }} onClick={list.loadMore} disabled={list.loadingMore}>
@@ -330,6 +318,27 @@ function Inbox({ store }: { store: Store }) {
           )}
         </div>
       </main>
+
+      {editingQ && (
+        <AnswerSheet
+          q={editingQ}
+          onClose={() => setEditing(null)}
+          onSave={async (body) => {
+            await saveAnswer(store.code, editingQ, body);
+            list.patchMore(editingQ.id, (x) => ({ ...x, status: 'answered', answer: { body, at: x.answer?.at ?? new Date(), editedAt: x.answer ? new Date() : null } }));
+            setEditing(null);
+          }}
+          onRemove={
+            editingQ.answer
+              ? async () => {
+                  await removeAnswer(store.code, editingQ.id);
+                  list.patchMore(editingQ.id, (x) => ({ ...x, status: 'open', answer: null }));
+                  setEditing(null);
+                }
+              : undefined
+          }
+        />
+      )}
 
       {selecting && selectedIds.length > 0 && (
         <div className="selection-bar" role="region" aria-label={t('inbox.selectedN', { n: selectedIds.length })}>
@@ -469,7 +478,7 @@ function EmptyInbox({ tab, store }: { tab: InboxTab; store: Store }) {
   return <div className="empty">{t(`inbox.empty.${tab}`)}</div>;
 }
 
-function AnswerEditor({ q, onSave, onCancel, onRemove }: { q: Question; onSave: (body: string) => Promise<void>; onCancel: () => void; onRemove?: () => Promise<void> }) {
+function AnswerSheet({ q, onSave, onClose, onRemove }: { q: Question; onSave: (body: string) => Promise<void>; onClose: () => void; onRemove?: () => Promise<void> }) {
   const { t } = useTranslation();
   const [text, setText] = useState(q.answer?.body ?? '');
   const [error, setError] = useState<string | null>(null);
@@ -488,45 +497,45 @@ function AnswerEditor({ q, onSave, onCancel, onRemove }: { q: Question; onSave: 
   }
 
   return (
-    <form
-      className="ticket__a"
-      onSubmit={(e) => {
-        e.preventDefault();
-        const body = tidyText(text);
-        const err = checkAnswer(body);
-        setError(err);
-        if (!err) act(() => onSave(body));
-      }}
-    >
-      <label className="ticket__a-label" htmlFor={`a-${q.id}`}>
-        {t('inbox.answerLabel')}
-      </label>
-      <textarea
-        id={`a-${q.id}`}
-        ref={ref}
-        className="textarea"
-        rows={3}
-        maxLength={LIMITS.answer + 50}
-        placeholder={t('inbox.answerPlaceholder')}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        aria-invalid={!!error}
-      />
-      {error && <p className="field__error">{t(error)}</p>}
-      <div className="btn-row" style={{ marginTop: 10 }}>
-        {onRemove && (
-          <button type="button" className="btn btn--text btn--sm" onClick={() => act(onRemove)} disabled={busy}>
-            {t('inbox.removeAnswer')}
+    <Sheet title={q.answer ? t('inbox.editAnswer') : t('inbox.answerTitle')} onClose={onClose}>
+      <p className="qitem__quote">{q.body}</p>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const body = tidyText(text);
+          const err = checkAnswer(body);
+          setError(err);
+          if (!err) act(() => onSave(body));
+        }}
+      >
+        <label className="sr-only" htmlFor={`a-${q.id}`}>
+          {t('inbox.answerLabel')}
+        </label>
+        <textarea
+          id={`a-${q.id}`}
+          ref={ref}
+          className="textarea"
+          rows={5}
+          maxLength={LIMITS.answer + 50}
+          placeholder={t('inbox.answerPlaceholder')}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          aria-invalid={!!error}
+          style={{ resize: 'none' }}
+        />
+        {error && <p className="field__error" style={{ marginTop: 8 }}>{t(error)}</p>}
+        <div className="btn-row" style={{ marginTop: 12 }}>
+          {onRemove && (
+            <button type="button" className="btn btn--text btn--sm" onClick={() => act(onRemove)} disabled={busy}>
+              {t('inbox.removeAnswer')}
+            </button>
+          )}
+          <span style={{ flex: 1 }} />
+          <button className="btn btn--primary" disabled={busy || !text.trim()}>
+            {t('inbox.saveAnswer')}
           </button>
-        )}
-        <span style={{ flex: 1 }} />
-        <button type="button" className="btn btn--sm" onClick={onCancel} disabled={busy}>
-          {t('common.cancel')}
-        </button>
-        <button className="btn btn--sm btn--primary" disabled={busy}>
-          {t('inbox.saveAnswer')}
-        </button>
-      </div>
-    </form>
+        </div>
+      </form>
+    </Sheet>
   );
 }

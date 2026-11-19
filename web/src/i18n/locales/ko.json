@@ -70,7 +70,8 @@
     "faq4q": "상호명을 바꾸면 QR도 새로 뽑아야 하나요?",
     "faq4a": "아니요. 링크와 QR은 가입할 때 정해진 뒤 바뀌지 않아요.",
     "closing": "오늘 가입하고, 내일 아침 테이블에 붙여 보세요.",
-    "sampleQ2": "주차는 어디에 하면 되나요?"
+    "sampleQ2": "주차는 어디에 하면 되나요?",
+    "sampleStore": "연남동 로스터리"
   },
   "signup": {
     "title": "가입하기",
@@ -150,7 +151,17 @@
     "suspendedTitle": "이용이 제한된 가게예요",
     "suspendedDesc": "운영정책 위반으로 지금은 이 가게 페이지를 이용할 수 없어요.",
     "powered": "큐플레이스로 내 가게 질문함 만들기",
-    "sentHidden": "보냈어요. 사장님이 답변하면 이 페이지에 보여요."
+    "sentHidden": "보냈어요. 사장님이 답변하면 이 페이지에 보여요.",
+    "anonymousQ": "익명 질문",
+    "waiting": "답변을 기다리고 있어요",
+    "ask": "질문하기",
+    "askTitle": "익명으로 질문하기",
+    "statsQ": "질문",
+    "statsA": "답변",
+    "tabAll": "전체",
+    "tabAnswered": "답변 완료",
+    "shareStore": "공유",
+    "end": "모든 질문을 봤어요"
   },
   "report": {
     "title": "신고하기",
@@ -221,7 +232,8 @@
     "blockAndDelete": "차단하고 질문 삭제",
     "blocked": "차단했어요",
     "blockFailed": "이 질문은 작성자 정보가 없어 차단할 수 없어요.",
-    "pinLimit": "고정은 3개까지 할 수 있어요."
+    "pinLimit": "고정은 3개까지 할 수 있어요.",
+    "answerTitle": "답변 쓰기"
   },
   "share": {
     "title": "링크 · QR",

@@ -70,7 +70,8 @@
     "faq4q": "If I rename my shop, do I need a new QR?",
     "faq4a": "No. Your link and QR code never change.",
     "closing": "Sign up today, put it on the tables tomorrow.",
-    "sampleQ2": "Where can I park?"
+    "sampleQ2": "Where can I park?",
+    "sampleStore": "Harbour Street Roasters"
   },
   "signup": {
     "title": "Sign up",
@@ -150,7 +151,17 @@
     "suspendedTitle": "This page is restricted",
     "suspendedDesc": "It's unavailable due to a policy violation.",
     "powered": "Make a question box for your shop with Q Place",
-    "sentHidden": "Sent. It will appear here once the owner replies."
+    "sentHidden": "Sent. It will appear here once the owner replies.",
+    "anonymousQ": "Anonymous",
+    "waiting": "Waiting for a reply",
+    "ask": "Ask a question",
+    "askTitle": "Ask anonymously",
+    "statsQ": "questions",
+    "statsA": "replies",
+    "tabAll": "All",
+    "tabAnswered": "Answered",
+    "shareStore": "Share",
+    "end": "You're all caught up"
   },
   "report": {
     "title": "Report",
@@ -221,7 +232,8 @@
     "blockAndDelete": "Block and delete",
     "blocked": "Blocked",
     "blockFailed": "This question has no sender record, so it can't be blocked.",
-    "pinLimit": "You can pin up to 3."
+    "pinLimit": "You can pin up to 3.",
+    "answerTitle": "Write a reply"
   },
   "share": {
     "title": "Link · QR",

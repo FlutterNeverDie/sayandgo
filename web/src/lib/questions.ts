@@ -5,6 +5,7 @@ import {
   doc,
   getDoc,
   getDocFromServer,
+  getCountFromServer,
   getDocs,
   increment,
   limit,
@@ -72,6 +73,16 @@ export function fetchPublicPage(code: string, answeredOnly: boolean, cursor: Que
   const c: QueryConstraint[] = [where('hidden', '==', false)];
   if (answeredOnly) c.push(where('status', '==', 'answered'));
   return fetchPage(code, c, cursor);
+}
+
+/** 가게 머리의 "질문 N · 답변 M". count()는 1,000건당 읽기 1회. */
+export async function fetchCounts(code: string): Promise<{ total: number; answered: number }> {
+  const visible = where('hidden', '==', false);
+  const [all, answered] = await Promise.all([
+    getCountFromServer(query(qcol(code), visible)),
+    getCountFromServer(query(qcol(code), visible, where('status', '==', 'answered'))),
+  ]);
+  return { total: all.data().count, answered: answered.data().count };
 }
 
 async function ensureSignedIn(): Promise<User> {

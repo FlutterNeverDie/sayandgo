@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../app/auth';
-import { QuestionTicket } from '../components/question/QuestionTicket';
+import { QuestionItem } from '../components/question/QuestionItem';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
 import type { Question } from '../lib/types';
 
@@ -47,15 +47,9 @@ export function LandingPage() {
           <h2 id="sample-h" className="section__title">
             {t('landing.sampleTitle')}
           </h2>
-          <QuestionTicket q={sample} />
-          <div className="ticket" style={{ marginTop: 12 }}>
-            <div className="ticket__q">
-              <div className="ticket__meta">
-                <span>{t('time.justNow')}</span>
-                <span className="pill pill--open">{t('store.open')}</span>
-              </div>
-              <p className="ticket__body">{t('landing.sampleQ2')}</p>
-            </div>
+          <div className="feed" style={{ borderTop: '1px solid var(--rule)' }}>
+            <QuestionItem q={sample} storeName={t('landing.sampleStore')} defaultOpen />
+            <QuestionItem q={{ ...sample, id: 'sample2', body: t('landing.sampleQ2'), status: 'open', answer: null, createdAt: new Date() }} storeName={t('landing.sampleStore')} />
           </div>
         </section>
 

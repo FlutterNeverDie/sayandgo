@@ -13,7 +13,6 @@ import { ErrorBox, Loading, TicketSkeleton } from '../components/ui/States';
 import { currentLang } from '../i18n';
 import {
   alreadyReported,
-  deleteMyQuestion,
   fetchAnsweredCount,
   fetchPublicPage,
   toggleHelpful,
@@ -80,7 +79,6 @@ function ActiveStore({ store }: { store: Store }) {
   const [composing, setComposing] = useState(false);
   const [menuFor, setMenuFor] = useState<Question | null>(null);
   const [reporting, setReporting] = useState<Question | 'store' | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<Question | null>(null);
 
   useEffect(() => {
     document.title = `${store.storeName} · ${t('app.name')}`;
@@ -153,18 +151,6 @@ function ActiveStore({ store }: { store: Store }) {
     setMine(myQuestionIds(store.code));
     // 답변 전 글은 공개되지 않으므로 목록은 그대로 (읽기 0)
     toast(q.visibility === 'owner' ? t('store.sentPrivate') : t('store.sentHidden'), { ms: 3600 });
-  }
-
-  async function onDeleteMine(q: Question) {
-    setConfirmDelete(null);
-    try {
-      await deleteMyQuestion(store.code, q.id);
-      patchAll((i) => (i.id === q.id ? null : i));
-      setMine(myQuestionIds(store.code));
-      toast(t('store.deletedMine'));
-    } catch {
-      toast(t('errors.generic'));
-    }
   }
 
   async function onReport(reason: Parameters<typeof reportStore>[1], detail: string) {
@@ -288,17 +274,6 @@ function ActiveStore({ store }: { store: Store }) {
       {menuFor && (
         <Sheet onClose={() => setMenuFor(null)}>
           <div className="menu-list">
-            {mine.has(menuFor.id) && (
-              <button
-                className="danger"
-                onClick={() => {
-                  setConfirmDelete(menuFor);
-                  setMenuFor(null);
-                }}
-              >
-                {t('store.deleteMine')}
-              </button>
-            )}
             <button
               onClick={() => {
                 const q = menuFor;
@@ -310,19 +285,6 @@ function ActiveStore({ store }: { store: Store }) {
               {t('store.report')}
             </button>
             <button onClick={() => setMenuFor(null)}>{t('common.cancel')}</button>
-          </div>
-        </Sheet>
-      )}
-
-      {confirmDelete && (
-        <Sheet title={t('store.deleteMine')} desc={t('store.deleteMineConfirm')} onClose={() => setConfirmDelete(null)}>
-          <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
-            <button className="btn" onClick={() => setConfirmDelete(null)}>
-              {t('common.cancel')}
-            </button>
-            <button className="btn btn--ink" onClick={() => onDeleteMine(confirmDelete)}>
-              {t('common.delete')}
-            </button>
           </div>
         </Sheet>
       )}
@@ -463,7 +425,8 @@ function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () 
           </ul>
         </div>
 
-        <button className="btn btn--black btn--block btn--lg" style={{ marginTop: 16 }} disabled={busy || wait > 0 || length === 0}>
+        <p className="no-delete">{t('store.noDelete')}</p>
+        <button className="btn btn--black btn--block btn--lg" style={{ marginTop: 10 }} disabled={busy || wait > 0 || length === 0}>
           {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
         </button>
         <p className="field__hint" id="q-hint" style={{ marginTop: 12 }}>

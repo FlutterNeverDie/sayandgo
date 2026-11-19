@@ -213,9 +213,6 @@
     "answer": "Owner's reply",
     "edited": "edited",
     "mine": "Yours",
-    "deleteMine": "Delete my question",
-    "deleteMineConfirm": "Delete this question? This can't be undone.",
-    "deletedMine": "Question deleted",
     "report": "Report",
     "reportStore": "Report this place",
     "notFoundTitle": "Place not found",
@@ -250,14 +247,15 @@
     "anonTitle": "Nobody can tell who sent it",
     "anon1": "No sign-in, name or contact details",
     "anon2": "The owner never sees your device or IP",
-    "anon3": "You can delete it from this device any time",
+    "anon3": "Neither the owner nor anyone else can see who sent it",
     "ownerOnly": "Owner only",
     "kindLabel": "Anonymous · {{kind}}",
     "helpful": "Helpful",
     "anonShort": "Anonymous",
     "sortLatest": "Latest",
     "sortHelpful": "Most helpful",
-    "shareText": "{{name}} answered: {{q}}"
+    "shareText": "{{name}} answered: {{q}}",
+    "noDelete": "Once sent, it can't be edited or deleted. Please check before sending."
   },
   "report": {
     "title": "Report",

@@ -327,9 +327,9 @@ describe('사장님 관리', () => {
     await seed(async (db) => updateDoc(doc(db, `stores/${CODE}/questions/q1`), { hidden: true, hiddenBy: 'admin' }));
     await assertFails(updateDoc(q1(owner()), { hidden: false, hiddenBy: null }));
   });
-  it('삭제: 주인 · 작성자 본인 가능, 남은 불가', async () => {
+  it('삭제: 보낸 손님 본인도 남도 불가', async () => {
     await assertFails(deleteDoc(q1(anon('anon2'))));
-    await assertSucceeds(deleteDoc(q1(anon('anon1'))));
+    await assertFails(deleteDoc(q1(anon('anon1'))));
   });
   it('주인 삭제', async () => {
     await assertSucceeds(deleteDoc(q1(owner())));

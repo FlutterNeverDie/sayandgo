@@ -182,13 +182,6 @@ export async function postQuestion(code: string, body: string, lang: string, kin
   return { id: ref.id, body, lang, kind, visibility, status: 'open', answer: null, hidden: false, hiddenBy: null, reportCount: 0, helpful: 0, pinned: false, createdAt: new Date() };
 }
 
-export async function deleteMyQuestion(code: string, id: string) {
-  const b = writeBatch(db);
-  b.delete(qdoc(code, id));
-  b.delete(adoc(code, id));
-  await b.commit();
-  rememberMine(code, id, false);
-}
 
 const reportedKey = 'qplace:reported';
 

@@ -114,8 +114,7 @@ service cloud.firestore {
           // 운영자
           || (isAdmin() && changes(['hidden', 'hiddenBy']));
 
-        allow delete: if isOwner(code) || isAdmin()
-          || (signedIn() && get(authorPath()).data.uid == request.auth.uid);        // 내가 쓴 질문
+        allow delete: if isOwner(code) || isAdmin();                                 // 보낸 손님은 지울 수 없다
 
         // ---------- 도움됐어요 기록 (문서 ID = 누른 사람) ----------
         match /helpful/{uid} {
@@ -136,7 +135,7 @@ service cloud.firestore {
           && !exists(/databases/$(db)/documents/stores/$(code)/questions/$(qid))
           && existsAfter(/databases/$(db)/documents/stores/$(code)/questions/$(qid));
         allow read:   if isOwner(code) || (signedIn() && resource.data.uid == request.auth.uid);
-        allow delete: if isOwner(code) || isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+        allow delete: if isOwner(code) || isAdmin();
       }
 
       // ---------- 차단 목록 ----------

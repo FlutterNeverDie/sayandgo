@@ -557,3 +557,5 @@ body.white .topbar { background: #ffffff; }
 .post--hidden .post__qtext, .post--hidden .post__ans { color: var(--faint); }
 .post--selected { background: var(--mint-soft); }
 .post__select { width: 22px; height: 22px; accent-color: var(--text); margin: 9px 0 0 9px; }
+
+.no-delete { margin-top: 14px; font-size: 13px; font-weight: 600; color: #9c3418; text-align: center; }

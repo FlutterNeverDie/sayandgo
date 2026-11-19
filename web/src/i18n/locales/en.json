@@ -378,11 +378,6 @@
     "tip": "Put it on tables, the counter or the door",
     "design": "Design",
     "captionLang": "Text language",
-    "langs": {
-      "ko": "한국어",
-      "en": "English",
-      "both": "KR + EN"
-    },
     "types": {
       "A": "Basic",
       "B": "Big text",
@@ -405,7 +400,9 @@
     "customize": "Customize poster",
     "change": "Change",
     "customOn": "Custom text",
-    "apply": "Apply"
+    "apply": "Apply",
+    "zoom": "View larger",
+    "langHint": "Switch to your guests’ language if many visit from abroad"
   },
   "settings": {
     "title": "Settings",

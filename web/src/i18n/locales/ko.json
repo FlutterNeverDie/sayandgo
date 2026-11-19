@@ -378,11 +378,6 @@
     "tip": "테이블 · 카운터 · 입구에 붙여 보세요",
     "design": "디자인",
     "captionLang": "문구 언어",
-    "langs": {
-      "ko": "한국어",
-      "en": "English",
-      "both": "한국어+EN"
-    },
     "types": {
       "A": "기본",
       "B": "큰 문구",
@@ -405,7 +400,9 @@
     "customize": "포스터 꾸미기",
     "change": "바꾸기",
     "customOn": "문구 직접 씀",
-    "apply": "적용"
+    "apply": "적용",
+    "zoom": "크게 보기",
+    "langHint": "외국 손님이 많으면 그 나라 말로 바꿔 보세요"
   },
   "settings": {
     "title": "설정",

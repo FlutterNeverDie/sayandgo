@@ -804,3 +804,22 @@ body.warm .topbar { background: #f3f2ef; }
 .poster-mini img { height: 100%; width: auto; max-width: 100%; object-fit: contain; border-radius: 8px; outline: 1px solid var(--rule); }
 .sheet .share-label:first-of-type { margin-top: 12px; }
 .sheet .poster-types button { background: var(--raised); }
+
+/* 포스터 크게 보기 */
+.qr-stage__btn, .poster-mini__btn { display: flex; justify-content: center; width: 100%; border: 0; background: none; padding: 0; cursor: zoom-in; }
+.poster-mini__btn { display: block; position: relative; height: 100%; width: auto; }
+.poster-mini__zoom {
+  position: absolute; right: 6px; bottom: 6px; display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 9px; border-radius: 999px; background: rgba(21, 32, 29, 0.82); color: #fff; font-size: 12px; font-weight: 600;
+}
+.poster-mini__zoom svg { width: 14px; height: 14px; }
+.poster-zoom {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 56px 16px calc(24px + env(safe-area-inset-bottom));
+  background: rgba(10, 16, 14, 0.92); cursor: zoom-out; animation: fade-in 160ms ease;
+}
+.poster-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; background: #fff; }
+.poster-zoom__close {
+  position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; display: grid; place-items: center;
+  border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.14); color: #fff; cursor: pointer;
+}
+@keyframes fade-in { from { opacity: 0; } }

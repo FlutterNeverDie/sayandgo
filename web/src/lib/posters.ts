@@ -3,8 +3,14 @@ import QRCode from 'qrcode';
 /** 포스터 디자인 5종 (링크 · QR 화면에서 고름) */
 export type PosterType = 'A' | 'B' | 'C' | 'D' | 'E';
 export const POSTER_TYPES: PosterType[] = ['A', 'B', 'C', 'D', 'E'];
-/** 포스터 문구 언어: 한국어 · 영어 · 둘 다 */
-export type PosterLang = 'ko' | 'en' | 'both';
+/** 포스터 문구 언어 (앱 화면 언어와 별개. 외국 손님이 많은 매장용) */
+export type PosterLang = 'ko' | 'en' | 'ja' | 'zh';
+export const POSTER_LANGS: { code: PosterLang; label: string }[] = [
+  { code: 'ko', label: '한국어' },
+  { code: 'en', label: 'English' },
+  { code: 'ja', label: '日本語' },
+  { code: 'zh', label: '中文 (简体)' },
+];
 
 const INK = '#15201d';
 const MINT = '#3ccfae';
@@ -27,6 +33,20 @@ const TEXT = {
     sub: "It's anonymous. Nobody knows who wrote it.",
     sticker: 'Anonymous feedback',
     fold: 'Fold here',
+  },
+  ja: {
+    caption: 'QRを読み取って、匿名でご意見をお聞かせください',
+    headline: '正直な\nご意見を\nください',
+    sub: '匿名です。誰が書いたかは分かりません。',
+    sticker: '匿名でご意見を',
+    fold: 'ここで折ってください',
+  },
+  zh: {
+    caption: '扫描二维码，匿名留下您的意见',
+    headline: '请告诉我们\n真实的\n想法',
+    sub: '完全匿名，没有人知道是谁写的。',
+    sticker: '匿名反馈',
+    fold: '沿此线折叠',
   },
 };
 
@@ -51,11 +71,10 @@ export const POSTER_SIZE: Record<PosterType, [number, number]> = {
 
 function captions(input: PosterInput): string[] {
   if (input.caption?.trim()) return [input.caption.trim()];
-  if (input.lang === 'both') return [TEXT.ko.caption, TEXT.en.caption];
-  return [TEXT[input.lang].caption];
+  return [(TEXT[input.lang] ?? TEXT.ko).caption];
 }
 
-const primary = (lang: PosterLang) => (lang === 'en' ? TEXT.en : TEXT.ko);
+const primary = (lang: PosterLang) => TEXT[lang] ?? TEXT.ko;
 
 /** 한 단락을 폭에 맞게 나눈다: 띄어쓰기 단위로, 한 단어가 너무 길면 글자 단위로 */
 function wrap(ctx: CanvasRenderingContext2D, para: string, maxWidth: number): string[] {
@@ -151,14 +170,10 @@ export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElemen
       ctx.fillStyle = i === 1 && !input.caption?.trim() ? MINT_INK : INK;
       ctx.fillText(l, 90, 220 + i * head.size * 1.08);
     });
-    let y = 220 + head.lines.length * head.size * 1.08 + 10;
+    const sub = fit(ctx, t.sub, W - 180, 34, 500, 2, 24);
     ctx.fillStyle = MUTED;
-    ctx.font = `500 34px ${FONT}`;
-    ctx.fillText(t.sub, 90, y);
-    if (input.lang === 'both') {
-      y += 46;
-      ctx.fillText(TEXT.en.caption, 90, y);
-    }
+    ctx.font = `500 ${sub.size}px ${FONT}`;
+    drawLines(ctx, sub.lines, 90, 220 + head.lines.length * head.size * 1.08 + 10, sub.size * 1.35);
     ctx.drawImage(await qrCanvas(input.url, 380), 90, H - 120 - 60 - 380);
     ctx.fillStyle = INK;
     ctx.textAlign = 'right';
@@ -261,14 +276,14 @@ export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElemen
     ctx.drawImage(await qrCanvas(input.url, 500), (W - 500) / 2, 200);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    const label = input.caption?.trim() || (input.lang === 'en' ? TEXT.en.sticker : TEXT.ko.sticker);
+    const label = input.caption?.trim() || primary(input.lang).sticker;
     const f = fit(ctx, label, W - 200, 58, 800, 1, 30);
     ctx.font = `800 ${f.size}px ${FONT}`;
     ctx.fillStyle = '#ffffff';
     ctx.fillText(f.lines[0], W / 2, 860);
     ctx.fillStyle = MINT;
     ctx.font = `800 44px ${FONT}`;
-    ctx.fillText(input.lang === 'both' && !input.caption?.trim() ? `${TEXT.en.sticker} · ${input.brand}` : input.brand, W / 2, 940);
+    ctx.fillText(input.brand, W / 2, 940);
   }
 
   return canvas;

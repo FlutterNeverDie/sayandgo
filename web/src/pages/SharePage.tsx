@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RequireOwner } from '../app/auth';
 import { currentLang } from '../i18n';
-import { CloseIcon, CopyIcon, DownloadIcon, ShareIcon } from '../components/ui/Icons';
+import { CloseIcon, CopyIcon, DownloadIcon, ShareIcon, ZoomIcon } from '../components/ui/Icons';
 import { OwnerShell } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
-import { canvasToBlob, POSTER_SIZE, POSTER_TYPES, renderPoster, type PosterLang, type PosterType } from '../lib/posters';
+import { canvasToBlob, POSTER_LANGS, POSTER_SIZE, POSTER_TYPES, renderPoster, type PosterLang, type PosterType } from '../lib/posters';
 import { storeUrl } from '../lib/storeCode';
 import type { Store } from '../lib/types';
 import { hasBannedWord } from '../lib/bannedWords';
@@ -22,7 +22,11 @@ interface Pref {
 function readPref(): Pref {
   const fallback: Pref = { type: 'A', lang: currentLang() === 'ko' ? 'ko' : 'en', caption: '' };
   try {
-    return { ...fallback, ...JSON.parse(localStorage.getItem(PREF_KEY) ?? '{}') };
+    const saved = { ...fallback, ...JSON.parse(localStorage.getItem(PREF_KEY) ?? '{}') } as Pref;
+    // 예전 '한국어+EN' 같은 없어진 값은 기본값으로
+    if (!POSTER_LANGS.some((l) => l.code === saved.lang)) saved.lang = fallback.lang;
+    if (!POSTER_TYPES.includes(saved.type)) saved.type = fallback.type;
+    return saved;
   } catch {
     return fallback;
   }
@@ -41,6 +45,7 @@ function Share({ store }: { store: Store }) {
   const [pref, setPref] = useState<Pref>(readPref);
   const [draft, setDraft] = useState(pref.caption);
   const [customizing, setCustomizing] = useState(false);
+  const [zoom, setZoom] = useState(false);
   const [poster, setPoster] = useState<{ blob: Blob; src: string } | null>(null);
   const fileName = `sayandgo-${store.code}-${pref.type}.png`;
   const captionError = draft.trim() && hasBannedWord(draft) ? t('errors.banned') : null;
@@ -120,7 +125,9 @@ function Share({ store }: { store: Store }) {
 
         <div className="qr-stage">
           {poster ? (
-            <img src={poster.src} alt={`${store.storeName} QR`} width={w} height={h} className={`qr-stage__img qr-stage__img--${pref.type}`} />
+            <button type="button" className="qr-stage__btn" onClick={() => setZoom(true)} aria-label={t('share.zoom')}>
+              <img src={poster.src} alt={`${store.storeName} QR`} width={w} height={h} className={`qr-stage__img qr-stage__img--${pref.type}`} />
+            </button>
           ) : (
             <div className="skeleton qr-stage__img" style={{ aspectRatio: `${w} / ${h}`, width: '100%', maxWidth: pref.type === 'C' ? 340 : 300 }} />
           )}
@@ -131,7 +138,7 @@ function Share({ store }: { store: Store }) {
           <span className="poster-pick__text">
             <b>{t('share.customize')}</b>
             <span>
-              {t(`share.types.${pref.type}`)} · {t(`share.langs.${pref.lang}`)}
+              {t(`share.types.${pref.type}`)} · {POSTER_LANGS.find((l) => l.code === pref.lang)?.label}
               {pref.caption ? ` · ${t('share.customOn')}` : ''}
             </span>
           </span>
@@ -166,7 +173,17 @@ function Share({ store }: { store: Store }) {
       {customizing && (
         <Sheet title={t('share.customize')} onClose={() => setCustomizing(false)}>
           <div className="poster-mini">
-            {poster ? <img src={poster.src} alt="" /> : <div className="skeleton" style={{ aspectRatio: `${w} / ${h}`, height: '100%' }} />}
+            {poster ? (
+              <button type="button" className="poster-mini__btn" onClick={() => setZoom(true)} aria-label={t('share.zoom')}>
+                <img src={poster.src} alt="" />
+                <span className="poster-mini__zoom">
+                  <ZoomIcon />
+                  {t('share.zoom')}
+                </span>
+              </button>
+            ) : (
+              <div className="skeleton" style={{ aspectRatio: `${w} / ${h}`, height: '100%' }} />
+            )}
           </div>
           <p className="share-label">{t('share.design')}</p>
           <div className="poster-types" role="radiogroup" aria-label={t('share.design')}>
@@ -204,19 +221,47 @@ function Share({ store }: { store: Store }) {
           </div>
 
 
-          <p className="share-label">{t('share.captionLang')}</p>
-          <div className="segmented" role="radiogroup" aria-label={t('share.captionLang')}>
-            {(['ko', 'en', 'both'] as PosterLang[]).map((l) => (
-              <button key={l} type="button" role="radio" aria-selected={pref.lang === l} onClick={() => setPref((p) => ({ ...p, lang: l }))}>
-                {t(`share.langs.${l}`)}
-              </button>
-            ))}
+          <div className="field" style={{ marginTop: 20 }}>
+            <label className="field__label" htmlFor="poster-lang">
+              {t('share.captionLang')}
+            </label>
+            <select id="poster-lang" className="select" value={pref.lang} onChange={(e) => setPref((p) => ({ ...p, lang: e.target.value as PosterLang }))}>
+              {POSTER_LANGS.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+            <p className="field__hint">{t('share.langHint')}</p>
           </div>
           <button type="button" className="btn btn--black btn--lg" style={{ width: '100%', marginTop: 20 }} onClick={() => setCustomizing(false)}>
             {t('share.apply')}
           </button>
         </Sheet>
       )}
+      {zoom && poster && <PosterZoom src={poster.src} onClose={() => setZoom(false)} />}
     </OwnerShell>
+  );
+}
+
+/** 포스터 크게 보기: 화면 가득, 아무 데나 누르거나 Esc로 닫기 */
+function PosterZoom({ src, onClose }: { src: string; onClose: () => void }) {
+  const { t } = useTranslation();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.stopPropagation();
+      onClose();
+    };
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, [onClose]);
+  return (
+    <div className="poster-zoom" role="dialog" aria-modal="true" aria-label={t('share.zoom')} onClick={onClose}>
+      <img src={src} alt="" />
+      <button type="button" className="poster-zoom__close" aria-label={t('common.close')}>
+        <CloseIcon />
+      </button>
+    </div>
   );
 }

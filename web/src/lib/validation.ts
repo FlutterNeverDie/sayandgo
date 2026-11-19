@@ -4,7 +4,7 @@ import { hasBannedWord } from './bannedWords';
 export const LIMITS = {
   storeName: 20,
   intro: 30,
-  questionMin: 2,
+  questionMin: 3,
   questionMax: 500,
   answer: 1000,
   passwordMin: 8,

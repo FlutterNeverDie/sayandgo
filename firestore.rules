@@ -79,7 +79,7 @@ service cloud.firestore {
           && d().keys().hasOnly(['body', 'lang', 'kind', 'visibility', 'status', 'answer', 'hidden', 'hiddenBy',
                                  'reportCount', 'helpful', 'pinned', 'createdAt'])
           && d().helpful == 0
-          && str(d().body, 2, 500) && str(d().lang, 2, 10)
+          && str(d().body, 3, 500) && str(d().lang, 2, 10)
           && d().kind in ['question', 'suggestion', 'complaint', 'praise']
           && d().visibility in ['public', 'owner']
           && d().status == 'open' && d().answer == null

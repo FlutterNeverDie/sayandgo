@@ -70,7 +70,7 @@ function ComposeForm({ store, onBack }: { store: Store; onBack: () => void }) {
   }, [draftKey, text]);
 
   const length = text.trim().length;
-  const canSend = !busy && wait <= 0 && length > 0;
+  const canSend = !busy && wait <= 0 && length >= LIMITS.questionMin;
 
   async function onSubmit(e?: FormEvent) {
     e?.preventDefault();
@@ -106,9 +106,6 @@ function ComposeForm({ store, onBack }: { store: Store; onBack: () => void }) {
           <h1>{t('store.askTitle')}</h1>
           <span>{store.storeName}</span>
         </div>
-        <button className="btn btn--black btn--sm" onClick={() => onSubmit()} disabled={!canSend}>
-          {busy ? t('store.sending') : t('store.sendShort')}
-        </button>
       </header>
 
       <main className="page compose">
@@ -153,6 +150,10 @@ function ComposeForm({ store, onBack }: { store: Store; onBack: () => void }) {
             </span>
           </div>
 
+          <button className="btn btn--black btn--block btn--lg" style={{ marginTop: 16 }} disabled={!canSend}>
+            {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
+          </button>
+
           <div className="anon-box">
             <p className="anon-box__title">
               <LockIcon />
@@ -165,9 +166,6 @@ function ComposeForm({ store, onBack }: { store: Store; onBack: () => void }) {
             </ul>
           </div>
 
-          <button className="btn btn--black btn--block btn--lg" style={{ marginTop: 16 }} disabled={!canSend}>
-            {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
-          </button>
           <p className="field__hint" id="q-hint" style={{ marginTop: 12 }}>
             <Trans i18nKey="store.consent" components={{ 1: <Link to="/policy" /> }} />
           </p>

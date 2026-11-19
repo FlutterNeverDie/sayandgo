@@ -31,7 +31,7 @@
     "passwordCommon": "That password is too common. Pick another.",
     "tooLong": "That's too long.",
     "banned": "That wording can't be posted. Please rephrase.",
-    "questionShort": "Write at least two characters.",
+    "questionShort": "Write at least three characters.",
     "emailInUse": "This email is already registered. Please log in.",
     "wrongLogin": "Email or password is incorrect.",
     "tooMany": "Too many attempts. Try again in a moment.",
@@ -428,10 +428,10 @@
     "praise": "Compliment"
   },
   "kindPlaceholder": {
-    "question": "What would you like to know?",
-    "suggestion": "It would be great if…",
-    "complaint": "Tell the owner honestly what wasn't right. It really helps.",
-    "praise": "What did you like?"
+    "question": "What would you like to know?\ne.g. Do you sell the decaf beans?",
+    "suggestion": "What would make it better?\ne.g. Blankets on the terrace would be nice",
+    "complaint": "Tell us honestly what wasn't right\ne.g. The music was too loud to talk",
+    "praise": "What did you like?\ne.g. The staff were really kind"
   },
   "kindNoun": {
     "question": "Anonymous question",

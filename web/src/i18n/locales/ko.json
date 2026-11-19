@@ -153,7 +153,25 @@
     "notesTitle": "이런 쪽지가 와요",
     "ownerSays": "사장님:",
     "heroDots": "소개 그림",
-    "myQr": "내 QR 보기"
+    "myQr": "내 QR 보기",
+    "scenes": {
+      "beforeWhen": "지난주 · 익명 손님",
+      "beforeQ": "아메리카노가 조금 썼어요",
+      "afterWhen": "이번 주 · 사장님",
+      "afterA": "로스팅을 바꿨어요. 다시 드셔 보세요",
+      "cameBack": "손님이 다시 왔어요",
+      "anon": "익명",
+      "bubbles": [
+        "음악이 조금 커요",
+        "콘센트 자리 더 있으면",
+        "직원분 친절해요"
+      ],
+      "starsCap": "별점은 이유를\n알려 주지 않아요",
+      "starsWhere": "지도 앱 리뷰",
+      "starsVague": "\"그냥 그랬어요\"",
+      "starsWhy": "무엇이 문제였는지 알 수 없음",
+      "feedbackWhere": "익명 피드백"
+    }
   },
   "signup": {
     "title": "우리 가게 피드백함 만들기",

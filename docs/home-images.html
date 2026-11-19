@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>홈 그림 후보</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: #15201d; font-family: "Pretendard Variable", Pretendard, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; word-break: keep-all; }
+  :root { --mint: #3ccfae; --mint-ink: #0b6b58; --mint-soft: #e2f6ef; --ink: #15201d; --muted: #5f6b67; }
+  .wrap { padding: 32px 24px 64px; }
+  h1 { font-size: 24px; font-weight: 800; } .lead { color: #5b6b67; margin-top: 6px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 28px; margin-top: 24px; }
+  .item h2 { font-size: 16px; font-weight: 800; } .item p.d { font-size: 13px; color: #5b6b67; margin: 4px 0 10px; max-width: 390px; min-height: 36px; }
+  .scene { width: 390px; height: 390px; position: relative; overflow: hidden; border-radius: 4px; }
+
+  /* 1 사장님 휴대폰 */
+  .s1 { background: #dfe8e4; }
+  .s1 .counter { position: absolute; left: 0; right: 0; bottom: 0; height: 90px; background: #b9c9c2; }
+  .s1 .ph { position: absolute; left: 95px; top: 34px; width: 200px; height: 380px; background: var(--ink); border-radius: 30px; padding: 9px; transform: rotate(-5deg); }
+  .s1 .sc { background: #fff; height: 100%; border-radius: 22px; padding: 14px 12px; }
+  .s1 .t { font-size: 15px; font-weight: 800; }
+  .s1 .tabs { display: flex; gap: 10px; font-size: 10px; color: var(--muted); margin: 8px 0 8px; border-bottom: 1px solid #edf0ee; padding-bottom: 5px; }
+  .s1 .tabs b { color: var(--ink); }
+  .s1 .row { background: #f3f5f4; border-radius: 10px; padding: 7px 8px; font-size: 9.5px; margin-bottom: 7px; }
+  .s1 .row small { display: block; font-size: 8px; font-weight: 700; color: var(--muted); }
+  .s1 .row .b { display: inline-block; margin-top: 5px; background: var(--ink); color: #fff; border-radius: 6px; padding: 2px 7px; font-size: 8px; font-weight: 700; }
+  .s1 .new { position: absolute; left: 238px; top: 26px; background: #e5484d; color: #fff; font-size: 12px; font-weight: 800; border-radius: 12px; padding: 3px 9px; transform: rotate(-5deg); }
+  .s1 .hand { position: absolute; left: 70px; bottom: -60px; width: 150px; height: 170px; background: #e8c9a8; border-radius: 70px 70px 30px 30px; transform: rotate(14deg); }
+
+  /* 2 영수증 */
+  .s2 { background: #ece7de; }
+  .s2 .rc { position: absolute; left: 70px; top: 22px; width: 250px; background: #fff; padding: 18px 18px 30px; font-size: 12px; transform: rotate(2deg);
+            clip-path: polygon(0 0, 100% 0, 100% 96%, 94% 100%, 88% 96%, 82% 100%, 76% 96%, 70% 100%, 64% 96%, 58% 100%, 52% 96%, 46% 100%, 40% 96%, 34% 100%, 28% 96%, 22% 100%, 16% 96%, 10% 100%, 4% 96%, 0 100%); }
+  .s2 .hd { text-align: center; font-weight: 900; font-size: 14px; letter-spacing: .02em; }
+  .s2 .sub { text-align: center; color: var(--muted); font-size: 10px; margin-top: 2px; }
+  .s2 .ln { border-top: 1px dashed #c9c2b6; margin: 10px 0; }
+  .s2 .it { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; margin-bottom: 9px; }
+  .s2 .it b { font-weight: 700; } .s2 .it span { color: var(--mint-ink); font-weight: 800; }
+  .s2 .it i { grid-column: 1 / -1; font-style: normal; color: var(--muted); font-size: 10.5px; }
+  .s2 .tot { display: flex; justify-content: space-between; font-weight: 900; font-size: 13px; }
+
+  /* 3 별점 vs 피드백 */
+  .s3 { background: #eef0f2; padding: 30px 20px; }
+  .s3 .cap { font-size: 18px; font-weight: 800; line-height: 1.35; }
+  .s3 .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 22px; }
+  .s3 .c { background: #fff; border-radius: 14px; padding: 14px; height: 220px; }
+  .s3 .c small { font-size: 11px; font-weight: 700; color: var(--muted); }
+  .s3 .stars { font-size: 22px; color: #f5b301; letter-spacing: 1px; margin-top: 10px; }
+  .s3 .stars span { color: #d6dadd; }
+  .s3 .vague { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .s3 .why { margin-top: 14px; font-size: 12px; color: #a3abb0; }
+  .s3 .c.good { outline: 2px solid var(--mint); }
+  .s3 .q { margin-top: 10px; font-size: 13px; font-weight: 600; }
+  .s3 .a { margin-top: 10px; background: var(--mint-soft); border-radius: 10px; padding: 8px; font-size: 12px; color: var(--mint-ink); font-weight: 600; }
+
+  /* 4 비포 · 애프터 */
+  .s4 { background: #f1ede6; padding: 28px 22px; }
+  .s4 .wk { font-size: 12px; font-weight: 800; color: var(--muted); }
+  .s4 .b1 { margin-top: 8px; background: #fff; border-radius: 16px 16px 16px 4px; padding: 14px; font-size: 16px; font-weight: 600; width: 82%; }
+  .s4 .arrow { margin: 16px 0 16px 30px; height: 46px; border-left: 3px dashed #b8ad9c; position: relative; }
+  .s4 .arrow::after { content: ''; position: absolute; left: -9px; bottom: -4px; border: 8px solid transparent; border-top: 10px solid #b8ad9c; }
+  .s4 .b2 { background: var(--ink); color: #fff; border-radius: 16px 16px 4px 16px; padding: 14px; font-size: 16px; font-weight: 600; width: 86%; margin-left: auto; }
+  .s4 .b2 small { display: block; color: var(--mint); font-size: 11px; font-weight: 800; margin-bottom: 4px; }
+  .s4 .wk2 { text-align: right; margin-top: 8px; }
+
+  /* 5 가게 앞 말풍선 */
+  .s5 { background: #e3eef3; }
+  .s5 .shop { position: absolute; left: 55px; right: 55px; bottom: 0; height: 190px; background: #fff; }
+  .s5 .awn { position: absolute; left: 40px; right: 40px; bottom: 182px; height: 40px;
+             background: repeating-linear-gradient(90deg, var(--mint) 0 28px, #fff 28px 56px); border-radius: 0 0 14px 14px; }
+  .s5 .sign { position: absolute; left: 50%; bottom: 228px; transform: translateX(-50%); background: var(--ink); color: #fff; font-weight: 800; font-size: 13px; padding: 6px 14px; border-radius: 8px; }
+  .s5 .win { position: absolute; left: 80px; bottom: 30px; width: 110px; height: 100px; background: #cfe3ea; border-radius: 6px; }
+  .s5 .door { position: absolute; right: 85px; bottom: 0; width: 70px; height: 130px; background: #2b3a35; border-radius: 6px 6px 0 0; }
+  .s5 .bub { position: absolute; background: #fff; border-radius: 16px; padding: 9px 12px; font-size: 12px; font-weight: 600; box-shadow: 0 2px 0 rgba(0,0,0,.06); }
+  .s5 .bub::after { content: ''; position: absolute; left: 18px; bottom: -8px; border: 8px solid transparent; border-top-color: #fff; border-bottom: 0; }
+  .s5 .bub small { display: block; font-size: 9.5px; color: var(--muted); font-weight: 700; }
+  .s5 .b1 { left: 22px; top: 26px; } .s5 .b2 { right: 18px; top: 70px; } .s5 .b3 { left: 70px; top: 118px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>홈 그림 후보 5개 (A · B와 같은 390 × 390)</h1>
+  <p class="lead">A(테이블 위 QR) · B(손님 휴대폰)와 겹치지 않는 장면들입니다. 우리 앱 아이콘은 넣지 않았습니다. 2개를 골라 주시면 A · B 뒤에 이어서 자동 슬라이드로 넣겠습니다.</p>
+  <div class="grid">
+
+    <section class="item"><h2>1. 사장님 휴대폰</h2><p class="d">손님 쪽이 아니라 사장님 쪽. 받은 피드백 화면에 새 피드백이 쌓여 있고 "답변하기"가 보임.</p>
+      <div class="scene s1"><div class="counter"></div>
+        <div class="ph"><div class="sc"><p class="t">받은 피드백</p><div class="tabs"><span>답변 12</span><b>새 피드백 3</b><span>숨김 1</span></div>
+          <div class="row"><small>익명님의 아쉬운 점</small>화장실이 조금 지저분했어요<br><span class="b">답변하기</span></div>
+          <div class="row"><small>익명님의 제안</small>오트밀크 옵션이 있으면 좋겠어요<br><span class="b">답변하기</span></div>
+          <div class="row"><small>익명님의 아쉬운 점</small>주말엔 자리가 너무 없어요<br><span class="b">답변하기</span></div>
+        </div></div>
+        <span class="new">새 피드백 3</span><div class="hand"></div></div>
+    </section>
+
+    <section class="item"><h2>2. 영수증</h2><p class="d">가게에 익숙한 영수증 모양으로 "이번 주 고친 것"을 정리. 문제 → 고친 것이 한 줄씩.</p>
+      <div class="scene s2"><div class="rc">
+        <p class="hd">이번 주 손님 피드백</p><p class="sub">연남동 로스터리 · 11월 셋째 주</p><div class="ln"></div>
+        <div class="it"><b>음악 소리가 커요</b><span>고침</span><i>→ 오후엔 볼륨 한 단계 낮춤</i></div>
+        <div class="it"><b>주말 자리 부족</b><span>고침</span><i>→ 주말 오전 테이블 2개 추가</i></div>
+        <div class="it"><b>오트밀크 있었으면</b><span>준비 중</span><i>→ 다음 달부터</i></div>
+        <div class="ln"></div><div class="tot"><span>받은 피드백</span><span>3건</span></div>
+      </div></div>
+    </section>
+
+    <section class="item"><h2>3. 별점 vs 피드백</h2><p class="d">별점은 이유를 안 알려 주지만, 익명 피드백은 고칠 점을 알려 준다는 차이를 한 장으로.</p>
+      <div class="scene s3"><p class="cap">별점은 이유를<br>알려 주지 않아요</p>
+        <div class="cards">
+          <div class="c"><small>지도 앱 리뷰</small><p class="stars">★★★<span>★★</span></p><p class="vague">"그냥 그랬어요"</p><p class="why">무엇이 문제였는지 알 수 없음</p></div>
+          <div class="c good"><small>익명 피드백</small><p class="q">주말엔 자리가 너무 없어요</p><p class="a">테이블 두 개 더 놓을게요</p></div>
+        </div></div>
+    </section>
+
+    <section class="item"><h2>4. 비포 · 애프터</h2><p class="d">지난주 손님 한마디가 이번 주 가게를 바꿨다는 흐름. 말 대신 시간의 흐름으로 보여 줌.</p>
+      <div class="scene s4"><p class="wk">지난주 · 익명 손님</p><div class="b1">아메리카노가 조금 썼어요</div>
+        <div class="arrow"></div>
+        <div class="b2"><small>이번 주 · 사장님</small>로스팅을 바꿨어요. 다시 드셔 보세요</div><p class="wk wk2">손님이 다시 왔어요</p></div>
+    </section>
+
+    <section class="item"><h2>5. 가게 앞 말풍선</h2><p class="d">가게 외관 위로 손님들의 익명 말풍선이 떠 있음. "들리지 않던 말이 들린다"는 느낌.</p>
+      <div class="scene s5"><div class="awn"></div><span class="sign">OUR SHOP</span><div class="shop"></div><div class="win"></div><div class="door"></div>
+        <div class="bub b1"><small>익명</small>음악이 조금 커요</div>
+        <div class="bub b2"><small>익명</small>콘센트 자리 더 있으면</div>
+        <div class="bub b3"><small>익명</small>직원분 친절해요</div></div>
+    </section>
+
+  </div>
+</div>
+</body>
+</html>

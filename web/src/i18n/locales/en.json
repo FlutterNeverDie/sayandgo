@@ -153,7 +153,25 @@
     "notesTitle": "Notes like these arrive",
     "ownerSays": "Owner:",
     "heroDots": "Intro pictures",
-    "myQr": "View my QR"
+    "myQr": "View my QR",
+    "scenes": {
+      "beforeWhen": "Last week · anonymous guest",
+      "beforeQ": "The americano was a bit bitter",
+      "afterWhen": "This week · owner",
+      "afterA": "We changed the roast. Give it another try",
+      "cameBack": "The guest came back",
+      "anon": "Anonymous",
+      "bubbles": [
+        "Music is a bit loud",
+        "More seats with outlets?",
+        "Staff were so kind"
+      ],
+      "starsCap": "Star ratings don't\ntell you why",
+      "starsWhere": "Map app review",
+      "starsVague": "\"It was okay\"",
+      "starsWhy": "No idea what went wrong",
+      "feedbackWhere": "Anonymous feedback"
+    }
   },
   "signup": {
     "title": "Create your feedback box",

@@ -18,7 +18,7 @@ function Share({ store }: { store: Store }) {
   const toast = useToast();
   const url = storeUrl(store.code);
   const isLocal = /^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname);
-  const fileName = `qplace-${store.code}.png`;
+  const fileName = `sayandgo-${store.code}.png`;
   const [poster, setPoster] = useState<{ blob: Blob; src: string } | null>(null);
 
   useEffect(() => {

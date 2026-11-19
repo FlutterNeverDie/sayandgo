@@ -1,11 +1,11 @@
 // 로컬 에뮬레이터에 샘플 데이터를 넣는다. 실제 프로젝트에는 쓰지 않는다.
 // 사용: npm run emulators (다른 창) → node scripts/seed-emulator.mjs
-const PROJECT = 'demo-qplace';
+const PROJECT = 'demo-sayandgo';
 const AUTH = 'http://127.0.0.1:9099';
 const FS = `http://127.0.0.1:8080/v1/projects/${PROJECT}/databases/(default)/documents`;
 const ADMIN = { Authorization: 'Bearer owner', 'Content-Type': 'application/json' }; // 에뮬레이터 전용: 규칙 우회
 
-const EMAIL = 'demo@qplace.test';
+const EMAIL = 'demo@sayandgo.test';
 const PASSWORD = 'coffee2024';
 const CODE = 'k7m2xp9a';
 

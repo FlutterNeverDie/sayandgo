@@ -99,7 +99,7 @@ async function seed(fn: (db: Firestore) => Promise<void>) {
 
 beforeAll(async () => {
   env = await initializeTestEnvironment({
-    projectId: 'demo-qplace',
+    projectId: 'demo-sayandgo',
     firestore: {
       rules: readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8'),
       host: '127.0.0.1',

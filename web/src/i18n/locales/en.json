@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Q Place"
+    "name": "Say&Go"
   },
   "common": {
     "loading": "Loading",
@@ -223,7 +223,7 @@
     "deletedDesc": "This link no longer takes questions.",
     "suspendedTitle": "This page is restricted",
     "suspendedDesc": "It's unavailable due to a policy violation.",
-    "powered": "Make a question box for your shop with Q Place",
+    "powered": "Get feedback for your shop with Say&Go",
     "sentHidden": "Sent. It will appear here once the owner replies.",
     "anonymousQ": "Anonymous asked",
     "waiting": "Not answered yet",
@@ -319,7 +319,7 @@
     },
     "pinned": "Pinned",
     "blockTitle": "Block this sender?",
-    "blockDesc": "The device that sent this can't send questions anymore. Neither you nor Q Place can see who it is.",
+    "blockDesc": "The device that sent this can't send questions anymore. Neither you nor Say&Go can see who it is.",
     "blockOnly": "Block only",
     "blockAndDelete": "Block and delete",
     "blocked": "Blocked",
@@ -340,7 +340,7 @@
     "qrDesc": "A print-ready image with your shop name. Save it and print or display it.",
     "savePng": "Save image",
     "sharePng": "Save to photos · Share",
-    "qrCaption": "Scan to leave an anonymous question",
+    "qrCaption": "Scan, say it anonymously, and go",
     "devNotice": "This is a development address and won't open on other devices. Save again after deploying.",
     "tip": "Put it on tables, the counter or the door"
   },

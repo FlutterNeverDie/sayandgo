@@ -10,12 +10,12 @@ import {
 
 const env = import.meta.env;
 
-/** 실제 프로젝트 설정이 없으면 로컬 에뮬레이터(demo-qplace)로 붙는다. */
+/** 실제 프로젝트 설정이 없으면 로컬 에뮬레이터(demo-sayandgo)로 붙는다. */
 export const usingEmulator = env.VITE_USE_EMULATOR === 'true' || !env.VITE_FIREBASE_API_KEY;
 
 const app = initializeApp(
   usingEmulator
-    ? { apiKey: 'demo-key', authDomain: 'demo-qplace.firebaseapp.com', projectId: 'demo-qplace', appId: 'demo' }
+    ? { apiKey: 'demo-key', authDomain: 'demo-sayandgo.firebaseapp.com', projectId: 'demo-sayandgo', appId: 'demo' }
     : {
         apiKey: env.VITE_FIREBASE_API_KEY,
         authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -49,7 +49,7 @@ if (usingEmulator) {
   // 에뮬레이터 전용: ?devLogin=1 이면 샘플 사장님으로 로그인 (scripts/seed-emulator.mjs의 계정)
   if (typeof location !== 'undefined' && new URLSearchParams(location.search).has('devLogin')) {
     import('firebase/auth').then(({ signInWithEmailAndPassword }) =>
-      signInWithEmailAndPassword(auth, 'demo@qplace.test', 'coffee2024').catch(() => undefined),
+      signInWithEmailAndPassword(auth, 'demo@sayandgo.test', 'coffee2024').catch(() => undefined),
     );
   }
 }

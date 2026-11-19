@@ -83,7 +83,7 @@ export function fetchPublicPage(code: string, sort: PublicSort, cursor: QueryDoc
 
 // ---------- 도움됐어요 ----------
 
-const votedKey = 'qplace:helpful';
+const votedKey = 'sayandgo:helpful';
 
 export function votedIds(): Set<string> {
   try {
@@ -135,7 +135,7 @@ async function ensureSignedIn(): Promise<User> {
   return auth.currentUser ?? (await signInAnonymously(auth)).user;
 }
 
-const mineKey = (code: string) => `qplace:mine:${code}`;
+const mineKey = (code: string) => `sayandgo:mine:${code}`;
 
 export function myQuestionIds(code: string): Set<string> {
   try {
@@ -183,7 +183,7 @@ export async function postQuestion(code: string, body: string, lang: string, kin
 }
 
 
-const reportedKey = 'qplace:reported';
+const reportedKey = 'sayandgo:reported';
 
 export function alreadyReported(targetId: string): boolean {
   try {

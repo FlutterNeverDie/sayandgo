@@ -19,7 +19,7 @@ i18n
     nonExplicitSupportedLngs: true, // ko-KR → ko
     load: 'languageOnly',
     // 국가보다 브라우저 언어 우선. 직접 고른 언어는 기억한다.
-    detection: { order: ['localStorage', 'navigator'], lookupLocalStorage: 'qplace:lang', caches: ['localStorage'] },
+    detection: { order: ['localStorage', 'navigator'], lookupLocalStorage: 'sayandgo:lang', caches: ['localStorage'] },
     interpolation: { escapeValue: false },
     returnObjects: true,
   });

@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "demo-qplace",
-    "prod": "qplace-prod"
+    "default": "demo-sayandgo",
+    "prod": "sayandgo-prod"
   }
 }

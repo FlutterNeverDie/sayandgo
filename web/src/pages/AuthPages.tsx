@@ -222,7 +222,7 @@ export function LoginPage() {
   );
 }
 
-const RESEND_KEY = 'qplace:verifySentAt';
+const RESEND_KEY = 'sayandgo:verifySentAt';
 
 export function VerifyPage() {
   const { t } = useTranslation();

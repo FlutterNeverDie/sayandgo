@@ -30,7 +30,7 @@ import { getStore } from '../lib/stores';
 import { QUESTION_KINDS, type Question, type QuestionKind, type Store } from '../lib/types';
 import { checkQuestion, LIMITS, tidyText } from '../lib/validation';
 
-const LAST_POST_KEY = 'qplace:lastPost';
+const LAST_POST_KEY = 'sayandgo:lastPost';
 const WAIT_SEC = 30;
 
 export function StorePage() {
@@ -312,7 +312,7 @@ function readLastPost(): number {
 /** 남기기: 종류 고르기 + 사장님만 보기 + 익명 안내. 버튼을 눌렀을 때만 열린다. */
 function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () => void; onPosted: (q: Question) => void }) {
   const { t } = useTranslation();
-  const draftKey = `qplace:draft:${store.code}`;
+  const draftKey = `sayandgo:draft:${store.code}`;
   const [text, setText] = useState(() => sessionStorage.getItem(draftKey) ?? '');
   const [kind, setKind] = useState<QuestionKind>('question');
   const [ownerOnly, setOwnerOnly] = useState(false);

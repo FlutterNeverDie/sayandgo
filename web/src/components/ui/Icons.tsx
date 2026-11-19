@@ -55,3 +55,16 @@ export const HeartIcon = ({ filled }: { filled?: boolean }) => (
     <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z" />
   </svg>
 );
+
+export const CopyIcon = () => (
+  <svg {...base} width={16} height={16}>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M5 15V6a2 2 0 0 1 2-2h9" />
+  </svg>
+);
+
+export const DownloadIcon = () => (
+  <svg {...base} width={18} height={18}>
+    <path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14" />
+  </svg>
+);

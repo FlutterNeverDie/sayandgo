@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RequireOwner } from '../app/auth';
+import { CopyIcon, DownloadIcon, ShareIcon } from '../components/ui/Icons';
 import { OwnerShell } from '../components/ui/Layout';
 import { useToast } from '../components/ui/Overlay';
 import { canvasToBlob, makeQrPoster } from '../lib/qr';
@@ -11,6 +12,7 @@ export function SharePage() {
   return <RequireOwner>{(store) => <Share store={store} />}</RequireOwner>;
 }
 
+/** 링크 · QR: 포스터 크게 → 저장 / 공유 → 링크 한 줄 */
 function Share({ store }: { store: Store }) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -39,6 +41,23 @@ function Share({ store }: { store: Store }) {
   const file = poster ? new File([poster.blob], fileName, { type: 'image/png' }) : null;
   const canShareFile = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] });
 
+  function copy() {
+    navigator.clipboard
+      .writeText(url)
+      .then(() => toast(t('common.copied')))
+      .catch(() => toast(t('errors.generic')));
+  }
+
+  function share() {
+    if (canShareFile) {
+      navigator.share({ files: [file!], title: store.storeName, text: t('share.shareText', { name: store.storeName }) }).catch(() => undefined);
+    } else if (typeof navigator.share === 'function') {
+      navigator.share({ title: store.storeName, text: t('share.shareText', { name: store.storeName }), url }).catch(() => undefined);
+    } else {
+      copy();
+    }
+  }
+
   return (
     <OwnerShell storeName={store.storeName}>
       <main className="page">
@@ -49,64 +68,37 @@ function Share({ store }: { store: Store }) {
           </p>
         </div>
 
-        <section aria-labelledby="link-h">
+        <div className="qr-stage">
+          {poster ? (
+            <img src={poster.src} alt={`${store.storeName} QR`} width={1080} height={1350} />
+          ) : (
+            <div className="skeleton" style={{ width: '100%', aspectRatio: '1080 / 1350', borderRadius: 14 }} />
+          )}
+        </div>
+
+        <div className="share-actions">
+          <a className="btn btn--black btn--lg" href={poster?.src} download={fileName} aria-disabled={!poster} onClick={(e) => !poster && e.preventDefault()}>
+            <DownloadIcon />
+            {t('share.savePng')}
+          </a>
+          <button className="btn btn--line btn--lg" onClick={share}>
+            <ShareIcon size={18} />
+            {t('common.share')}
+          </button>
+        </div>
+        <p className="share-tip">{isLocal ? t('share.devNotice') : t('share.tip')}</p>
+
+        <section className="section" aria-labelledby="link-h" style={{ marginTop: 32 }}>
           <h2 id="link-h" className="section__title">
             {t('share.link')}
           </h2>
-          <div className="input-group">
-            <input className="input" readOnly value={url} aria-label={t('share.link')} onFocus={(e) => e.target.select()} />
-            <button
-              className="btn"
-              onClick={() =>
-                navigator.clipboard
-                  .writeText(url)
-                  .then(() => toast(t('common.copied')))
-                  .catch(() => toast(t('errors.generic')))
-              }
-            >
+          <button className="link-row" onClick={copy} aria-label={`${t('common.copy')} ${url}`}>
+            <span className="link-row__url">{url.replace(/^https?:\/\//, '')}</span>
+            <span className="link-row__copy">
+              <CopyIcon />
               {t('common.copy')}
-            </button>
-          </div>
-          {'share' in navigator && (
-            <button
-              className="btn btn--block"
-              style={{ marginTop: 8 }}
-              onClick={() => navigator.share({ title: store.storeName, text: t('share.shareText', { name: store.storeName }), url }).catch(() => undefined)}
-            >
-              {t('share.nativeShare')}
-            </button>
-          )}
-        </section>
-
-        <section className="section" aria-labelledby="qr-h">
-          <h2 id="qr-h" className="section__title">
-            {t('share.qrTitle')}
-          </h2>
-          <p className="subtitle" style={{ marginBottom: 12 }}>
-            {t('share.qrDesc')}
-          </p>
-          {isLocal && (
-            <p className="notice" style={{ marginBottom: 12 }}>
-              {t('share.devNotice')}
-            </p>
-          )}
-          <div className="panel" style={{ padding: 12, display: 'grid', placeItems: 'center' }}>
-            {poster ? (
-              <img src={poster.src} alt={`${store.storeName} QR`} width={1080} height={1350} style={{ width: '100%', maxWidth: 360, height: 'auto' }} />
-            ) : (
-              <div className="skeleton" style={{ width: '100%', maxWidth: 360, aspectRatio: '1080 / 1350' }} />
-            )}
-          </div>
-          <div style={{ display: 'grid', gap: 8, marginTop: 12 }}>
-            <a className="btn btn--primary btn--block" href={poster?.src} download={fileName} aria-disabled={!poster} onClick={(e) => !poster && e.preventDefault()}>
-              {t('share.savePng')}
-            </a>
-            {canShareFile && (
-              <button className="btn btn--block" onClick={() => navigator.share({ files: [file!], title: store.storeName }).catch(() => undefined)}>
-                {t('share.sharePng')}
-              </button>
-            )}
-          </div>
+            </span>
+          </button>
         </section>
       </main>
     </OwnerShell>

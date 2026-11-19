@@ -332,16 +332,17 @@
   },
   "share": {
     "title": "Link · QR",
-    "desc": "Your link and QR code never change. Put them up once and keep using them.",
+    "desc": "Put it up once and keep using it. Your link and QR never change.",
     "link": "Your link",
     "nativeShare": "Share to another app",
     "shareText": "Leave an anonymous question for {{name}}",
     "qrTitle": "QR code",
     "qrDesc": "A print-ready image with your shop name. Save it and print or display it.",
-    "savePng": "Save as PNG",
+    "savePng": "Save image",
     "sharePng": "Save to photos · Share",
     "qrCaption": "Scan to leave an anonymous question",
-    "devNotice": "This is a development address (localhost) and won't open on other devices. Use a QR made after deploying to your real domain."
+    "devNotice": "This is a development address and won't open on other devices. Save again after deploying.",
+    "tip": "Put it on tables, the counter or the door"
   },
   "settings": {
     "title": "Settings",

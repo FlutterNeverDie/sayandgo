@@ -257,7 +257,7 @@ function Inbox({ store }: { store: Store }) {
           </div>
         )}
 
-        <div className="segmented" role="tablist">
+        <div className="segmented" role="tablist" style={{ marginTop: 16 }}>
           {TABS.map((k) => (
             <button
               key={k}
@@ -333,7 +333,7 @@ function Inbox({ store }: { store: Store }) {
               }
               actions={
                 !selecting && !q.answer ? (
-                  <button className="btn btn--sm btn--primary" style={{ marginLeft: 10 }} onClick={() => setEditing(q.id)}>
+                  <button className="btn btn--sm btn--primary" onClick={() => setEditing(q.id)}>
                     {t('inbox.answer')}
                   </button>
                 ) : undefined

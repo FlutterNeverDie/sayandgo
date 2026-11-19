@@ -8,7 +8,7 @@ import { ReportSheet } from '../components/question/ReportSheet';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
 import { Switch } from '../components/ui/Fields';
-import { LockIcon } from '../components/ui/Icons';
+import { LockIcon, ShareIcon } from '../components/ui/Icons';
 import { ErrorBox, Loading, TicketSkeleton } from '../components/ui/States';
 import { currentLang } from '../i18n';
 import {
@@ -142,15 +142,25 @@ function ActiveStore({ store }: { store: Store }) {
 
   return (
     <>
-      <PublicTopbar title={store.storeName} showTitle={past} />
-      <main className="page">
+      <PublicTopbar
+        title={store.storeName}
+        showTitle={past}
+        end={
+          'share' in navigator ? (
+            <button className="icon-btn" aria-label={t('store.shareStore')} onClick={() => navigator.share({ title: store.storeName, url }).catch(() => undefined)}>
+              <ShareIcon />
+            </button>
+          ) : undefined
+        }
+      />
+      <main className="page" style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
         <StoreHeader
           headerRef={headerRef}
           store={store}
           intro={store.intro}
           chips={
             <>
-              <span className="anon-line" style={{ marginTop: 0, marginRight: 4 }}>
+              <span className="chip" style={{ color: 'var(--mint-ink)', fontWeight: 700 }}>
                 <LockIcon />
                 {t('store.anonBadge')}
               </span>
@@ -162,23 +172,9 @@ function ActiveStore({ store }: { store: Store }) {
               {!store.acceptingQuestions && <span className="chip chip--paused">{t('store.pausedChip')}</span>}
             </>
           }
-          actions={
-            <>
-              {store.acceptingQuestions && (
-                <button className="btn btn--primary" onClick={() => setComposing(true)}>
-                  {t('store.ask')}
-                </button>
-              )}
-              {'share' in navigator && (
-                <button className="btn" style={{ flex: store.acceptingQuestions ? '0 0 auto' : 1 }} onClick={() => navigator.share({ title: store.storeName, url }).catch(() => undefined)}>
-                  {t('store.shareStore')}
-                </button>
-              )}
-            </>
-          }
         />
 
-        <section className="feed" aria-label={t('store.listTitle')} style={{ borderTop: '1px solid var(--rule)' }}>
+        <section className="feed" aria-label={t('store.listTitle')} style={{ marginTop: 12 }}>
           {list.isLoading && (
             <>
               <TicketSkeleton />
@@ -192,7 +188,7 @@ function ActiveStore({ store }: { store: Store }) {
             </div>
           )}
           {list.isSuccess && items.length === 0 && (
-            <div className="center-state" style={{ padding: '48px 16px' }}>
+            <div className="center-state panel" style={{ padding: '40px 16px' }}>
               <h2 style={{ fontSize: 16 }}>{t('store.emptyTitle')}</h2>
               <p>{t('store.emptyDesc')}</p>
             </div>
@@ -219,13 +215,17 @@ function ActiveStore({ store }: { store: Store }) {
         />
       </main>
 
-      {store.acceptingQuestions && (
-        <div className={`ask-bar${past && !composing ? ' ask-bar--show' : ''}`} aria-hidden={!past}>
-          <button className="btn btn--primary" tabIndex={past ? 0 : -1} onClick={() => setComposing(true)}>
-            {t('store.ask')}
-          </button>
+      <div className="cta-bar">
+        <div className="cta-bar__inner">
+          {store.acceptingQuestions ? (
+            <button className="btn btn--primary" onClick={() => setComposing(true)}>
+              {t('store.ask')}
+            </button>
+          ) : (
+            <p className="notice">{t('store.paused')}</p>
+          )}
         </div>
-      )}
+      </div>
 
       {composing && <ComposeSheet store={store} onClose={() => setComposing(false)} onPosted={onPosted} />}
 

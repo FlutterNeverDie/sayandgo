@@ -14,15 +14,29 @@ import { errorKey } from '../lib/format';
 import { signUp, verifyActionSettings } from '../lib/stores';
 import { checkEmail, checkPassword, checkStoreName, LIMITS } from '../lib/validation';
 
-function AuthFrame({ title, children }: { title: string; children: React.ReactNode }) {
+/** 앱 아이콘 (public/favicon.svg와 같은 모양) */
+function AppMark({ size = 56 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">
+      <rect width="100" height="100" rx="24" fill="#3ccfae" />
+      <circle cx="47" cy="46" r="22" fill="none" stroke="#15201d" strokeWidth="10" />
+      <path d="M68.8 56.1 L77 77 L57.1 67.8 Z" fill="#15201d" stroke="#15201d" strokeWidth="3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function AuthFrame({ title, subtitle, below, children }: { title: string; subtitle?: string; below?: React.ReactNode; children: React.ReactNode }) {
   return (
     <>
       <PublicTopbar />
       <main className="page page--narrow">
-        <div className="title-row">
-          <h1 className="title">{title}</h1>
+        <div className="auth__brand">
+          <AppMark />
+          <h1>{title}</h1>
+          {subtitle && <p>{subtitle}</p>}
         </div>
-        {children}
+        <div className="panel auth__card">{children}</div>
+        {below && <div className="auth__below">{below}</div>}
       </main>
     </>
   );
@@ -63,7 +77,15 @@ export function SignupPage() {
   }
 
   return (
-    <AuthFrame title={t('signup.title')}>
+    <AuthFrame
+      title={t('signup.title')}
+      subtitle={t('signup.subtitle')}
+      below={
+        <p className="subtitle">
+          {t('signup.haveAccount')} <Link to="/login">{t('login.title')}</Link>
+        </p>
+      }
+    >
       <form onSubmit={onSubmit} noValidate>
         <TextField
           label={t('signup.email')}
@@ -141,12 +163,9 @@ export function SignupPage() {
             {t(formError)}
           </p>
         )}
-        <button className="btn btn--primary btn--block" disabled={busy}>
+        <button className="btn btn--primary btn--block btn--lg" disabled={busy}>
           {busy ? t('common.loading') : t('signup.submit')}
         </button>
-        <p className="subtitle" style={{ marginTop: 20, textAlign: 'center' }}>
-          {t('signup.haveAccount')} <Link to="/login">{t('login.title')}</Link>
-        </p>
       </form>
     </AuthFrame>
   );
@@ -180,7 +199,18 @@ export function LoginPage() {
   }
 
   return (
-    <AuthFrame title={t('login.title')}>
+    <AuthFrame
+      title={t('login.title')}
+      subtitle={t('login.subtitle')}
+      below={
+        <>
+          <p className="subtitle">{t('login.noAccount')}</p>
+          <Link to="/signup" className="btn btn--block btn--lg auth__alt">
+            {t('landing.start')}
+          </Link>
+        </>
+      }
+    >
       <form onSubmit={onSubmit} noValidate>
         <TextField label={t('signup.email')} type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <PasswordField label={t('signup.password')} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
@@ -189,15 +219,14 @@ export function LoginPage() {
             {t(formError)}
           </p>
         )}
-        <button className="btn btn--primary btn--block" disabled={busy}>
+        <button className="btn btn--primary btn--block btn--lg" disabled={busy}>
           {busy ? t('common.loading') : t('login.submit')}
         </button>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20, fontSize: 14 }}>
-          <Link to="/reset">{t('login.forgot')}</Link>
-          <span className="subtitle">
-            {t('login.noAccount')} <Link to="/signup">{t('signup.title')}</Link>
-          </span>
-        </div>
+        <p style={{ marginTop: 16, textAlign: 'center', fontSize: 14 }}>
+          <Link to="/reset" style={{ color: 'var(--muted)' }}>
+            {t('login.forgot')}
+          </Link>
+        </p>
       </form>
     </AuthFrame>
   );
@@ -256,11 +285,8 @@ export function VerifyPage() {
   }
 
   return (
-    <AuthFrame title={t('verify.title')}>
+    <AuthFrame title={t('verify.title')} subtitle={t('verify.spam')}>
       <p style={{ marginBottom: 8 }}>{t('verify.desc', { email: user.email })}</p>
-      <p className="subtitle" style={{ marginBottom: 24 }}>
-        {t('verify.spam')}
-      </p>
       <div style={{ display: 'grid', gap: 8 }}>
         <button className="btn btn--primary btn--block" onClick={checkNow}>
           {t('verify.check')}
@@ -316,25 +342,19 @@ export function ResetPage() {
   }
 
   return (
-    <AuthFrame title={t('reset.title')}>
+    <AuthFrame title={t('reset.title')} subtitle={t('reset.desc')} below={<Link to="/login">{t('reset.back')}</Link>}>
       {sent ? (
         <p className="notice" role="status">
           {t('reset.sent')}
         </p>
       ) : (
         <form onSubmit={onSubmit} noValidate>
-          <p className="subtitle" style={{ marginBottom: 20 }}>
-            {t('reset.desc')}
-          </p>
           <TextField label={t('signup.email')} type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} />
           <button className="btn btn--primary btn--block" disabled={busy}>
             {t('reset.submit')}
           </button>
         </form>
       )}
-      <p style={{ marginTop: 20 }}>
-        <Link to="/login">{t('reset.back')}</Link>
-      </p>
     </AuthFrame>
   );
 }

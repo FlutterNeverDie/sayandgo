@@ -43,3 +43,9 @@ export const LockIcon = ({ size = 16 }: { size?: number }) => (
     <path d="M8 11V8a4 4 0 0 1 8 0v3" />
   </svg>
 );
+
+export const ShareIcon = () => (
+  <svg {...base}>
+    <path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" />
+  </svg>
+);

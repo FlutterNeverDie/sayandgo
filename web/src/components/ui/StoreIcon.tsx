@@ -68,3 +68,10 @@ export function StoreIcon({ category, tone, size = 64 }: { category: StoreCatego
     </span>
   );
 }
+
+/** 가게 색을 옅게 (답변 상자 · 가게 머리 배경) */
+export function toneSoft(tone: string, alpha = 0.16): string {
+  const hex = HEX_RE.test(tone) ? tone : LEGACY_TONES[tone] ?? PRESET_TONES[0];
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}

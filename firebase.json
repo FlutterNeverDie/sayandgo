@@ -1,7 +1,14 @@
 {
   "firestore": {
     "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
+    "indexes": "firestore.indexes.json",
+    "location": "asia-northeast3"
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "anonymous": true
+    }
   },
   "emulators": {
     "auth": { "port": 9099 },

@@ -49,33 +49,104 @@
     "settings": "Settings"
   },
   "landing": {
-    "title": "Hear from your guests, right at the counter",
-    "lead": "Put one QR code on the table and guests leave questions and feedback anonymously. Answer only the ones you want.",
-    "start": "Start for free",
+    "title": "Hear what guests really think",
+    "lead": "Anonymous means honest. Answer only what you want.",
+    "start": "Create my shop QR",
     "login": "Log in",
-    "howTitle": "How it works",
-    "how1": "Sign up with your email and shop name to get your link and QR code instantly.",
-    "how2": "Save the QR and place it on tables, the counter or the door.",
-    "how3": "Answer what you want to answer. Hide or delete the rest.",
-    "sampleTitle": "What guests see",
-    "sampleQ": "Do you sell the decaf beans too?",
-    "sampleA": "Yes, in 200g bags. Just ask at the counter.",
+    "howTitle": "Easy to start",
     "faqTitle": "Questions",
-    "faq1q": "Is it really free?",
-    "faq1a": "Yes. Signing up, receiving questions, answering and the QR code are all free. Guests may see ads.",
     "faq2q": "Can I see who wrote a question?",
-    "faq2a": "No. Guests don't sign up, and no name, contact or IP address is kept.",
+    "faq2a": "No. No name, contact or IP is kept.",
     "faq3q": "What about abusive posts?",
-    "faq3a": "Common slurs are blocked automatically, and you can hide, delete or block. Posts reported by several people are hidden right away.",
+    "faq3a": "Slurs are blocked, and you can hide, delete or block.",
     "faq4q": "If I rename my shop, do I need a new QR?",
-    "faq4a": "No. Your link and QR code never change.",
-    "closing": "Sign up today, put it on the tables tomorrow.",
-    "sampleQ2": "Blankets on the terrace would be nice",
-    "sampleStore": "Harbour Street Roasters",
-    "sampleA2": "Great idea. We will have them from next week."
+    "faq4a": "No. Your link and QR never change.",
+    "closing": "Put it up today, hear them tomorrow",
+    "examplesTitle": "What it looks like",
+    "ex1Name": "Harbour Street Roasters",
+    "ex1Intro": "Open 8am weekdays, 10am weekends",
+    "ex1Q": "Do you sell the decaf beans too?",
+    "ex1A": "Yes, in 200g bags. Just ask at the counter.",
+    "ex2Name": "Station 24h PC Café",
+    "ex2Intro": "Open 24 hours · separate smoking room",
+    "ex2Q": "Chargers at every seat would be great",
+    "ex2A": "From next week every seat will have a USB-C charger.",
+    "how1t": "Put up a QR",
+    "how1": "Ready the moment you sign up",
+    "how2t": "Receive anonymously",
+    "how2": "No sign-in, no names",
+    "how2Sample": "The latte was a bit weak today",
+    "how3t": "Pick and answer",
+    "how3": "Only answered notes go public",
+    "how3Sample": "Thanks for telling us. We adjusted the dose.",
+    "examples": [
+      {
+        "name": "Harbour Street Roasters",
+        "category": "cafe",
+        "tone": "#3ccfae",
+        "intro": "Open 8am weekdays",
+        "kind": "question",
+        "q": "Do you sell the decaf beans?",
+        "a": "Yes, in 200g bags."
+      },
+      {
+        "name": "Station 24h PC Café",
+        "category": "pc",
+        "tone": "#8cc8ff",
+        "intro": "24 hours · smoking room",
+        "kind": "suggestion",
+        "q": "Chargers at every seat, please",
+        "a": "USB-C chargers at every seat from next week."
+      },
+      {
+        "name": "Old Town Soup House",
+        "category": "restaurant",
+        "tone": "#ffb35c",
+        "intro": "Broth from 5am",
+        "kind": "complaint",
+        "q": "The soup was a bit salty today",
+        "a": "Thanks for telling us. We fixed the seasoning."
+      },
+      {
+        "name": "Corner Florist",
+        "category": "flower",
+        "tone": "#f7a8c4",
+        "intro": "Same-day bouquets",
+        "kind": "question",
+        "q": "Can I order a bouquet for today?",
+        "a": "Yes, if you message us before 11am."
+      },
+      {
+        "name": "Hapjeong Hair Studio",
+        "category": "beauty",
+        "tone": "#15201d",
+        "intro": "By appointment",
+        "kind": "praise",
+        "q": "Love my new haircut, thank you",
+        "a": "Thank you! See you next time."
+      },
+      {
+        "name": "Neighbourhood Pilates",
+        "category": "fitness",
+        "tone": "#8fd16a",
+        "intro": "Small groups of 6",
+        "kind": "suggestion",
+        "q": "A weekend morning class would be great",
+        "a": "Saturday 9:30 classes start next month."
+      },
+      {
+        "name": "Seochon Bookshop",
+        "category": "study",
+        "tone": "#e8dcc8",
+        "intro": "Closed on Mondays",
+        "kind": "question",
+        "q": "Do you buy second-hand books?",
+        "a": "Sorry, we only stock new books."
+      }
+    ]
   },
   "signup": {
-    "title": "Sign up",
+    "title": "Create your question box",
     "email": "Email",
     "emailHint": "Used to log in and reset your password. Guests never see it.",
     "password": "Password",
@@ -96,13 +167,15 @@
     "submit": "Sign up and get the email",
     "haveAccount": "Already signed up?",
     "category": "Type of place (optional)",
-    "categoryHint": "Used as your shop icon. You can change it later."
+    "categoryHint": "Used as your shop icon. You can change it later.",
+    "subtitle": "Your link and QR code are ready in a minute."
   },
   "login": {
-    "title": "Log in",
+    "title": "Owner log in",
     "submit": "Log in",
     "forgot": "Forgot password",
-    "noAccount": "No account yet?"
+    "noAccount": "New here?",
+    "subtitle": "Check and answer what your guests left."
   },
   "verify": {
     "title": "Check your inbox",

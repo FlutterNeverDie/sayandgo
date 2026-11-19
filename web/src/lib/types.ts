@@ -27,7 +27,7 @@ export interface Answer {
 
 export type HiddenBy = null | 'owner' | 'report' | 'admin';
 export type QuestionKind = 'question' | 'suggestion' | 'complaint' | 'praise';
-export const QUESTION_KINDS: QuestionKind[] = ['question', 'suggestion', 'complaint', 'praise'];
+export const QUESTION_KINDS: QuestionKind[] = ['suggestion', 'complaint', 'question', 'praise'];
 /** public: 모두에게 공개(답변 후) · owner: 사장님만 */
 export type Visibility = 'public' | 'owner';
 

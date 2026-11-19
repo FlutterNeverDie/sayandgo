@@ -46,7 +46,7 @@ function ComposeForm({ store, onBack }: { store: Store; onBack: () => void }) {
   const toast = useToast();
   const draftKey = `sayandgo:draft:${store.code}`;
   const [text, setText] = useState(() => sessionStorage.getItem(draftKey) ?? '');
-  const [kind, setKind] = useState<QuestionKind>('question');
+  const [kind, setKind] = useState<QuestionKind>(QUESTION_KINDS[0]); // 첫 번째(제안해요)가 기본
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(Date.now());

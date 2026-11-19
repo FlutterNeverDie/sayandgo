@@ -241,13 +241,14 @@ function Inbox({ store }: { store: Store }) {
           store={store}
           intro={store.intro}
           answered={counts.data?.answered ?? null}
+          asked={counts.data ? counts.data.open + counts.data.answered + counts.data.hidden : null}
           actions={
             <>
               <Link to="/share" className="btn btn--black">
                 {t('store.qrShare')}
               </Link>
               <Link to="/settings" className="btn btn--line" style={{ flex: '0 0 auto' }}>
-                {t('store.editInfo')}
+                {t('nav.settings')}
               </Link>
             </>
           }

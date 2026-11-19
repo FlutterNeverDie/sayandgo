@@ -85,7 +85,7 @@ function Settings({ store }: { store: Store }) {
 
   return (
     <OwnerShell storeName={store.storeName} back="/inbox">
-      <main className="page">
+      <main className="page page--grow">
         <div className="title-row">
           <h1 className="title">{t('settings.title')}</h1>
         </div>
@@ -119,6 +119,7 @@ function Settings({ store }: { store: Store }) {
           <Row to="/settings/account" label={t('settings.account')} value={auth.currentUser?.email} />
         </div>
 
+        <div className="grow" />
         <Footer />
       </main>
     </OwnerShell>

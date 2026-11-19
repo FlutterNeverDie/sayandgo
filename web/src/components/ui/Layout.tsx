@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { BackIcon, SettingsIcon } from './Icons';
+import { BackIcon } from './Icons';
 import { LanguageSelect } from './Fields';
 
 export function Footer({ extra }: { extra?: ReactNode }) {
@@ -45,7 +45,7 @@ export function PublicTopbar({ end, title, showTitle }: { end?: ReactNode; title
   );
 }
 
-/** 사장님 화면: 받은 질문함이 메인. 위쪽 바에 설정 아이콘, 들어간 화면은 뒤로 버튼 */
+/** 사장님 화면: 받은 질문함이 메인. 설정은 가게 머리의 설정 버튼, 들어간 화면은 뒤로 버튼 */
 export function OwnerShell({ storeName, title, back, children }: { storeName: string; openCount?: number; title?: string; back?: string; children: ReactNode }) {
   const { t } = useTranslation();
   return (
@@ -65,9 +65,6 @@ export function OwnerShell({ storeName, title, back, children }: { storeName: st
                 {t('app.name')}
               </Link>
               <span className="topbar__store">{storeName}</span>
-              <Link to="/settings" className="icon-btn" aria-label={t('nav.settings')} style={{ marginLeft: 'auto', marginRight: -8 }}>
-                <SettingsIcon />
-              </Link>
             </>
           )}
         </div>

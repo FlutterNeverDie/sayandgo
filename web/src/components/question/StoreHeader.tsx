@@ -4,11 +4,15 @@ import { LockIcon } from '../ui/Icons';
 import type { StoreLook } from './QuestionItem';
 
 /** 가게 머리 (에스크식 프로필): 상호명 · 소개 · 익명 보장 · 답변 수 · 버튼 */
-export function StoreHeader({ store, intro, answered, extra, actions, headerRef }: {
+export function StoreHeader({ store, intro, answered, asked, extra, invite, actions, headerRef }: {
   store: StoreLook;
   intro?: string;
   answered?: number | null;
+  /** 받은 질문 수. 손님 화면은 셀 수 없어 넘기지 않는다 */
+  asked?: number | null;
   extra?: ReactNode;
+  /** 버튼 위에 놓는 사장님의 한마디 (손님 화면) */
+  invite?: string;
   actions?: ReactNode;
   headerRef?: React.Ref<HTMLElement>;
 }) {
@@ -28,8 +32,15 @@ export function StoreHeader({ store, intro, answered, extra, actions, headerRef 
             {t('store.statsA')} <b className="num">{answered}</b>
           </>
         )}
+        {asked != null && (
+          <>
+            {' · '}
+            {t('store.statsQ')} <b className="num">{asked}</b>
+          </>
+        )}
         {extra}
       </p>
+      {invite && <p className="prof__invite">{invite}</p>}
       {actions && <div className="prof__btns">{actions}</div>}
     </header>
   );

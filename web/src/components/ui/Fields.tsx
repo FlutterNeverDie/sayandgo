@@ -1,6 +1,7 @@
 import { useId, useState, type InputHTMLAttributes, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../../i18n';
+import { GlobeIcon } from './Icons';
 import { passwordStrength } from '../../lib/validation';
 
 interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -97,21 +98,24 @@ export function Switch({ checked, onChange, label }: { checked: boolean; onChang
   );
 }
 
+/** 화면에 보이는 언어 표시 (ko → KR, en → EN) */
+const LANG_SHORT: Record<string, string> = { ko: 'KR', en: 'EN' };
+
+/** 지구본 + 현재 언어(KR · EN). 누르면 기기의 기본 선택창이 뜬다 */
 export function LanguageSelect() {
   const { t, i18n } = useTranslation();
+  const current = i18n.resolvedLanguage ?? 'ko';
   return (
-    <select
-      className="select"
-      style={{ width: 'auto', minHeight: 36, height: 36, padding: '0 8px', fontSize: 14, border: 0, background: 'transparent' }}
-      value={i18n.resolvedLanguage}
-      onChange={(e) => i18n.changeLanguage(e.target.value)}
-      aria-label={t('lang.label')}
-    >
-      {LANGUAGES.map((l) => (
-        <option key={l.code} value={l.code}>
-          {l.name}
-        </option>
-      ))}
-    </select>
+    <label className="lang-btn">
+      <GlobeIcon />
+      <span>{LANG_SHORT[current] ?? current.toUpperCase()}</span>
+      <select value={current} onChange={(e) => i18n.changeLanguage(e.target.value)} aria-label={t('lang.label')}>
+        {LANGUAGES.map((l) => (
+          <option key={l.code} value={l.code}>
+            {l.name}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

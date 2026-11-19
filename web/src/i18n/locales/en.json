@@ -208,7 +208,7 @@
     "paused": "Not taking questions right now. Past questions and answers are below.",
     "listTitle": "Questions and answers",
     "emptyTitle": "No replies yet",
-    "emptyDesc": "Leave a question or a note, anonymously.",
+    "emptyDesc": "Tell us anonymously what bothered you or what you wish we did.",
     "emptyAnsweredDesc": "No answered questions yet.",
     "open": "Awaiting reply",
     "answer": "Owner's reply",
@@ -238,7 +238,6 @@
     "end": "You're all caught up",
     "moreText": "More",
     "less": "Less",
-    "editInfo": "Edit info",
     "qrShare": "QR · Share",
     "pausedChip": "Questions paused",
     "anonBadge": "Anonymous · no sign-in",
@@ -256,7 +255,8 @@
     "sortLatest": "Latest",
     "sortHelpful": "Most helpful",
     "shareText": "{{name}} answered: {{q}}",
-    "noDelete": "Once sent, it can't be edited or deleted. Please check before sending."
+    "noDelete": "Once sent, it can't be edited or deleted. Please check before sending.",
+    "invite": "It's anonymous, so be honest. We read every word, even the harsh ones, and use it to get better."
   },
   "report": {
     "title": "Report",

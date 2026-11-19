@@ -26,11 +26,11 @@ export function LegalPage({ kind }: { kind: 'terms' | 'privacy' | 'policy' | 'ri
   return (
     <>
       <PublicTopbar />
-      <main className="page">
+      <main className="page page--grow">
         <div className="title-row">
           <h1 className="title">{t(`legal.${kind}`)}</h1>
         </div>
-        <p className="subtitle">{t('legal.koreanOnly')}</p>
+        <p className="subtitle grow">{t('legal.koreanOnly')}</p>
         <Footer />
       </main>
     </>

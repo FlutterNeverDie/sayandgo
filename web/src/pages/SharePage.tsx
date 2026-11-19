@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RequireOwner } from '../app/auth';
+import { currentLang } from '../i18n';
 import { CopyIcon, DownloadIcon, ShareIcon } from '../components/ui/Icons';
 import { OwnerShell } from '../components/ui/Layout';
 import { useToast } from '../components/ui/Overlay';
@@ -49,7 +50,7 @@ function Share({ store }: { store: Store }) {
   }
 
   // 문구 안에 주소를 넣는다: 이미지와 같이 보내면 많은 앱이 url 값을 버리고, title은 빈 줄로 붙는다
-  const message = `${t('share.shareText', { name: store.storeName })}\n${url}`;
+  const message = `${t('share.shareText', { name: store.storeName, lng: currentLang() })}\n${url}`;
 
   function share() {
     if (canShareFile) {

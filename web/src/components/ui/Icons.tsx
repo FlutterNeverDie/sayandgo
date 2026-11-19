@@ -50,6 +50,13 @@ export const ShareIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
+export const GlobeIcon = ({ size = 18 }: { size?: number }) => (
+  <svg {...base} width={size} height={size}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3 12h18M12 3c2.5 2.7 3.5 5.7 3.5 9s-1 6.3-3.5 9c-2.5-2.7-3.5-5.7-3.5-9s1-6.3 3.5-9Z" />
+  </svg>
+);
+
 export const HeartIcon = ({ filled }: { filled?: boolean }) => (
   <svg {...base} width={16} height={16} fill={filled ? 'currentColor' : 'none'}>
     <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z" />

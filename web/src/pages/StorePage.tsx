@@ -8,7 +8,7 @@ import { ReportSheet } from '../components/question/ReportSheet';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
 import { Switch } from '../components/ui/Fields';
-import { LockIcon } from '../components/ui/Icons';
+import { LockIcon, ShareIcon } from '../components/ui/Icons';
 import { ErrorBox, Loading, TicketSkeleton } from '../components/ui/States';
 import i18n, { currentLang } from '../i18n';
 import { CategoryGlyph } from '../components/ui/StoreIcon';
@@ -148,7 +148,7 @@ function ActiveStore({ store }: { store: Store }) {
   }
 
   function onShare(q: Question) {
-    const message = `${t('store.shareText', { name: store.storeName, q: q.body })}\n${url}`;
+    const message = `${t('store.shareText', { name: store.storeName, q: q.body, lng: currentLang() })}\n${url}`;
     if (typeof navigator.share === 'function') navigator.share({ text: message }).catch(() => undefined);
     else navigator.clipboard.writeText(message).then(() => toast(t('common.copied')));
   }
@@ -175,7 +175,7 @@ function ActiveStore({ store }: { store: Store }) {
   const url = storeUrl(store.code);
   const shareStore = () =>
     typeof navigator.share === 'function'
-      ? navigator.share({ text: `${t('share.shareText', { name: store.storeName })}\n${url}` }).catch(() => undefined)
+      ? navigator.share({ text: `${t('share.shareText', { name: store.storeName, lng: currentLang() })}\n${url}` }).catch(() => undefined)
       : navigator.clipboard.writeText(url).then(() => toast(t('common.copied')));
 
   return (
@@ -184,29 +184,25 @@ function ActiveStore({ store }: { store: Store }) {
         title={store.storeName}
         showTitle={past}
         end={
-          <button className="btn btn--text btn--sm" onClick={shareStore}>
-            {t('common.share')}
+          <button className="icon-btn" onClick={shareStore} aria-label={t('common.share')} style={{ marginRight: -8 }}>
+            <ShareIcon size={20} />
           </button>
         }
       />
-      <main className="page" style={{ paddingBottom: 'calc(110px + env(safe-area-inset-bottom))' }}>
+      <main className="page page--grow" style={{ paddingBottom: items.length ? 'calc(110px + env(safe-area-inset-bottom))' : 'env(safe-area-inset-bottom)' }}>
         <StoreHeader
           headerRef={headerRef}
           store={store}
           intro={store.intro}
           answered={answered.data ?? null}
+          invite={store.acceptingQuestions ? t('store.invite') : undefined}
           extra={!store.acceptingQuestions && <span className="chip chip--paused" style={{ marginLeft: 8 }}>{t('store.pausedChip')}</span>}
           actions={
-            <>
-              {store.acceptingQuestions && (
-                <button className="btn btn--black" onClick={() => setComposing(true)}>
-                  {t('store.ask')}
-                </button>
-              )}
-              <button className="btn btn--line" style={{ flex: store.acceptingQuestions ? '0 0 88px' : 1 }} onClick={shareStore}>
-                {t('common.share')}
+            store.acceptingQuestions && (
+              <button className="btn btn--black" onClick={() => setComposing(true)}>
+                {t('store.ask')}
               </button>
-            </>
+            )
           }
         />
 
@@ -218,7 +214,7 @@ function ActiveStore({ store }: { store: Store }) {
           ))}
         </div>
 
-        <section className="posts" aria-label={t('store.listTitle')}>
+        <section className="posts grow" aria-label={t('store.listTitle')}>
           {list.isLoading && (
             <>
               <TicketSkeleton />
@@ -232,7 +228,7 @@ function ActiveStore({ store }: { store: Store }) {
             </div>
           )}
           {list.isSuccess && items.length === 0 && (
-            <div className="center-state" style={{ padding: '48px 20px' }}>
+            <div className="center-state" style={{ padding: '96px 20px' }}>
               <h2 style={{ fontSize: 16 }}>{t('store.emptyTitle')}</h2>
               <p>{t('store.emptyDesc')}</p>
             </div>

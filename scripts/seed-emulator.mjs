@@ -120,4 +120,10 @@ await put(`stores/${CODE}/questions/qh2`, {
   hidden: true, hiddenBy: 'report', reportCount: 3, helpful: 0, pinned: false, createdAt: ago(500),
 });
 
-console.log(`완료\n  사장님 로그인: ${EMAIL} / ${PASSWORD}\n  손님 화면: http://127.0.0.1:5173/q/${CODE}`);
+// 질문이 하나도 없는 가게 (빈 화면 확인용)
+await put('stores/empty234', {
+  storeName: '레벨업 PC방 미사점', intro: '', category: 'pc', tone: '#8cc8ff', ownerUid: 'someone-else', lang: 'ko',
+  status: 'active', acceptingQuestions: true, blockedWords: [], createdAt: ago(60),
+});
+
+console.log(`완료\n  사장님 로그인: ${EMAIL} / ${PASSWORD}\n  손님 화면: http://127.0.0.1:5173/q/${CODE}\n  빈 가게: http://127.0.0.1:5173/q/empty234`);

@@ -48,18 +48,24 @@ function Share({ store }: { store: Store }) {
       .catch(() => toast(t('errors.generic')));
   }
 
+  // 문구 안에 주소를 넣는다: 이미지와 같이 보내면 많은 앱이 url 값을 버리고, title은 빈 줄로 붙는다
+  const message = `${t('share.shareText', { name: store.storeName })}\n${url}`;
+
   function share() {
     if (canShareFile) {
-      navigator.share({ files: [file!], title: store.storeName, text: t('share.shareText', { name: store.storeName }) }).catch(() => undefined);
+      navigator.share({ files: [file!], text: message }).catch(() => undefined);
     } else if (typeof navigator.share === 'function') {
-      navigator.share({ title: store.storeName, text: t('share.shareText', { name: store.storeName }), url }).catch(() => undefined);
+      navigator.share({ text: message }).catch(() => undefined);
     } else {
-      copy();
+      navigator.clipboard
+        .writeText(message)
+        .then(() => toast(t('common.copied')))
+        .catch(() => toast(t('errors.generic')));
     }
   }
 
   return (
-    <OwnerShell storeName={store.storeName}>
+    <OwnerShell storeName={store.storeName} back="/inbox">
       <main className="page">
         <div className="title-row" style={{ display: 'block' }}>
           <h1 className="title">{t('share.title')}</h1>

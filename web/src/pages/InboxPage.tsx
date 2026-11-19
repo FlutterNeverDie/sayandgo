@@ -235,7 +235,7 @@ function Inbox({ store }: { store: Store }) {
   }
 
   return (
-    <OwnerShell storeName={store.storeName} openCount={openCount}>
+    <OwnerShell storeName={store.storeName}>
       <main className="page">
         <StoreHeader
           store={store}

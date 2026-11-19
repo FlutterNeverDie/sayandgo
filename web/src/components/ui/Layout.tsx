@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { BackIcon, SettingsIcon } from './Icons';
 import { LanguageSelect } from './Fields';
 
 export function Footer({ extra }: { extra?: ReactNode }) {
@@ -44,40 +45,34 @@ export function PublicTopbar({ end, title, showTitle }: { end?: ReactNode; title
   );
 }
 
-/** 사장님 화면: 상단 바(데스크톱 메뉴) + 하단 탭(휴대폰) */
-export function OwnerShell({ storeName, openCount, children }: { storeName: string; openCount?: number; children: ReactNode }) {
+/** 사장님 화면: 받은 질문함이 메인. 위쪽 바에 설정 아이콘, 들어간 화면은 뒤로 버튼 */
+export function OwnerShell({ storeName, title, back, children }: { storeName: string; openCount?: number; title?: string; back?: string; children: ReactNode }) {
   const { t } = useTranslation();
-  const items = [
-    { to: '/inbox', label: t('nav.inbox'), badge: openCount },
-    { to: '/share', label: t('nav.share') },
-    { to: '/settings', label: t('nav.settings') },
-  ];
   return (
     <>
       <header className="topbar">
         <div className="topbar__inner">
-          <Link to="/inbox" className="wordmark">
-            {t('app.name')}
-          </Link>
-          <span className="topbar__store">{storeName}</span>
-          <nav className="topbar__end topbar__nav" aria-label="main">
-            {items.map((i) => (
-              <NavLink key={i.to} to={i.to}>
-                {i.label}
-              </NavLink>
-            ))}
-          </nav>
+          {back ? (
+            <>
+              <Link to={back} className="icon-btn" aria-label={t('common.back')} style={{ marginLeft: -10 }}>
+                <BackIcon />
+              </Link>
+              {title && <span className="topbar__heading">{title}</span>}
+            </>
+          ) : (
+            <>
+              <Link to="/inbox" className="wordmark">
+                {t('app.name')}
+              </Link>
+              <span className="topbar__store">{storeName}</span>
+              <Link to="/settings" className="icon-btn" aria-label={t('nav.settings')} style={{ marginLeft: 'auto', marginRight: -8 }}>
+                <SettingsIcon />
+              </Link>
+            </>
+          )}
         </div>
       </header>
       {children}
-      <nav className="tabbar" aria-label="main">
-        {items.map((i) => (
-          <NavLink key={i.to} to={i.to}>
-            {i.label}
-            {!!i.badge && <span className="badge num">{i.badge >= 10 ? '9+' : i.badge}</span>}
-          </NavLink>
-        ))}
-      </nav>
     </>
   );
 }

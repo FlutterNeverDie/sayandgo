@@ -17,7 +17,8 @@
     "show": "보기",
     "hide": "숨기기",
     "menu": "메뉴",
-    "loadFailed": "불러오지 못했어요."
+    "loadFailed": "불러오지 못했어요.",
+    "back": "뒤로"
   },
   "time": {
     "justNow": "방금"
@@ -335,7 +336,7 @@
     "desc": "한 번 붙여 두면 계속 써요. 링크와 QR은 바뀌지 않아요.",
     "link": "내 가게 링크",
     "nativeShare": "다른 앱으로 공유",
-    "shareText": "{{name}}에 궁금한 점을 익명으로 남겨 주세요",
+    "shareText": "{{name}}에 익명으로 한마디 남겨 주세요",
     "qrTitle": "QR 코드",
     "qrDesc": "가게 이름이 들어간 출력용 이미지예요. 저장해서 인쇄하거나 바로 붙이세요.",
     "savePng": "이미지 저장",

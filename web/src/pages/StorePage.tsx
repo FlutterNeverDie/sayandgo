@@ -148,9 +148,9 @@ function ActiveStore({ store }: { store: Store }) {
   }
 
   function onShare(q: Question) {
-    const text = t('store.shareText', { name: store.storeName, q: q.body });
-    if (typeof navigator.share === 'function') navigator.share({ title: store.storeName, text, url }).catch(() => undefined);
-    else navigator.clipboard.writeText(`${text}\n${url}`).then(() => toast(t('common.copied')));
+    const message = `${t('store.shareText', { name: store.storeName, q: q.body })}\n${url}`;
+    if (typeof navigator.share === 'function') navigator.share({ text: message }).catch(() => undefined);
+    else navigator.clipboard.writeText(message).then(() => toast(t('common.copied')));
   }
 
   function onPosted(q: Question) {
@@ -175,7 +175,7 @@ function ActiveStore({ store }: { store: Store }) {
   const url = storeUrl(store.code);
   const shareStore = () =>
     typeof navigator.share === 'function'
-      ? navigator.share({ title: store.storeName, url }).catch(() => undefined)
+      ? navigator.share({ text: `${t('share.shareText', { name: store.storeName })}\n${url}` }).catch(() => undefined)
       : navigator.clipboard.writeText(url).then(() => toast(t('common.copied')));
 
   return (

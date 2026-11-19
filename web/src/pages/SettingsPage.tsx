@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { RequireOwner, useAuth } from '../app/auth';
 import { LanguageSelect, PasswordField, Switch, TextField } from '../components/ui/Fields';
-import { BackIcon, ChevronIcon, CloseIcon } from '../components/ui/Icons';
+import { ChevronIcon, CloseIcon } from '../components/ui/Icons';
 import { Footer, OwnerShell } from '../components/ui/Layout';
 import { useToast } from '../components/ui/Overlay';
 import { ErrorBox } from '../components/ui/States';
@@ -57,13 +57,10 @@ function Settings({ store }: { store: Store }) {
   if (section) {
     const s = section as Section;
     return (
-      <OwnerShell storeName={store.storeName}>
+      <OwnerShell storeName={store.storeName} back="/settings">
         <main className="page">
-          <div className="subpage-head">
-            <Link to="/settings" className="icon-btn" aria-label={t('settings.title')}>
-              <BackIcon />
-            </Link>
-            <h1>{titles[s]}</h1>
+          <div className="title-row">
+            <h1 className="title">{titles[s]}</h1>
           </div>
           {s === 'store' && <StoreInfo store={store} onSave={save} />}
           {s === 'words' && <BlockedWords store={store} onSave={save} />}
@@ -87,7 +84,7 @@ function Settings({ store }: { store: Store }) {
   );
 
   return (
-    <OwnerShell storeName={store.storeName}>
+    <OwnerShell storeName={store.storeName} back="/inbox">
       <main className="page">
         <div className="title-row">
           <h1 className="title">{t('settings.title')}</h1>

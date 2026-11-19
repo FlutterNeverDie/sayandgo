@@ -17,7 +17,8 @@
     "show": "Show",
     "hide": "Hide",
     "menu": "Menu",
-    "loadFailed": "Couldn't load this."
+    "loadFailed": "Couldn't load this.",
+    "back": "Back"
   },
   "time": {
     "justNow": "just now"
@@ -335,7 +336,7 @@
     "desc": "Put it up once and keep using it. Your link and QR never change.",
     "link": "Your link",
     "nativeShare": "Share to another app",
-    "shareText": "Leave an anonymous question for {{name}}",
+    "shareText": "Leave {{name}} an anonymous note",
     "qrTitle": "QR code",
     "qrDesc": "A print-ready image with your shop name. Save it and print or display it.",
     "savePng": "Save image",

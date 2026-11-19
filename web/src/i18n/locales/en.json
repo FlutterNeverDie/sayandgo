@@ -18,7 +18,8 @@
     "hide": "Hide",
     "menu": "Menu",
     "loadFailed": "Couldn't load this.",
-    "back": "Back"
+    "back": "Back",
+    "saving": "Saving"
   },
   "time": {
     "justNow": "just now"

@@ -18,6 +18,7 @@ import { listBlocked, unblock } from '../lib/questions';
 import { updateStore, type StoreSettings } from '../lib/stores';
 import type { Store } from '../lib/types';
 import { checkIntro, checkPassword, checkStoreName, LIMITS } from '../lib/validation';
+import { useLock } from '../lib/useLock';
 
 type Section = 'store' | 'words' | 'blocked' | 'account';
 const SECTIONS: Section[] = ['store', 'words', 'blocked', 'account'];
@@ -33,16 +34,20 @@ function Settings({ store }: { store: Store }) {
   const qc = useQueryClient();
   const { section } = useParams();
 
+  // 저장은 한 번에 하나만 (연타 · 겹치는 저장 막기)
+  const { busy: saving, run } = useLock();
   async function save(patch: Partial<StoreSettings>, quiet = false) {
-    const prev = store;
-    qc.setQueryData<Store>(['store', store.code], { ...store, ...patch });
-    try {
-      await updateStore(store.code, patch);
-      if (!quiet) toast(t('common.saved'));
-    } catch {
-      qc.setQueryData<Store>(['store', store.code], prev);
-      toast(t('errors.generic'));
-    }
+    await run(async () => {
+      const prev = store;
+      qc.setQueryData<Store>(['store', store.code], { ...store, ...patch });
+      try {
+        await updateStore(store.code, patch);
+        if (!quiet) toast(t('common.saved'));
+      } catch {
+        qc.setQueryData<Store>(['store', store.code], prev);
+        toast(t('errors.generic'));
+      }
+    });
   }
 
   if (section && !SECTIONS.includes(section as Section)) return <Navigate to="/settings" replace />;
@@ -62,8 +67,8 @@ function Settings({ store }: { store: Store }) {
           <div className="title-row">
             <h1 className="title">{titles[s]}</h1>
           </div>
-          {s === 'store' && <StoreInfo store={store} onSave={save} />}
-          {s === 'words' && <BlockedWords store={store} onSave={save} />}
+          {s === 'store' && <StoreInfo store={store} onSave={save} saving={saving} />}
+          {s === 'words' && <BlockedWords store={store} onSave={save} saving={saving} />}
           {s === 'blocked' && <BlockedList code={store.code} />}
           {s === 'account' && <Account store={store} />}
         </main>
@@ -96,7 +101,7 @@ function Settings({ store }: { store: Store }) {
               <p className="switch-row__title">{t('inbox.pauseTitle')}</p>
               <p className="switch-row__desc">{store.acceptingQuestions ? t('inbox.pauseOn') : t('inbox.pauseOff')}</p>
             </div>
-            <Switch checked={store.acceptingQuestions} onChange={(v) => save({ acceptingQuestions: v }, true)} label={t('inbox.pauseTitle')} />
+            <Switch checked={store.acceptingQuestions} onChange={(v) => save({ acceptingQuestions: v }, true)} label={t('inbox.pauseTitle')} disabled={saving} />
           </div>
         </div>
 
@@ -135,7 +140,7 @@ function ChevronRight() {
 }
 
 /** 가게 정보: 미리보기 + 상호명 · 소개 · 아이콘 · 색, 저장 버튼 하나 */
-function StoreInfo({ store, onSave }: { store: Store; onSave: (p: Partial<StoreSettings>) => Promise<void> }) {
+function StoreInfo({ store, onSave, saving }: { store: Store; onSave: (p: Partial<StoreSettings>) => Promise<void>; saving: boolean }) {
   const { t } = useTranslation();
   const [name, setName] = useState(store.storeName);
   const [intro, setIntro] = useState(store.intro);
@@ -148,7 +153,7 @@ function StoreInfo({ store, onSave }: { store: Store; onSave: (p: Partial<StoreS
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!errs.name && !errs.intro) onSave({ storeName: name.trim(), intro: intro.trim(), category, tone });
+        if (!saving && dirty && !errs.name && !errs.intro) onSave({ storeName: name.trim(), intro: intro.trim(), category, tone });
       }}
     >
       <div className="panel" style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
@@ -185,14 +190,15 @@ function StoreInfo({ store, onSave }: { store: Store; onSave: (p: Partial<StoreS
         <TonePicker value={tone} onChange={setTone} label={t('settings.tone')} />
       </div>
 
-      <button className="btn btn--primary btn--block" disabled={!dirty || !!errs.name || !!errs.intro}>
-        {t('common.save')}
+      {/* 바뀐 게 있을 때만 누를 수 있고, 저장 중에는 잠근다 */}
+      <button className="btn btn--primary btn--block" disabled={saving || !dirty || !!errs.name || !!errs.intro}>
+        {saving ? t('common.saving') : t('common.save')}
       </button>
     </form>
   );
 }
 
-function BlockedWords({ store, onSave }: { store: Store; onSave: (p: Partial<StoreSettings>) => Promise<void> }) {
+function BlockedWords({ store, onSave, saving }: { store: Store; onSave: (p: Partial<StoreSettings>) => Promise<void>; saving: boolean }) {
   const { t } = useTranslation();
   const [word, setWord] = useState('');
   const words = store.blockedWords;
@@ -200,6 +206,7 @@ function BlockedWords({ store, onSave }: { store: Store; onSave: (p: Partial<Sto
   function add(e: FormEvent) {
     e.preventDefault();
     const w = word.trim().slice(0, LIMITS.blockedWordLength);
+    if (saving) return;
     if (!w || full || words.includes(w)) return setWord('');
     onSave({ blockedWords: [...words, w] });
     setWord('');
@@ -211,7 +218,7 @@ function BlockedWords({ store, onSave }: { store: Store; onSave: (p: Partial<Sto
       </p>
       <form className="input-group" onSubmit={add}>
         <input className="input" value={word} maxLength={LIMITS.blockedWordLength} placeholder={t('settings.wordsPlaceholder')} aria-label={t('settings.wordsPlaceholder')} onChange={(e) => setWord(e.target.value)} disabled={full} />
-        <button className="btn" disabled={full || !word.trim()}>
+        <button className="btn" disabled={saving || full || !word.trim()}>
           {t('settings.wordsAdd')}
         </button>
       </form>
@@ -223,7 +230,7 @@ function BlockedWords({ store, onSave }: { store: Store; onSave: (p: Partial<Sto
           {words.map((w) => (
             <li key={w} className="chip" style={{ paddingRight: 2, color: 'var(--text)' }}>
               {w}
-              <button className="icon-btn" style={{ width: 28, height: 28 }} aria-label={t('settings.wordsRemove', { w })} onClick={() => onSave({ blockedWords: words.filter((x) => x !== w) })}>
+              <button className="icon-btn" style={{ width: 28, height: 28 }} aria-label={t('settings.wordsRemove', { w })} disabled={saving} onClick={() => onSave({ blockedWords: words.filter((x) => x !== w) })}>
                 <CloseIcon />
               </button>
             </li>
@@ -238,6 +245,7 @@ function BlockedList({ code }: { code: string }) {
   const { t } = useTranslation();
   const toast = useToast();
   const q = useQuery({ queryKey: ['blocked', code], queryFn: () => listBlocked(code), staleTime: 5 * 60_000 });
+  const { busy, run } = useLock();
   return (
     <>
       {q.isError && <ErrorBox onRetry={() => q.refetch()} />}
@@ -253,10 +261,13 @@ function BlockedList({ code }: { code: string }) {
               </div>
               <button
                 className="btn btn--sm"
-                onClick={async () => {
-                  await unblock(code, b.uid).catch(() => toast(t('errors.generic')));
-                  q.refetch();
-                }}
+                disabled={busy}
+                onClick={() =>
+                  run(async () => {
+                    await unblock(code, b.uid).catch(() => toast(t('errors.generic')));
+                    await q.refetch();
+                  })
+                }
               >
                 {t('settings.unblock')}
               </button>
@@ -278,36 +289,35 @@ function Account({ store }: { store: Store }) {
   const [pwError, setPwError] = useState<string | null>(null);
   const [delPw, setDelPw] = useState('');
   const [delError, setDelError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { busy, run } = useLock();
 
   async function onChangePassword(e: FormEvent) {
     e.preventDefault();
     const err = checkPassword(next);
     if (err) return setPwError(err);
-    setBusy(true);
-    try {
-      await changePassword(user!, cur, next);
-      setCur('');
-      setNext('');
-      setPwError(null);
-      toast(t('settings.passwordChanged'));
-    } catch (e2) {
-      setPwError(errorKey(e2) === 'errors.wrongLogin' ? 'errors.wrongPassword' : errorKey(e2));
-    } finally {
-      setBusy(false);
-    }
+    await run(async () => {
+      try {
+        await changePassword(user!, cur, next);
+        setCur('');
+        setNext('');
+        setPwError(null);
+        toast(t('settings.passwordChanged'));
+      } catch (e2) {
+        setPwError(errorKey(e2) === 'errors.wrongLogin' ? 'errors.wrongPassword' : errorKey(e2));
+      }
+    });
   }
 
   async function onDelete(e: FormEvent) {
     e.preventDefault();
-    setBusy(true);
-    try {
-      await deleteAccount(user!, delPw, store.code);
-      navigate('/', { replace: true });
-    } catch (e2) {
-      setDelError(errorKey(e2) === 'errors.wrongLogin' ? 'errors.wrongPassword' : errorKey(e2));
-      setBusy(false);
-    }
+    await run(async () => {
+      try {
+        await deleteAccount(user!, delPw, store.code);
+        navigate('/', { replace: true });
+      } catch (e2) {
+        setDelError(errorKey(e2) === 'errors.wrongLogin' ? 'errors.wrongPassword' : errorKey(e2));
+      }
+    });
   }
 
   return (
@@ -323,7 +333,7 @@ function Account({ store }: { store: Store }) {
             <LanguageSelect />
           </span>
         </div>
-        <button className="menu-row" onClick={() => signOut(auth).then(() => navigate('/'))}>
+        <button className="menu-row" disabled={busy} onClick={() => run(() => signOut(auth).then(() => navigate('/')))}>
           {t('settings.logout')}
         </button>
       </div>

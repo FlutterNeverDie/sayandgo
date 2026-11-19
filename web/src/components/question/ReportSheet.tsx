@@ -3,19 +3,19 @@ import { useTranslation } from 'react-i18next';
 import { LIMITS } from '../../lib/validation';
 import { REPORT_REASONS, type ReportReason } from '../../lib/types';
 import { Sheet } from '../ui/Overlay';
+import { useLock } from '../../lib/useLock';
 
 export function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (reason: ReportReason, detail: string) => Promise<void> }) {
   const { t } = useTranslation();
   const [reason, setReason] = useState<ReportReason>('abuse');
   const [detail, setDetail] = useState('');
-  const [busy, setBusy] = useState(false);
+  const { busy, run } = useLock();
   return (
     <Sheet title={t('report.title')} desc={t('report.desc')} onClose={onClose}>
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          setBusy(true);
-          await onSubmit(reason, detail.trim()).finally(() => setBusy(false));
+          await run(() => onSubmit(reason, detail.trim()));
         }}
       >
         <div className="radio-list" role="radiogroup">

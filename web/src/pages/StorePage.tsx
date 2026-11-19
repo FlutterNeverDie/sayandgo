@@ -26,6 +26,7 @@ import {
 import { CODE_RE, storeUrl } from '../lib/storeCode';
 import { getStore } from '../lib/stores';
 import type { Question, Store } from '../lib/types';
+import { useKeyedLock } from '../lib/useLock';
 
 
 export function StorePage() {
@@ -133,7 +134,10 @@ function ActiveStore({ store }: { store: Store }) {
     }
   };
 
-  async function onVote(q: Question) {
+  // 글마다 처리 중이면 다음 누름은 무시 (쓰기 연타 방지)
+  const voteLock = useKeyedLock();
+  const onVote = (q: Question) => voteLock(q.id, () => vote(q));
+  async function vote(q: Question) {
     const on = !voted.has(q.id);
     const apply = (state: boolean, delta: number) => {
       setVoted((v) => {

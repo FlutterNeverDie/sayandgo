@@ -14,6 +14,7 @@ import { auth } from '../lib/firebase';
 import { errorKey } from '../lib/format';
 import { signUp, verifyActionSettings, withContinueFallback } from '../lib/stores';
 import { checkEmail, checkPassword, checkStoreName, LIMITS } from '../lib/validation';
+import { useLock } from '../lib/useLock';
 
 function AuthFrame({ title, subtitle, below, children }: { title: string; subtitle?: string; below?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -42,7 +43,7 @@ export function SignupPage() {
   const [agree, setAgree] = useState({ age14: false, terms: false, privacy: false });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const { busy, run } = useLock();
   const [formError, setFormError] = useState<string | null>(null);
 
   const errs = { email: checkEmail(email), password: checkPassword(password), storeName: checkStoreName(storeName) };
@@ -56,14 +57,14 @@ export function SignupPage() {
     setFormError(null);
     if (errs.email || errs.password || errs.storeName) return;
     if (!allAgreed) return setFormError('errors.agreeRequired');
-    setBusy(true);
-    try {
-      await signUp({ email, password, storeName, lang: currentLang(), category: category ?? 'other' });
-      navigate('/verify', { replace: true });
-    } catch (err) {
-      setFormError(errorKey(err));
-      setBusy(false);
-    }
+    await run(async () => {
+      try {
+        await signUp({ email, password, storeName, lang: currentLang(), category: category ?? 'other' });
+        navigate('/verify', { replace: true });
+      } catch (err) {
+        setFormError(errorKey(err));
+      }
+    });
   }
 
   return (
@@ -168,7 +169,7 @@ export function LoginPage() {
   const { user, ready } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [busy, setBusy] = useState(false);
+  const { busy, run } = useLock();
   const [formError, setFormError] = useState<string | null>(null);
   const from = (location.state as { from?: string } | null)?.from ?? '/inbox';
 
@@ -178,14 +179,14 @@ export function LoginPage() {
     e.preventDefault();
     setFormError(null);
     if (checkEmail(email) || !password) return setFormError('errors.wrongLogin');
-    setBusy(true);
-    try {
-      const { user: u } = await signInWithEmailAndPassword(auth, email.trim(), password);
-      navigate(u.emailVerified ? from : '/verify', { replace: true });
-    } catch (err) {
-      setFormError(errorKey(err));
-      setBusy(false);
-    }
+    await run(async () => {
+      try {
+        const { user: u } = await signInWithEmailAndPassword(auth, email.trim(), password);
+        navigate(u.emailVerified ? from : '/verify', { replace: true });
+      } catch (err) {
+        setFormError(errorKey(err));
+      }
+    });
   }
 
   return (
@@ -230,6 +231,7 @@ export function VerifyPage() {
   const { user, ready } = useAuth();
   const [now, setNow] = useState(Date.now());
   const [message, setMessage] = useState<string | null>(null);
+  const { busy, run } = useLock();
   const sentAt = Number(sessionStorage.getItem(RESEND_KEY) ?? 0) || 0;
   const wait = Math.max(0, 60 - Math.floor((now - sentAt) / 1000));
 
@@ -255,33 +257,35 @@ export function VerifyPage() {
   if (!user) return <Navigate to="/login" replace />;
   if (user.emailVerified) return <Navigate to="/inbox" replace />;
 
-  async function resend() {
-    if (!user) return;
-    try {
-      auth.languageCode = currentLang();
-      await withContinueFallback((withUrl) => sendEmailVerification(user, withUrl ? verifyActionSettings() : undefined));
-      sessionStorage.setItem(RESEND_KEY, String(Date.now()));
-      setNow(Date.now());
-      setMessage(t('verify.resent'));
-    } catch (err) {
-      setMessage(t(errorKey(err)));
-    }
-  }
+  const resend = () =>
+    run(async () => {
+      if (!user) return;
+      try {
+        auth.languageCode = currentLang();
+        await withContinueFallback((withUrl) => sendEmailVerification(user, withUrl ? verifyActionSettings() : undefined));
+        sessionStorage.setItem(RESEND_KEY, String(Date.now()));
+        setNow(Date.now());
+        setMessage(t('verify.resent'));
+      } catch (err) {
+        setMessage(t(errorKey(err)));
+      }
+    });
 
-  async function checkNow() {
-    await user!.reload().catch(() => undefined);
-    if (auth.currentUser?.emailVerified) navigate('/inbox', { replace: true });
-    else setMessage(t('verify.notYet'));
-  }
+  const checkNow = () =>
+    run(async () => {
+      await user!.reload().catch(() => undefined);
+      if (auth.currentUser?.emailVerified) navigate('/inbox', { replace: true });
+      else setMessage(t('verify.notYet'));
+    });
 
   return (
     <AuthFrame title={t('verify.title')} subtitle={t('verify.spam')}>
       <p style={{ marginBottom: 8 }}>{t('verify.desc', { email: user.email })}</p>
       <div style={{ display: 'grid', gap: 8 }}>
-        <button className="btn btn--primary btn--block" onClick={checkNow}>
+        <button className="btn btn--primary btn--block" onClick={checkNow} disabled={busy}>
           {t('verify.check')}
         </button>
-        <button className="btn btn--block" onClick={resend} disabled={wait > 0}>
+        <button className="btn btn--block" onClick={resend} disabled={busy || wait > 0}>
           {wait > 0 ? t('verify.resendIn', { s: wait }) : t('verify.resend')}
         </button>
       </div>
@@ -308,29 +312,28 @@ export function ResetPage() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const { busy, run } = useLock();
   const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const err = checkEmail(email);
     if (err) return setError(err);
-    setBusy(true);
-    try {
-      auth.languageCode = currentLang();
-      await withContinueFallback((withUrl) =>
-        sendPasswordResetEmail(auth, email.trim(), withUrl ? { url: `${location.origin}/login` } : undefined),
-      );
-    } catch (e2) {
-      // 가입 여부를 드러내지 않도록 네트워크 오류만 알린다
-      if (errorKey(e2) === 'errors.network') {
-        setError('errors.network');
-        setBusy(false);
-        return;
+    await run(async () => {
+      try {
+        auth.languageCode = currentLang();
+        await withContinueFallback((withUrl) =>
+          sendPasswordResetEmail(auth, email.trim(), withUrl ? { url: `${location.origin}/login` } : undefined),
+        );
+      } catch (e2) {
+        // 가입 여부를 드러내지 않도록 네트워크 오류만 알린다
+        if (errorKey(e2) === 'errors.network') {
+          setError('errors.network');
+          return;
+        }
       }
-    }
-    setSent(true);
-    setBusy(false);
+      setSent(true);
+    });
   }
 
   return (

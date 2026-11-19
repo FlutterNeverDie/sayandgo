@@ -11,6 +11,7 @@ import { CODE_RE } from '../lib/storeCode';
 import { getStore } from '../lib/stores';
 import { QUESTION_KINDS, type QuestionKind, type Store } from '../lib/types';
 import { checkQuestion, LIMITS, tidyText } from '../lib/validation';
+import { useLock } from '../lib/useLock';
 
 const LAST_POST_KEY = 'sayandgo:lastPost';
 const WAIT_SEC = 30;
@@ -48,7 +49,7 @@ function ComposeForm({ store, onBack }: { store: Store; onBack: () => void }) {
   const [text, setText] = useState(() => sessionStorage.getItem(draftKey) ?? '');
   const [kind, setKind] = useState<QuestionKind>(QUESTION_KINDS[0]); // 첫 번째(제안해요)가 기본
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { busy, run } = useLock();
   const [now, setNow] = useState(Date.now());
   const ref = useRef<HTMLTextAreaElement>(null);
   const wait = Math.max(0, WAIT_SEC - Math.floor((now - readLastPost()) / 1000));
@@ -78,22 +79,22 @@ function ComposeForm({ store, onBack }: { store: Store; onBack: () => void }) {
     const err = checkQuestion(body, store.blockedWords);
     setError(err);
     if (err || wait > 0) return;
-    setBusy(true);
-    try {
-      await postQuestion(store.code, body, currentLang(), kind, 'public');
+    await run(async () => {
       try {
-        localStorage.setItem(LAST_POST_KEY, String(Date.now()));
-      } catch {
-        /* 무시 */
+        await postQuestion(store.code, body, currentLang(), kind, 'public');
+        try {
+          localStorage.setItem(LAST_POST_KEY, String(Date.now()));
+        } catch {
+          /* 무시 */
+        }
+        sessionStorage.removeItem(draftKey);
+        toast(t('store.sentHidden'), { ms: 3600 });
+        onBack();
+      } catch (e2) {
+        const code = (e2 as { code?: string }).code;
+        setError(code === 'unavailable' ? 'errors.network' : 'errors.cantPost');
       }
-      sessionStorage.removeItem(draftKey);
-      toast(t('store.sentHidden'), { ms: 3600 });
-      onBack();
-    } catch (e2) {
-      const code = (e2 as { code?: string }).code;
-      setError(code === 'unavailable' ? 'errors.network' : 'errors.cantPost');
-      setBusy(false);
-    }
+    });
   }
 
   return (

@@ -25,6 +25,7 @@ import {
 import { updateStore } from '../lib/stores';
 import type { Question, Store } from '../lib/types';
 import { checkAnswer, LIMITS, tidyText } from '../lib/validation';
+import { useLock } from '../lib/useLock';
 
 const TABS: InboxTab[] = ['answered', 'open', 'hidden'];
 const UNDO_MS = 5000;
@@ -73,14 +74,17 @@ function useInboxList(code: string, tab: InboxTab) {
   }, [code, tab, visible, retry]);
 
   const cursor = more.length ? moreCursor : head?.cursor ?? null;
+  const loadingRef = useRef(false);
   const loadMore = useCallback(async () => {
-    if (!cursor) return;
+    if (!cursor || loadingRef.current) return; // 더 보기 연타 막기
+    loadingRef.current = true;
     setLoadingMore(true);
     try {
       const p = await fetchInboxPage(code, tab, cursor);
       setMore((m) => [...m, ...p.items]);
       setMoreCursor(p.cursor);
     } finally {
+      loadingRef.current = false;
       setLoadingMore(false);
     }
   }, [code, tab, cursor]);
@@ -204,14 +208,18 @@ function Inbox({ store }: { store: Store }) {
   const editingQ = editing ? list.items.find((q) => q.id === editing) ?? null : null;
   const selectedIds = [...selected].filter((id) => visibleItems.some((q) => q.id === id));
 
+  // 숨기기 · 답변 지우기 · 차단 같은 처리는 한 번에 하나만 (연타 막기)
+  const { busy: acting, run: locked } = useLock();
   async function run(action: () => Promise<unknown>, okText?: string) {
-    try {
-      await action();
-      if (okText) toast(okText);
-      refreshCounts();
-    } catch {
-      toast(t('errors.generic'));
-    }
+    await locked(async () => {
+      try {
+        await action();
+        if (okText) toast(okText);
+        refreshCounts();
+      } catch {
+        toast(t('errors.generic'));
+      }
+    });
   }
 
   async function toggleHidden(q: Question) {
@@ -222,13 +230,15 @@ function Inbox({ store }: { store: Store }) {
 
   async function doBlock(q: Question, alsoDelete: boolean) {
     setBlockFor(null);
-    try {
-      await blockAuthor(store.code, q);
-      toast(t('inbox.blocked'));
-      if (alsoDelete) scheduleDelete([q.id]);
-    } catch {
-      toast(t('inbox.blockFailed'));
-    }
+    await locked(async () => {
+      try {
+        await blockAuthor(store.code, q);
+        toast(t('inbox.blocked'));
+        if (alsoDelete) scheduleDelete([q.id]);
+      } catch {
+        toast(t('inbox.blockFailed'));
+      }
+    });
   }
 
   async function resume() {
@@ -259,7 +269,7 @@ function Inbox({ store }: { store: Store }) {
         {!store.acceptingQuestions && (
           <div className="notice" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <span style={{ flex: 1 }}>{t('inbox.pausedNotice')}</span>
-            <button className="btn btn--sm" onClick={resume}>
+            <button className="btn btn--sm" onClick={resume} disabled={acting}>
               {t('inbox.resume')}
             </button>
           </div>
@@ -387,6 +397,7 @@ function Inbox({ store }: { store: Store }) {
             <button
               className="btn btn--sm"
               style={{ marginLeft: 'auto' }}
+              disabled={acting}
               onClick={async () => {
                 const ids = selectedIds.filter((id) => visibleItems.find((q) => q.id === id)?.hiddenBy !== 'admin');
                 await run(() => setHidden(store.code, ids, true), t('inbox.hidden'));
@@ -471,10 +482,10 @@ function Inbox({ store }: { store: Store }) {
       {blockFor && (
         <Sheet title={t('inbox.blockTitle')} desc={t('inbox.blockDesc')} onClose={() => setBlockFor(null)}>
           <div style={{ display: 'grid', gap: 8 }}>
-            <button className="btn btn--ink btn--block" onClick={() => doBlock(blockFor, true)}>
+            <button className="btn btn--ink btn--block" disabled={acting} onClick={() => doBlock(blockFor, true)}>
               {t('inbox.blockAndDelete')}
             </button>
-            <button className="btn btn--block" onClick={() => doBlock(blockFor, false)}>
+            <button className="btn btn--block" disabled={acting} onClick={() => doBlock(blockFor, false)}>
               {t('inbox.blockOnly')}
             </button>
             <button className="btn btn--text btn--block" onClick={() => setBlockFor(null)}>
@@ -508,19 +519,20 @@ function AnswerSheet({ q, onSave, onClose, onRemove }: { q: Question; onSave: (b
   const { t } = useTranslation();
   const [text, setText] = useState(q.answer?.body ?? '');
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { busy, run } = useLock();
   const ref = useRef<HTMLTextAreaElement>(null);
   useEffect(() => ref.current?.focus(), []);
+  // 답변 고치기: 바뀐 게 있을 때만 저장 (같은 내용으로 다시 쓰지 않게)
+  const unchanged = !!q.answer && tidyText(text) === q.answer.body;
 
-  async function act(fn: () => Promise<void>) {
-    setBusy(true);
-    try {
-      await fn();
-    } catch {
-      setError('errors.generic');
-      setBusy(false);
-    }
-  }
+  const act = (fn: () => Promise<void>) =>
+    run(async () => {
+      try {
+        await fn();
+      } catch {
+        setError('errors.generic');
+      }
+    });
 
   return (
     <Sheet title={q.answer ? t('inbox.editAnswer') : t('inbox.answerTitle')} onClose={onClose}>
@@ -539,7 +551,7 @@ function AnswerSheet({ q, onSave, onClose, onRemove }: { q: Question; onSave: (b
           const body = tidyText(text);
           const err = checkAnswer(body);
           setError(err);
-          if (!err) act(() => onSave(body));
+          if (!err && !unchanged) act(() => onSave(body));
         }}
       >
         <label className="sr-only" htmlFor={`a-${q.id}`}>
@@ -569,7 +581,7 @@ function AnswerSheet({ q, onSave, onClose, onRemove }: { q: Question; onSave: (b
             </button>
           )}
           <span style={{ flex: 1 }} />
-          <button className="btn btn--primary" disabled={busy || !text.trim()}>
+          <button className="btn btn--primary" disabled={busy || !text.trim() || unchanged}>
             {t('inbox.saveAnswer')}
           </button>
         </div>

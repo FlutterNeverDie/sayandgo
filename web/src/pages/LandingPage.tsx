@@ -1,104 +1,69 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../app/auth';
 import { HeroSceneA, HeroSceneB } from '../components/landing/HeroScenes';
-import { QuestionItem, type StoreLook } from '../components/question/QuestionItem';
-import { LockIcon } from '../components/ui/Icons';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
-import { StoreIcon, toneSoft } from '../components/ui/StoreIcon';
-import type { Question, QuestionKind } from '../lib/types';
+import type { QuestionKind } from '../lib/types';
 
-const ago = (min: number) => new Date(Date.now() - min * 60_000);
+type Ex = { name: string; kind: QuestionKind; q: string; a: string };
 
-function sampleQ(id: string, kind: QuestionKind, body: string, answer: string, min: number): Question {
-  return {
-    id, body, kind, lang: 'ko', visibility: 'public', status: 'answered',
-    answer: { body: answer, at: ago(min - 5), editedAt: null },
-    hidden: false, hiddenBy: null, reportCount: 0, helpful: 0, pinned: false, createdAt: ago(min),
-  };
-}
-
+/** 홈: QR 스탠드 그림 → 한 줄 설명 · 시작 버튼 → 손님 쪽지 예시 → 자주 묻는 질문 */
 export function LandingPage() {
   const { t } = useTranslation();
   const { user, ready } = useAuth();
+
+  useEffect(() => {
+    document.body.classList.add('warm');
+    return () => document.body.classList.remove('warm');
+  }, []);
+
   if (ready && user?.emailVerified) return <Navigate to="/inbox" replace />;
 
-  type Ex = { name: string; category: StoreLook['category']; tone: string; intro: string; kind: QuestionKind; q: string; a: string };
-  const examples = (t('landing.examples', { returnObjects: true }) as Ex[]).map((e, i) => ({
-    store: { storeName: e.name, category: e.category, tone: e.tone } as StoreLook,
-    intro: e.intro,
-    q: sampleQ(`ex${i}`, e.kind, e.q, e.a, 60 + i * 97),
-  }));
+  // 미리보기 비교용: ?hero=a (테이블 위 QR) | ?hero=b (손님 휴대폰)
+  const hero = new URLSearchParams(location.search).get('hero') === 'b' ? 'b' : 'a';
+  const examples = t('landing.examples', { returnObjects: true }) as Ex[];
+  const notes = examples.filter((e) => e.kind === 'complaint' || e.kind === 'suggestion').slice(0, 3);
   const faqs = [2, 3, 4];
-  // 미리보기: ?hero=a | ?hero=b (홈 개편 시안 비교용)
-  const heroParam = new URLSearchParams(location.search).get('hero');
-  const hero = heroParam === 'a' || heroParam === 'b' ? heroParam : null;
 
   return (
     <>
       <PublicTopbar end={<Link to="/login" className="btn btn--text btn--sm">{t('landing.login')}</Link>} />
-      <main className="page" style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
-        {hero ? (
-          <section className="landing-hero landing-hero--scene">
-            {hero === 'a' ? <HeroSceneA name={t('landing.examples.0.name')} /> : <HeroSceneB name={t('landing.examples.0.name')} />}
-            <h1 className="landing__title" style={{ marginTop: 24 }}>
-              {t('landing.titleV2')}
-            </h1>
-            <p className="landing__lead">{t('landing.leadV2')}</p>
-          </section>
-        ) : (
-          <section className="landing-hero">
-            <h1 className="landing__title">{t('landing.title')}</h1>
-            <p className="landing__lead">{t('landing.lead')}</p>
-          </section>
-        )}
+      <main className="page">
+        {hero === 'a' ? <HeroSceneA name={examples[0].name} /> : <HeroSceneB name={examples[0].name} />}
 
-        <section className="section" aria-labelledby="ex-h">
-          <h2 id="ex-h" className="section__title">
-            {t('landing.examplesTitle')}
+        <section className="home-lead">
+          <h1 className="landing__title">{t('landing.titleV2')}</h1>
+          <p className="landing__lead">{t('landing.leadV2')}</p>
+          <Link to="/signup" className="btn btn--black btn--block btn--lg" style={{ marginTop: 18 }}>
+            {t('landing.start')}
+          </Link>
+        </section>
+
+        <section className="section" aria-labelledby="notes-h">
+          <h2 id="notes-h" className="section__title">
+            {t('landing.notesTitle')}
           </h2>
-          <div className="hscroll">
-            {examples.map((ex) => (
-              <div key={ex.q.id} className="example">
-                <div className="example__head" style={{ background: toneSoft(ex.store.tone, 0.18) }}>
-                  <StoreIcon category={ex.store.category} tone={ex.store.tone} size={44} />
-                  <div style={{ minWidth: 0 }}>
-                    <p className="example__name">{ex.store.storeName}</p>
-                    <p className="example__intro">{ex.intro}</p>
-                  </div>
-                </div>
-                <QuestionItem q={ex.q} store={ex.store} />
+          <div className="notes">
+            {notes.map((n) => (
+              <div key={n.q} className="note">
+                <small>
+                  {n.name} · {t(`kind.${n.kind}`)}
+                </small>
+                <p>{n.q}</p>
+                <p className="note__re">
+                  {t('landing.ownerSays')} {n.a}
+                </p>
               </div>
             ))}
           </div>
-        </section>
-
-        <section className="section" aria-labelledby="how-h">
-          <h2 id="how-h" className="section__title">
-            {t('landing.howTitle')}
-          </h2>
-          <ol className="menu-group steps">
-            {[
-              { icon: <QrGlyph />, title: t('landing.how1t'), desc: t('landing.how1') },
-              { icon: <LockIcon size={20} />, title: t('landing.how2t'), desc: t('landing.how2') },
-              { icon: <ReplyGlyph />, title: t('landing.how3t'), desc: t('landing.how3') },
-            ].map((step) => (
-              <li key={step.title} className="steps__row">
-                <span className="steps__icon">{step.icon}</span>
-                <span>
-                  <span className="steps__title">{step.title}</span>
-                  <span className="steps__desc">{step.desc}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
         </section>
 
         <section className="section" aria-labelledby="faq-h">
           <h2 id="faq-h" className="section__title">
             {t('landing.faqTitle')}
           </h2>
-          <div className="menu-group">
+          <div className="faq-list">
             {faqs.map((n) => (
               <details key={n} className="faq">
                 <summary>{t(`landing.faq${n}q`)}</summary>
@@ -108,36 +73,8 @@ export function LandingPage() {
           </div>
         </section>
 
-
         <Footer />
       </main>
-      <div className="cta-bar">
-        <div className="cta-bar__inner">
-          <Link to="/signup" className="btn btn--primary">
-            {t('landing.start')}
-          </Link>
-        </div>
-      </div>
     </>
-  );
-}
-
-function QrGlyph() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true">
-      <rect x="4" y="4" width="6" height="6" rx="1" />
-      <rect x="14" y="4" width="6" height="6" rx="1" />
-      <rect x="4" y="14" width="6" height="6" rx="1" />
-      <path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
-    </svg>
-  );
-}
-
-function ReplyGlyph() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 5h16v11H9l-5 4V5Z" />
-      <path d="M8 10h8M8 13h5" />
-    </svg>
   );
 }

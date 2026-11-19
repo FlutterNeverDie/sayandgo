@@ -664,7 +664,7 @@ body.white .topbar { background: #ffffff; }
 .hp-a__table { position: absolute; left: 0; right: 0; bottom: 0; height: 110px; background: #c9a77f; }
 .hp-a__edge { position: absolute; left: 0; right: 0; bottom: 110px; height: 10px; background: #b48f66; }
 .hp-a__stand { position: absolute; left: 50%; bottom: 88px; width: 190px; margin-left: -120px; transform: rotate(-3deg); }
-.hp-a__stand .hp-poster { box-shadow: 0 18px 0 -10px rgba(80, 55, 25, 0.25); }
+
 .hp-a__foot { height: 16px; margin: -2px 18px 0; background: #2b3a35; border-radius: 0 0 6px 6px; }
 .hp-a__cup { position: absolute; right: 34px; bottom: 104px; width: 62px; height: 54px; background: #fff; border-radius: 6px 6px 22px 22px; }
 .hp-a__cup::after { content: ''; position: absolute; right: -16px; top: 10px; width: 18px; height: 22px; border: 6px solid #fff; border-left: 0; border-radius: 0 12px 12px 0; }
@@ -682,3 +682,15 @@ body.white .topbar { background: #ffffff; }
 .hp-b__q small { display: block; color: var(--muted); font-size: 8.5px; font-weight: 700; }
 .hp-b__a { font-size: 10px; margin-top: 6px; }
 .hp-b__thumb { position: absolute; right: 120px; bottom: -40px; width: 120px; height: 150px; background: #e8c9a8; border-radius: 60px 60px 30px 30px; transform: rotate(-18deg); }
+
+/* ---------- 홈 (QR 스탠드 시안) ---------- */
+body.warm { background: #f3f2ef; }
+body.warm .topbar { background: #f3f2ef; }
+.home-lead { padding: 26px 0 0; }
+.notes { display: grid; gap: 14px; padding: 4px 4px 0; }
+.note { background: #fff; border-radius: 4px; padding: 14px 16px; transform: rotate(-1.4deg); font-size: 15px; }
+.note:nth-child(2) { transform: rotate(1.1deg); }
+.note:nth-child(3) { transform: rotate(-0.6deg); }
+.note small { display: block; color: #665e50; font-size: 12px; margin-bottom: 4px; }
+.note__re { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #d9d0c1; color: var(--mint-ink); font-weight: 600; font-size: 14px; }
+.faq-list { background: #fff; border-radius: 18px; overflow: hidden; }

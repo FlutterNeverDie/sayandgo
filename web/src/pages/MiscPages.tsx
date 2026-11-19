@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
-import { CopyIcon } from '../components/ui/Icons';
+import { CopyIcon, ShareIcon } from '../components/ui/Icons';
+import { currentLang } from '../i18n';
 import { useToast } from '../components/ui/Overlay';
 import { CONTACT_EMAIL } from '../lib/contact';
 import { LEGAL, type LegalKind } from './legal/content';
@@ -33,9 +34,15 @@ export function ContactPage() {
       .writeText(CONTACT_EMAIL)
       .then(() => toast(t('common.copied')))
       .catch(() => toast(t('errors.generic')));
+  // 연락처 공유: 공유 창이 없는 브라우저는 복사로 대신
+  const share = () => {
+    const text = `${t('contact.shareText', { lng: currentLang() })}\n${CONTACT_EMAIL}`;
+    if (typeof navigator.share === 'function') navigator.share({ text }).catch(() => undefined);
+    else copy();
+  };
   return (
     <>
-      <PublicTopbar />
+      <PublicTopbar back />
       <main className="page page--grow">
         <div className="title-row" style={{ display: 'block' }}>
           <h1 className="title">{t('contact.title')}</h1>
@@ -54,9 +61,10 @@ export function ContactPage() {
               {t('common.copy')}
             </span>
           </button>
-          <a className="btn btn--black btn--lg btn--block" style={{ marginTop: 12 }} href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(t('contact.subject'))}`}>
-            {t('contact.mail')}
-          </a>
+          <button type="button" className="btn btn--black btn--lg btn--block" style={{ marginTop: 12 }} onClick={share}>
+            <ShareIcon size={18} />
+            {t('common.share')}
+          </button>
           <p className="field__hint" style={{ marginTop: 12 }}>
             {t('contact.note')}
           </p>
@@ -72,7 +80,7 @@ export function LegalPage({ kind }: { kind: LegalKind }) {
   const { t, i18n } = useTranslation();
   return (
     <>
-      <PublicTopbar />
+      <PublicTopbar back />
       <main className="page page--grow">
         <div className="title-row">
           <h1 className="title">{t(`legal.${kind}`)}</h1>

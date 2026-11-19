@@ -25,7 +25,8 @@ export function LandingPage() {
 
   return (
     <>
-      <PublicTopbar end={<SessionButton />} />
+      {/* 앱 안의 다른 화면(가게 페이지 아래 "소개" 등)에서 왔을 때만 뒤로 */}
+      <PublicTopbar end={<SessionButton />} back={(window.history.state?.idx ?? 0) > 0} />
       <main className="page">
         <HeroCarousel name={examples[0].name} />
 

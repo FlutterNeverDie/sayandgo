@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppMark } from './AppMark';
 import { BackIcon } from './Icons';
 import { LanguageSelect } from './Fields';
@@ -25,12 +25,20 @@ export function Footer({ extra }: { extra?: ReactNode }) {
   );
 }
 
-/** 공개 화면 상단: 워드마크 + 언어 */
-export function PublicTopbar({ end, title, showTitle }: { end?: ReactNode; title?: string; showTitle?: boolean }) {
+/** 공개 화면 상단: (뒤로) + 워드마크 + 언어 */
+export function PublicTopbar({ end, title, showTitle, back }: { end?: ReactNode; title?: string; showTitle?: boolean; back?: boolean }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  // 앱 안에서 넘어왔으면 이전 화면으로, 링크로 바로 들어왔으면 홈으로
+  const goBack = () => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/', { replace: true }));
   return (
     <header className="topbar">
       <div className="topbar__inner">
+        {back && (
+          <button type="button" className="icon-btn" aria-label={t('common.back')} style={{ marginLeft: -10, marginRight: 2 }} onClick={goBack}>
+            <BackIcon />
+          </button>
+        )}
         {title && showTitle ? (
           <span className="topbar__title topbar__title--show">{title}</span>
         ) : (

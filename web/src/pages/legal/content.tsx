@@ -1,14 +1,16 @@
 import type { ReactNode } from 'react';
+import { CONTACT_EMAIL } from '../../lib/contact';
 import { TERMS_VERSION } from '../../lib/types';
 
 /**
  * 약관 · 정책 본문 (한국어본이 기준).
- * [대괄호] 부분은 운영자 정보를 채워야 한다. 공개 전에 법률 검토를 권장.
+ * 운영자 · 책임자는 개인 이름 대신 담당 이름으로 둔다 (개인정보 보호법상 책임자는 '성명 또는 담당 부서명 + 연락처'면 된다).
+ * 사업자 등록 뒤에는 상호 · 대표자로 바꾼다. 법률 검토를 권장.
  */
 export const OPERATOR = {
-  name: '[운영자명]',
-  email: '[연락 이메일]',
-  officer: '[개인정보 보호책임자 이름]',
+  name: 'Say&Go 운영팀',
+  email: CONTACT_EMAIL,
+  officer: 'Say&Go 운영팀 (개인정보 보호 담당)',
 };
 
 export type LegalKind = 'terms' | 'privacy' | 'policy' | 'rights';

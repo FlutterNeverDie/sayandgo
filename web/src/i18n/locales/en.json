@@ -517,8 +517,7 @@
       "Partnerships, collaboration or bulk sign-ups",
       "Anything else"
     ],
-    "mail": "Send an email",
-    "subject": "[Say&Go inquiry]",
-    "note": "We'll reply as soon as we can. To request removal of a specific post, please also see the rights infringement page."
+    "note": "We'll reply as soon as we can. To request removal of a specific post, please also see the rights infringement page.",
+    "shareText": "Say&Go contact email. Feedback or any other message is welcome."
   }
 }

@@ -5,32 +5,47 @@ import { currentLang } from '../i18n';
 import { CloseIcon, CopyIcon, DownloadIcon, ShareIcon, ZoomIcon } from '../components/ui/Icons';
 import { OwnerShell } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
-import { canvasToBlob, POSTER_LANGS, POSTER_SIZE, POSTER_TYPES, renderPoster, type PosterLang, type PosterType } from '../lib/posters';
+import {
+  canvasToBlob,
+  defaultTexts,
+  POSTER_FIELDS,
+  POSTER_LIMITS,
+  POSTER_SIZE,
+  POSTER_TYPES,
+  renderPoster,
+  type PosterField,
+  type PosterTexts,
+  type PosterType,
+} from '../lib/posters';
 import { storeUrl } from '../lib/storeCode';
 import type { Store } from '../lib/types';
 import { hasBannedWord } from '../lib/bannedWords';
 
-const PREF_KEY = 'sayandgo:poster';
-const CAPTION_MAX = 30;
-
+/** 디자인마다 사장님이 고친 칸만 저장 (고치지 않은 칸은 기본 문구) */
+type Custom = Partial<Record<PosterType, Partial<PosterTexts>>>;
 interface Pref {
   type: PosterType;
-  lang: PosterLang;
-  caption: string;
+  custom: Custom;
 }
 
-function readPref(): Pref {
-  const fallback: Pref = { type: 'A', lang: currentLang() === 'ko' ? 'ko' : 'en', caption: '' };
+// 포스터 설정은 이 기기에만 저장한다 (서버 저장 없음). 가게별로 따로.
+const prefKey = (code: string) => `sayandgo:poster:${code}`;
+
+function readPref(code: string): Pref {
+  const fallback: Pref = { type: 'A', custom: {} };
   try {
-    const saved = { ...fallback, ...JSON.parse(localStorage.getItem(PREF_KEY) ?? '{}') } as Pref;
-    // 예전 '한국어+EN' 같은 없어진 값은 기본값으로
-    if (!POSTER_LANGS.some((l) => l.code === saved.lang)) saved.lang = fallback.lang;
-    if (!POSTER_TYPES.includes(saved.type)) saved.type = fallback.type;
-    return saved;
+    localStorage.removeItem('sayandgo:poster'); // 예전 형식(언어 선택) 정리
+    const saved = JSON.parse(localStorage.getItem(prefKey(code)) ?? '{}') as Partial<Pref>;
+    return {
+      type: saved.type && POSTER_TYPES.includes(saved.type) ? saved.type : fallback.type,
+      custom: saved.custom && typeof saved.custom === 'object' ? saved.custom : {},
+    };
   } catch {
     return fallback;
   }
 }
+
+const hasBanned = (texts: Partial<PosterTexts> = {}) => Object.values(texts).some((v) => !!v && hasBannedWord(v));
 
 export function SharePage() {
   return <RequireOwner>{(store) => <Share store={store} />}</RequireOwner>;
@@ -42,36 +57,56 @@ function Share({ store }: { store: Store }) {
   const toast = useToast();
   const url = storeUrl(store.code);
   const isLocal = /^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname);
-  const [pref, setPref] = useState<Pref>(readPref);
-  const [draft, setDraft] = useState(pref.caption);
+  const [pref, setPref] = useState<Pref>(() => readPref(store.code));
+  // 그림에 반영하는 값: 입력을 멈추면 반영 (매 글자마다 다시 그리지 않게), 금칙어가 있으면 반영하지 않음
+  const [applied, setApplied] = useState<Custom>(pref.custom);
   const [customizing, setCustomizing] = useState(false);
   const [zoom, setZoom] = useState(false);
   const [poster, setPoster] = useState<{ blob: Blob; src: string } | null>(null);
   const fileName = `sayandgo-${store.code}-${pref.type}.png`;
-  const captionError = draft.trim() && hasBannedWord(draft) ? t('errors.banned') : null;
+  const defaults = defaultTexts(currentLang(), store.storeName);
+  const mine = pref.custom[pref.type] ?? {};
+  const isCustom = Object.keys(mine).length > 0;
 
-  // 고른 디자인 · 언어 · 문구는 기기에 기억 (서버 저장 없음)
   useEffect(() => {
     try {
-      localStorage.setItem(PREF_KEY, JSON.stringify(pref));
+      localStorage.setItem(prefKey(store.code), JSON.stringify(pref));
     } catch {
       /* 무시 */
     }
-  }, [pref]);
+  }, [pref, store.code]);
 
-  // 문구는 입력을 멈추면 반영 (매 글자마다 다시 그리지 않게)
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (!captionError) setPref((p) => ({ ...p, caption: draft.trim() }));
+      if (!hasBanned(pref.custom[pref.type])) setApplied(pref.custom);
     }, 400);
     return () => clearTimeout(timer);
-  }, [draft, captionError]);
+  }, [pref.custom, pref.type]);
+
+  /** 칸 하나 고치기. 기본 문구와 같아지면 '고친 칸'에서 뺀다 */
+  function setField(k: PosterField, value: string) {
+    setPref((p) => {
+      const cur = { ...(p.custom[p.type] ?? {}) };
+      if (value === defaults[k]) delete cur[k];
+      else cur[k] = value;
+      return { ...p, custom: { ...p.custom, [p.type]: cur } };
+    });
+  }
+  /** 비운 채로 칸을 벗어나면 기본 문구로 되돌린다 */
+  const restoreIfEmpty = (k: PosterField) => !(mine[k] ?? defaults[k]).trim() && setField(k, defaults[k]);
+  const resetType = () => setPref((p) => ({ ...p, custom: { ...p.custom, [p.type]: {} } }));
+
+  const appliedTexts = applied[pref.type] ?? {};
+  const texts = Object.fromEntries(
+    (Object.keys(defaults) as PosterField[]).map((k) => [k, appliedTexts[k]?.trim() || defaults[k]]),
+  ) as unknown as PosterTexts;
+  const textsKey = JSON.stringify(texts);
 
   useEffect(() => {
     let src = '';
     let alive = true;
     setPoster(null);
-    renderPoster({ type: pref.type, lang: pref.lang, caption: pref.caption, storeName: store.storeName, url, brand: t('app.name') })
+    renderPoster({ type: pref.type, texts: JSON.parse(textsKey) as PosterTexts, url, brand: t('app.name') })
       .then(canvasToBlob)
       .then((blob) => {
         if (!alive) return;
@@ -83,7 +118,7 @@ function Share({ store }: { store: Store }) {
       alive = false;
       if (src) URL.revokeObjectURL(src);
     };
-  }, [pref.type, pref.lang, pref.caption, store.storeName, url, t, toast]);
+  }, [pref.type, textsKey, url, t, toast]);
 
   const file = poster ? new File([poster.blob], fileName, { type: 'image/png' }) : null;
   const canShareFile = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] });
@@ -138,8 +173,8 @@ function Share({ store }: { store: Store }) {
           <span className="poster-pick__text">
             <b>{t('share.customize')}</b>
             <span>
-              {t(`share.types.${pref.type}`)} · {POSTER_LANGS.find((l) => l.code === pref.lang)?.label}
-              {pref.caption ? ` · ${t('share.customOn')}` : ''}
+              {t(`share.types.${pref.type}`)}
+              {isCustom ? ` · ${t('share.customOn')}` : ''}
             </span>
           </span>
           <span className="poster-pick__go">{t('share.change')}</span>
@@ -197,42 +232,58 @@ function Share({ store }: { store: Store }) {
           </div>
           <p className="share-hint">{t(`share.typeHints.${pref.type}`)}</p>
 
-          <div className="field" style={{ marginTop: 20 }}>
-            <label className="field__label" htmlFor="poster-caption">
-              {t('share.customCaption')}
-            </label>
-            <div className="input-clear">
-              <input
-                id="poster-caption"
-                className="input"
-                value={draft}
-                maxLength={CAPTION_MAX}
-                placeholder={t('share.customPlaceholder')}
-                onChange={(e) => setDraft(e.target.value)}
-                aria-invalid={!!captionError}
-              />
-              {draft && (
-                <button type="button" className="input-clear__btn" onClick={() => setDraft('')} aria-label={t('share.reset')}>
-                  <CloseIcon />
+          <div className="poster-fields">
+            <div className="poster-fields__head">
+              <p className="share-label">{t('share.texts')}</p>
+              {isCustom && (
+                <button type="button" className="text-btn" onClick={resetType}>
+                  {t('share.resetType')}
                 </button>
               )}
             </div>
-            {captionError ? <p className="field__error">{captionError}</p> : <p className="field__hint">{t('share.customHint', { n: draft.trim().length, max: CAPTION_MAX })}</p>}
-          </div>
-
-
-          <div className="field" style={{ marginTop: 20 }}>
-            <label className="field__label" htmlFor="poster-lang">
-              {t('share.captionLang')}
-            </label>
-            <select id="poster-lang" className="select" value={pref.lang} onChange={(e) => setPref((p) => ({ ...p, lang: e.target.value as PosterLang }))}>
-              {POSTER_LANGS.map((l) => (
-                <option key={l.code} value={l.code}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
-            <p className="field__hint">{pref.caption ? t('share.langHintCustom') : t('share.langHint')}</p>
+            {POSTER_FIELDS[pref.type].map((k) => {
+              const value = mine[k] ?? defaults[k];
+              const error = value.trim() && hasBannedWord(value) ? t('errors.banned') : null;
+              const common = {
+                id: `pf-${k}`,
+                value,
+                maxLength: POSTER_LIMITS[k],
+                onBlur: () => restoreIfEmpty(k),
+                'aria-invalid': !!error,
+              };
+              return (
+                <div className="field" key={`${pref.type}-${k}`}>
+                  <label className="field__label" htmlFor={`pf-${k}`}>
+                    {t(`share.fields.${k}`)}
+                  </label>
+                  <div className={`input-clear${k === 'headline' ? ' input-clear--top' : ''}`}>
+                    {k === 'headline' ? (
+                      <textarea
+                        {...common}
+                        className="textarea"
+                        rows={3}
+                        onChange={(e) => setField(k, e.target.value.split('\n').slice(0, 3).join('\n'))}
+                      />
+                    ) : (
+                      <input {...common} className="input" onChange={(e) => setField(k, e.target.value)} />
+                    )}
+                    {value && (
+                      <button type="button" className="input-clear__btn" onMouseDown={(e) => e.preventDefault()} onClick={() => setField(k, '')} aria-label={t('share.reset')}>
+                        <CloseIcon />
+                      </button>
+                    )}
+                  </div>
+                  {error ? (
+                    <p className="field__error">{error}</p>
+                  ) : (
+                    <p className="field__hint">
+                      {value.length} / {POSTER_LIMITS[k]}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+            <p className="share-hint">{t('share.textsHint')}</p>
           </div>
           <button type="button" className="btn btn--black btn--lg" style={{ width: '100%', marginTop: 20 }} onClick={() => setCustomizing(false)}>
             {t('share.apply')}

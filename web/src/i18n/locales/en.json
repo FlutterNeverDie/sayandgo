@@ -377,7 +377,6 @@
     "devNotice": "This is a development address and won't open on other devices. Save again after deploying.",
     "tip": "Put it on tables, the counter or the door",
     "design": "Design",
-    "captionLang": "Text language",
     "types": {
       "A": "Basic",
       "B": "Big text",
@@ -392,9 +391,6 @@
       "D": "Print on A4, fold along the middle, and stand it on the table.",
       "E": "A small square for counters, doors or menu corners."
     },
-    "customCaption": "Poster text (optional)",
-    "customPlaceholder": "Leave empty for the default text",
-    "customHint": "{{n}} / {{max}} · Write it in your own voice",
     "reset": "Clear",
     "tipD": "Print on A4 at actual size, then fold along the dotted line",
     "customize": "Customize poster",
@@ -402,8 +398,17 @@
     "customOn": "Custom text",
     "apply": "Apply",
     "zoom": "View larger",
-    "langHint": "Switch to your guests’ language if many visit from abroad",
-    "langHintCustom": "Your own text stays as written. The language applies only to the remaining default text"
+    "texts": "Poster text",
+    "resetType": "Reset to default",
+    "textsHint": "Saved per design, on this device only.",
+    "fields": {
+      "name": "Store name",
+      "caption": "Caption",
+      "headline": "Headline (up to 3 lines)",
+      "sub": "Small note",
+      "sticker": "Sticker text",
+      "fold": "Fold line note"
+    }
   },
   "settings": {
     "title": "Settings",

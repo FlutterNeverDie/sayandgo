@@ -823,3 +823,11 @@ body.warm .topbar { background: #f3f2ef; }
   border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.14); color: #fff; cursor: pointer;
 }
 @keyframes fade-in { from { opacity: 0; } }
+
+/* 포스터 문구 칸 */
+.poster-fields { margin-top: 8px; }
+.poster-fields__head { display: flex; align-items: center; justify-content: space-between; }
+.poster-fields .field { margin-top: 12px; }
+.input-clear--top .textarea { padding-right: 48px; min-height: 0; resize: none; }
+.input-clear--top .input-clear__btn { top: 6px; transform: none; }
+.text-btn { border: 0; background: none; padding: 6px 0; font-size: 13px; font-weight: 600; color: var(--mint-ink); cursor: pointer; }

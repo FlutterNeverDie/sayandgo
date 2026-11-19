@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>큐플레이스 구성도 · 플로우</title>
+<style>
+  body { margin: 0; background: #fff; color: #17302b; font: 15px/1.65 "Pretendard", -apple-system, "Apple SD Gothic Neo", sans-serif; }
+  main { max-width: 1000px; margin: 0 auto; padding: 32px 20px 80px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 19px; margin: 40px 0 10px; padding-top: 14px; border-top: 2px solid #17302b; }
+  .sub { color: #5b6b67; margin: 0 0 16px; }
+  .mermaid { background: #fbfcfc; border: 1px solid #e3e7e5; border-radius: 8px; padding: 12px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 7px 9px; border-bottom: 1px solid #e3e7e5; }
+  th { background: #f6f8f7; white-space: nowrap; }
+  code { background: #f6f8f7; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  li { margin-bottom: 3px; }
+</style>
+</head>
+<body>
+<main>
+<h1>큐플레이스 구성도 · 플로우</h1>
+<p class="sub">2026-11-19 · 세부는 <code>design-proposal.html</code>, <code>safety-and-policy.html</code></p>
+
+<h2>1. 시스템 구성도</h2>
+<pre class="mermaid">
+flowchart LR
+  subgraph U["모바일 브라우저"]
+    C["손님<br>익명 로그인"]
+    O["사장님<br>이메일 로그인"]
+    A["운영자<br>admin 권한"]
+  end
+  subgraph AWS["AWS"]
+    CF["CloudFront<br>정적 파일 캐시"] --> S3["S3<br>React 빌드"]
+  end
+  subgraph APP["React 앱 (브라우저 안에서 실행)"]
+    RQ["TanStack Query<br>메모리 캐시"] --> FC["Firestore 로컬 캐시<br>IndexedDB"]
+    BW["금칙어 검사"]
+    CV["캔버스<br>QR · 공유 이미지"]
+  end
+  subgraph FB["Firebase 무료 Spark · 서울 리전"]
+    AU["Auth<br>이메일 · 익명<br>인증/재설정 메일"]
+    FS["Firestore<br>보안 규칙 = 서버 역할"]
+  end
+  U --> CF
+  CF --> APP
+  FC --> FS
+  APP --> AU
+  APP -.손님 화면만.-> AD["Google AdSense"]
+  SC["로컬 스크립트<br>admin 권한 부여 1회"] -.-> AU
+</pre>
+
+<h2>2. 화면 지도</h2>
+<pre class="mermaid">
+flowchart TD
+  L["/ 소개<br>서비스 소개 · 이용 방법 · FAQ"] --> SU["/signup"]
+  L --> LI["/login"]
+  SU --> V["/verify 인증 대기"]
+  LI -->|인증 전| V
+  V --> IN
+  LI -->|인증 완료| IN["/inbox 받은 질문"]
+  LI --> RS["/reset"] --> AA["/auth/action<br>인증 · 새 비밀번호"]
+  IN --> SH["/share 링크 · QR"]
+  IN --> ST["/settings<br>상호명 · 소개 · 금지어 · 공개 설정<br>차단 목록 · 비밀번호 · 언어 · 탈퇴"]
+  Q["/q/:code 가게 페이지"] --> QD["/q/:code/:qid 질문 하나"]
+  FT["모든 화면 푸터"] --> T["/terms 이용약관"]
+  FT --> P["/privacy 개인정보처리방침"]
+  FT --> PO["/policy 운영정책"]
+  FT --> R["/rights 권리침해 신고"]
+  AD["/admin 운영자"]
+</pre>
+
+<h2>3. 사장님 가입 · 로그인</h2>
+<pre class="mermaid">
+flowchart TD
+  A["가입: 이메일 · 비밀번호 · 상호명<br>+ 필수 동의 3개 (만14세 · 약관 · 개인정보)"] --> B{"화면 검사<br>형식 · 금칙어"}
+  B -->|실패: 그 칸 아래 안내| A
+  B --> C["Auth 계정 생성"]
+  C -->|이메일 중복| A
+  C --> D["8자리 코드 생성<br>users + stores pending 한 배치"]
+  D -->|코드 충돌 드묾| D
+  D --> E["인증 메일"] --> F["/verify<br>다시 보내기 60초 · 스팸함 안내"]
+  F -->|메일 링크| G["토큰 갱신 → stores active"]
+  G --> H["/inbox + 내 링크 · QR 받기 카드"]
+  LG["로그인 이메일 · 비밀번호"] -->|미인증| F
+  LG --> H
+  LG -->|비밀번호 분실| RS["재설정 메일 → 새 비밀번호"]
+</pre>
+
+<h2>4. 손님 질문 (읽기 비용 표시)</h2>
+<pre class="mermaid">
+flowchart TD
+  A["QR · 링크 접속"] --> B{"가게 정보 캐시<br>10분 안?"}
+  B -->|예 · 읽기 0| D
+  B -->|아니오| C["stores 읽기 1"] --> D{"가게 상태"}
+  D -->|준비 중 · 탈퇴 · 이용 제한| X["안내 화면"]
+  D -->|active| E{"목록 캐시<br>60초 안?"}
+  E -->|예 · 읽기 0| G
+  E -->|아니오| F["고정 질문 최대 3 + 최근 10<br>hidden == false"] --> G["목록 표시<br>캐시 먼저 보여 주고 갱신"]
+  G -->|더 보기 버튼| F2["다음 10개 · 커서"] --> G
+  G --> H["질문 쓰기"]
+  H --> I{"2~500자 · 금칙어<br>공통 + 가게별"}
+  I -->|걸림| H
+  I --> J["익명 로그인 (기기당 최초 1회)"]
+  J --> K["배치: 질문 + 작성자 기록 + 쓰기 간격"]
+  K -->|규칙 거부: 30초 · 차단 · 받기 중지| M["안내 문구"]
+  K -->|성공 · 재조회 0| N["목록 맨 위에 바로 추가<br>내 질문 표시 · 30초 잠금"]
+  G --> RP["⋯ 신고 → 6번"]
+  G --> MY["내 질문 삭제"]
+</pre>
+
+<h2>5. 사장님 관리</h2>
+<pre class="mermaid">
+flowchart LR
+  IN["/inbox"] --> T1["새 질문<br>실시간 구독 10개"]
+  IN --> T2["답변함 · 숨김 · 전체<br>열 때만 10개씩"]
+  IN --> SW["질문 받기 스위치"]
+  CARD["질문 카드"] --> A1["답변 작성 · 수정 · 삭제"]
+  CARD --> A2["숨기기 · 다시 공개"]
+  CARD --> A3["삭제 → 5초 되돌리기"]
+  CARD --> A4["작성자 차단<br>차단만 / 차단하고 삭제"]
+  CARD --> A5["맨 위 고정 최대 3"]
+  CARD --> A6["답변 공유 이미지"]
+  SEL["선택 모드"] --> B1["여러 개 숨기기 · 삭제<br>한 배치"]
+  SH["/share"] --> S1["링크 복사"]
+  SH --> S2["네이티브 공유"]
+  SH --> S3["QR PNG 저장<br>상호명 포함 출력용"]
+</pre>
+
+<h2>6. 신고 · 운영</h2>
+<pre class="mermaid">
+flowchart TD
+  A["⋯ → 사유 선택<br>욕설 · 개인정보 · 도배 · 음란 · 명예훼손 · 기타"] --> B["익명 로그인"]
+  B --> C["배치: reports 생성 + reportCount +1"]
+  C -->|이미 신고함| D["이미 신고했어요"]
+  C --> E{"3건 이상?"}
+  E -->|아니오| G["접수 안내"]
+  E -->|예| F["자동 가림 hiddenBy=report"]
+  F --> H["사장님: 신고로 가려짐<br>다시 공개 / 삭제"]
+  F --> I["운영자 /admin<br>복구 · 가림 유지 · 삭제 · 가게 이용 제한"]
+  R["권리침해 신고 이메일"] --> J["임시조치 최대 30일"] --> K["삭제 또는 복구"]
+</pre>
+
+<h2>7. 비용 절감</h2>
+<table>
+  <tr><th>장치</th><th>내용</th><th>효과</th></tr>
+  <tr><td>페이지네이션</td><td><code>limit(10)</code> + <code>startAfter</code> 커서, "더 보기" 버튼 (자동 무한 스크롤 안 함)</td><td>보는 만큼만 읽기</td></tr>
+  <tr><td>메모리 캐시</td><td>TanStack Query: 질문 목록 60초, 가게 정보 · 개수 10분</td><td>뒤로 가기 · 재방문 읽기 0</td></tr>
+  <tr><td>기기 캐시</td><td>Firestore <code>persistentLocalCache</code></td><td>저장된 내용 먼저 표시</td></tr>
+  <tr><td>손님은 실시간 구독 안 함</td><td><code>getDocs</code> 한 번, 당겨서 새로고침</td><td>계속 열어 둬도 추가 과금 없음</td></tr>
+  <tr><td>낙관적 추가</td><td>질문 · 답변 저장 후 목록 재조회 없이 화면에 바로 반영</td><td>쓰기 뒤 읽기 0</td></tr>
+  <tr><td>사장님 구독 최소화</td><td>"새 질문" 탭만 구독, 화면이 꺼지면 구독 해제</td><td>바뀐 문서만 과금</td></tr>
+  <tr><td>개수 표시</td><td><code>count()</code> = 1,000건당 읽기 1, 10분 캐시</td><td>문서를 다 읽지 않음</td></tr>
+  <tr><td>규칙 안 읽기</td><td>규칙의 <code>get</code> · <code>exists</code>도 읽기로 과금 → 질문 쓰기 1건에 약 4회로 고정</td><td>예측 가능</td></tr>
+  <tr><td>Storage 0</td><td>사진 없음, QR · 공유 이미지는 브라우저에서 생성</td><td>저장 · 전송 비용 없음</td></tr>
+  <tr><td>CloudFront</td><td>해시 붙은 JS · CSS 1년 캐시, <code>index.html</code>만 매번 확인. 폰트는 필요한 글자만(서브셋)</td><td>전송량 최소</td></tr>
+  <tr><td>광고 지연 로딩</td><td>광고는 화면에 들어올 때만 불러옴</td><td>첫 화면 빠름</td></tr>
+</table>
+<p>손님 첫 방문 약 11~14 읽기 → 무료 한도(하루 5만)로 하루 약 3,500~4,500 방문. 넘으면 종량제 전환.</p>
+
+<h2>8. UI · UX 핵심</h2>
+<table>
+  <tr><th>화면</th><th>원칙</th></tr>
+  <tr><td>손님 가게 페이지</td><td>스크롤 없이 상호명 + 소개 + 입력창이 첫 화면에 / 익명 안내 한 줄 / 자동 포커스 안 함 / 키보드가 올라와도 보내기 버튼 보임 / 글자 수 표시 / 보내면 바로 목록 맨 위 "내 질문" / 로딩은 캐시 먼저, 없으면 전표 모양 뼈대 / 목록 10개마다 광고 자리</td></tr>
+  <tr><td>가입</td><td>3칸 + 동의, 칸마다 바로 검사 · 안내 / 비밀번호 보기 토글, 확인칸 없음 / 가입 직후 링크 · QR 카드로 바로 연결</td></tr>
+  <tr><td>받은 질문함</td><td>기본 탭 "새 질문" / 하단 탭바: 받은 질문 · 공유 · 설정 / 카드 "⋯" 메뉴에 관리 기능 모음 / 삭제는 확인창 대신 5초 되돌리기 / 새 질문 배지 + 탭 제목 "(3) 큐플레이스" / 광고 없음</td></tr>
+  <tr><td>공유 · QR</td><td>복사 · 공유 · QR 저장 버튼 3개를 한 화면에 / QR 이미지에 상호명 · "질문 남기기" 문구 포함 / iOS는 공유 시트로 사진 저장</td></tr>
+  <tr><td>공통</td><td>민트 + 종이색 바탕 + 주문 전표 카드, 말풍선 · 그라데이션 금지 / 터치 44px · iPhone 안전 영역 / 언어 자동 + "한국어 ▾" 선택 / 빈 화면 · 오류 문구는 짧고 다음 행동 제시 / 푸터: 소개 · 약관 · 개인정보 · 운영정책 · 권리침해 신고</td></tr>
+</table>
+</main>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#e6f8f3', primaryBorderColor: '#0b7d66', primaryTextColor: '#17302b',
+      lineColor: '#5b6b67', fontFamily: 'Pretendard, -apple-system, sans-serif', fontSize: '14px'
+    },
+    flowchart: { curve: 'basis', htmlLabels: true }
+  });
+</script>
+</body>
+</html>

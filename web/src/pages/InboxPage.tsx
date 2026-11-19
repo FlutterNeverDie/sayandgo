@@ -319,7 +319,7 @@ function Inbox({ store }: { store: Store }) {
           )}
           {!list.loading && !list.error && visibleItems.length === 0 && (
             <div style={{ padding: 20 }}>
-              <EmptyInbox tab={activeTab} store={store} />
+              <EmptyInbox tab={activeTab} total={counts.data ? counts.data.open + counts.data.answered + counts.data.hidden : null} />
             </div>
           )}
 
@@ -498,10 +498,10 @@ function Inbox({ store }: { store: Store }) {
   );
 }
 
-function EmptyInbox({ tab, store }: { tab: InboxTab; store: Store }) {
+/** 빈 목록 안내. "첫 피드백 준비" 안내는 지금까지 받은 피드백이 한 건도 없을 때만 */
+function EmptyInbox({ tab, total }: { tab: InboxTab; total: number | null }) {
   const { t } = useTranslation();
-  const isNew = !!store.createdAt && Date.now() - store.createdAt.getTime() < 3 * 86400_000;
-  if (tab === 'open' && isNew) {
+  if (tab === 'open' && total === 0) {
     return (
       <div className="empty" style={{ textAlign: 'left' }}>
         <strong>{t('inbox.firstRunTitle')}</strong>
@@ -509,6 +509,14 @@ function EmptyInbox({ tab, store }: { tab: InboxTab; store: Store }) {
         <Link to="/share" className="btn btn--primary btn--sm">
           {t('inbox.getQr')}
         </Link>
+      </div>
+    );
+  }
+  if (tab === 'open' && total) {
+    return (
+      <div className="empty">
+        <strong>{t('inbox.allDoneTitle')}</strong>
+        <p>{t('inbox.allDoneDesc')}</p>
       </div>
     );
   }

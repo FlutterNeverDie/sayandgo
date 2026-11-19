@@ -362,7 +362,9 @@
     "privateNote": "Only you can see this note. Your reply stays private too.",
     "editRule": "You can edit a reply for 10 minutes after posting.",
     "editLeft": "You can edit this for {{m}} more min.",
-    "answerRemoved": "Reply removed"
+    "answerRemoved": "Reply removed",
+    "allDoneTitle": "All caught up",
+    "allDoneDesc": "New feedback will show up here right away."
   },
   "share": {
     "title": "Link · QR",

@@ -362,7 +362,9 @@
     "privateNote": "사장님만 볼 수 있는 의견이에요. 답변도 손님들에게 공개되지 않아요.",
     "editRule": "답변은 올린 뒤 10분 동안만 고칠 수 있어요.",
     "editLeft": "{{m}}분 안에만 고칠 수 있어요.",
-    "answerRemoved": "답변을 지웠어요"
+    "answerRemoved": "답변을 지웠어요",
+    "allDoneTitle": "새 피드백을 모두 확인했어요",
+    "allDoneDesc": "새로 들어오면 여기에 바로 보여요."
   },
   "share": {
     "title": "링크 · QR",

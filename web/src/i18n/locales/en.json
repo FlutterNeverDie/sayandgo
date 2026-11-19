@@ -400,7 +400,7 @@
     "zoom": "View larger",
     "texts": "Poster text",
     "resetType": "Reset to default",
-    "textsHint": "Saved per design, on this device only.",
+    "textsHint": "Change the store name in Settings → Store info. Text is saved per design, on this device only.",
     "fields": {
       "name": "Store name",
       "caption": "Caption",

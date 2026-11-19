@@ -66,7 +66,7 @@ function Share({ store }: { store: Store }) {
   const fileName = `sayandgo-${store.code}-${pref.type}.png`;
   const defaults = defaultTexts(currentLang(), store.storeName);
   const mine = pref.custom[pref.type] ?? {};
-  const isCustom = Object.keys(mine).length > 0;
+  const isCustom = POSTER_FIELDS[pref.type].some((k) => k in mine);
 
   useEffect(() => {
     try {
@@ -98,7 +98,7 @@ function Share({ store }: { store: Store }) {
 
   const appliedTexts = applied[pref.type] ?? {};
   const texts = Object.fromEntries(
-    (Object.keys(defaults) as PosterField[]).map((k) => [k, appliedTexts[k]?.trim() || defaults[k]]),
+    (Object.keys(defaults) as PosterField[]).map((k) => [k, (k !== 'name' && appliedTexts[k]?.trim()) || defaults[k]]),
   ) as unknown as PosterTexts;
   const textsKey = JSON.stringify(texts);
 

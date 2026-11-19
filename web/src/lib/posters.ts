@@ -38,12 +38,12 @@ export interface PosterTexts {
 }
 export type PosterField = keyof PosterTexts;
 
-/** 디자인마다 고칠 수 있는 칸 (위에서 아래 순서) */
+/** 디자인마다 고칠 수 있는 칸 (위에서 아래 순서). 가게 이름은 손님 화면과 같아야 해서 고정 (바꾸려면 설정 → 가게 정보) */
 export const POSTER_FIELDS: Record<PosterType, PosterField[]> = {
-  A: ['name', 'caption'],
-  B: ['headline', 'sub', 'name'],
-  C: ['name', 'caption'],
-  D: ['name', 'caption', 'fold'],
+  A: ['caption'],
+  B: ['headline', 'sub'],
+  C: ['caption'],
+  D: ['caption', 'fold'],
   E: ['sticker'],
 };
 

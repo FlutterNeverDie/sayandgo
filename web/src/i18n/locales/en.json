@@ -357,7 +357,33 @@
     "sharePng": "Save to photos · Share",
     "qrCaption": "Scan to leave us anonymous feedback",
     "devNotice": "This is a development address and won't open on other devices. Save again after deploying.",
-    "tip": "Put it on tables, the counter or the door"
+    "tip": "Put it on tables, the counter or the door",
+    "design": "Design",
+    "captionLang": "Text language",
+    "langs": {
+      "ko": "한국어",
+      "en": "English",
+      "both": "KR + EN"
+    },
+    "types": {
+      "A": "Basic",
+      "B": "Big text",
+      "C": "Strip",
+      "D": "Tent",
+      "E": "Sticker"
+    },
+    "typeHints": {
+      "A": "A basic poster that works anywhere.",
+      "B": "Large text, readable from a distance on walls and doors.",
+      "C": "A long strip for the bottom of menus or counter edges.",
+      "D": "Print on A4, fold along the middle, and stand it on the table.",
+      "E": "A small square for counters, doors or menu corners."
+    },
+    "customCaption": "Poster text (optional)",
+    "customPlaceholder": "Leave empty for the default text",
+    "customHint": "{{n}} / {{max}} · Write it in your own voice",
+    "reset": "Clear",
+    "tipD": "Print on A4 at actual size, then fold along the dotted line"
   },
   "settings": {
     "title": "Settings",

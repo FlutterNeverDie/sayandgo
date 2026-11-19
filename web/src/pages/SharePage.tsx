@@ -5,27 +5,67 @@ import { currentLang } from '../i18n';
 import { CopyIcon, DownloadIcon, ShareIcon } from '../components/ui/Icons';
 import { OwnerShell } from '../components/ui/Layout';
 import { useToast } from '../components/ui/Overlay';
-import { canvasToBlob, makeQrPoster } from '../lib/qr';
+import { canvasToBlob, POSTER_SIZE, POSTER_TYPES, renderPoster, type PosterLang, type PosterType } from '../lib/posters';
 import { storeUrl } from '../lib/storeCode';
 import type { Store } from '../lib/types';
+import { hasBannedWord } from '../lib/bannedWords';
+
+const PREF_KEY = 'sayandgo:poster';
+const CAPTION_MAX = 30;
+
+interface Pref {
+  type: PosterType;
+  lang: PosterLang;
+  caption: string;
+}
+
+function readPref(): Pref {
+  const fallback: Pref = { type: 'A', lang: currentLang() === 'ko' ? 'ko' : 'en', caption: '' };
+  try {
+    return { ...fallback, ...JSON.parse(localStorage.getItem(PREF_KEY) ?? '{}') };
+  } catch {
+    return fallback;
+  }
+}
 
 export function SharePage() {
   return <RequireOwner>{(store) => <Share store={store} />}</RequireOwner>;
 }
 
-/** 링크 · QR: 포스터 크게 → 저장 / 공유 → 링크 한 줄 */
+/** 링크 · QR: 포스터 미리보기 → 디자인 · 언어 · 문구 → 저장 / 공유 → 링크 한 줄 */
 function Share({ store }: { store: Store }) {
   const { t } = useTranslation();
   const toast = useToast();
   const url = storeUrl(store.code);
   const isLocal = /^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname);
-  const fileName = `sayandgo-${store.code}.png`;
+  const [pref, setPref] = useState<Pref>(readPref);
+  const [draft, setDraft] = useState(pref.caption);
   const [poster, setPoster] = useState<{ blob: Blob; src: string } | null>(null);
+  const fileName = `sayandgo-${store.code}-${pref.type}.png`;
+  const captionError = draft.trim() && hasBannedWord(draft) ? t('errors.banned') : null;
+
+  // 고른 디자인 · 언어 · 문구는 기기에 기억 (서버 저장 없음)
+  useEffect(() => {
+    try {
+      localStorage.setItem(PREF_KEY, JSON.stringify(pref));
+    } catch {
+      /* 무시 */
+    }
+  }, [pref]);
+
+  // 문구는 입력을 멈추면 반영 (매 글자마다 다시 그리지 않게)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!captionError) setPref((p) => ({ ...p, caption: draft.trim() }));
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [draft, captionError]);
 
   useEffect(() => {
     let src = '';
     let alive = true;
-    makeQrPoster({ storeName: store.storeName, url, caption: t('share.qrCaption'), brand: t('app.name') })
+    setPoster(null);
+    renderPoster({ type: pref.type, lang: pref.lang, caption: pref.caption, storeName: store.storeName, url, brand: t('app.name') })
       .then(canvasToBlob)
       .then((blob) => {
         if (!alive) return;
@@ -37,7 +77,7 @@ function Share({ store }: { store: Store }) {
       alive = false;
       if (src) URL.revokeObjectURL(src);
     };
-  }, [store.storeName, url, t, toast]);
+  }, [pref.type, pref.lang, pref.caption, store.storeName, url, t, toast]);
 
   const file = poster ? new File([poster.blob], fileName, { type: 'image/png' }) : null;
   const canShareFile = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] });
@@ -65,6 +105,8 @@ function Share({ store }: { store: Store }) {
     }
   }
 
+  const [w, h] = POSTER_SIZE[pref.type];
+
   return (
     <OwnerShell storeName={store.storeName} back="/inbox">
       <main className="page">
@@ -77,10 +119,54 @@ function Share({ store }: { store: Store }) {
 
         <div className="qr-stage">
           {poster ? (
-            <img src={poster.src} alt={`${store.storeName} QR`} width={1080} height={1350} />
+            <img src={poster.src} alt={`${store.storeName} QR`} width={w} height={h} className={`qr-stage__img qr-stage__img--${pref.type}`} />
           ) : (
-            <div className="skeleton" style={{ width: '100%', aspectRatio: '1080 / 1350', borderRadius: 14 }} />
+            <div className="skeleton qr-stage__img" style={{ aspectRatio: `${w} / ${h}`, width: '100%', maxWidth: pref.type === 'C' ? 340 : 300 }} />
           )}
+        </div>
+
+        <p className="share-label">{t('share.design')}</p>
+        <div className="poster-types" role="radiogroup" aria-label={t('share.design')}>
+          {POSTER_TYPES.map((k) => (
+            <button key={k} type="button" role="radio" aria-checked={pref.type === k} onClick={() => setPref((p) => ({ ...p, type: k }))}>
+              <span className={`poster-thumb poster-thumb--${k}`} aria-hidden="true" />
+              <b>{k}</b>
+              <span>{t(`share.types.${k}`)}</span>
+            </button>
+          ))}
+        </div>
+        <p className="share-hint">{t(`share.typeHints.${pref.type}`)}</p>
+
+        <p className="share-label">{t('share.captionLang')}</p>
+        <div className="segmented" role="radiogroup" aria-label={t('share.captionLang')}>
+          {(['ko', 'en', 'both'] as PosterLang[]).map((l) => (
+            <button key={l} type="button" role="radio" aria-selected={pref.lang === l} onClick={() => setPref((p) => ({ ...p, lang: l }))}>
+              {t(`share.langs.${l}`)}
+            </button>
+          ))}
+        </div>
+
+        <div className="field" style={{ marginTop: 16 }}>
+          <label className="field__label" htmlFor="poster-caption">
+            {t('share.customCaption')}
+          </label>
+          <div className="input-group">
+            <input
+              id="poster-caption"
+              className="input"
+              value={draft}
+              maxLength={CAPTION_MAX}
+              placeholder={t('share.customPlaceholder')}
+              onChange={(e) => setDraft(e.target.value)}
+              aria-invalid={!!captionError}
+            />
+            {draft && (
+              <button type="button" className="btn" onClick={() => setDraft('')}>
+                {t('share.reset')}
+              </button>
+            )}
+          </div>
+          {captionError ? <p className="field__error">{captionError}</p> : <p className="field__hint">{t('share.customHint', { n: draft.trim().length, max: CAPTION_MAX })}</p>}
         </div>
 
         <div className="share-actions">
@@ -93,7 +179,7 @@ function Share({ store }: { store: Store }) {
             {t('common.share')}
           </button>
         </div>
-        <p className="share-tip">{isLocal ? t('share.devNotice') : t('share.tip')}</p>
+        <p className="share-tip">{isLocal ? t('share.devNotice') : pref.type === 'D' ? t('share.tipD') : t('share.tip')}</p>
 
         <section className="section" aria-labelledby="link-h" style={{ marginTop: 32 }}>
           <h2 id="link-h" className="section__title">

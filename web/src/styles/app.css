@@ -583,7 +583,11 @@ body.white .topbar { background: #ffffff; }
 
 /* ---------- 링크 · QR ---------- */
 .qr-stage { background: var(--surface); border-radius: 24px; padding: 20px; display: grid; place-items: center; }
-.qr-stage img { width: 100%; max-width: 300px; height: auto; border-radius: 12px; box-shadow: 0 1px 0 rgba(21, 32, 29, 0.06); }
+.qr-stage { min-height: 300px; }
+.qr-stage__img { width: 100%; max-width: 300px; height: auto; border-radius: 12px; outline: 1px solid var(--rule); }
+.qr-stage__img--C { max-width: 100%; }
+.qr-stage__img--D { max-width: 260px; }
+.qr-stage__img--E { max-width: 260px; border-radius: 28px; outline: 0; }
 .share-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
 .share-actions .btn { width: 100%; }
 .share-tip { margin-top: 12px; text-align: center; font-size: 13px; color: var(--faint); }
@@ -718,3 +722,26 @@ body.warm .topbar { background: #f3f2ef; }
 @keyframes breathe { from { transform: scale(0.94); opacity: 0.75; } to { transform: scale(1); opacity: 1; } }
 /* 위쪽 바 내 가게 버튼: 상호명이 길어도 넓어지지 않게 */
 .session-btn { max-width: 140px; }
+
+/* 포스터 디자인 고르기 */
+.share-label { font-size: var(--fs-14); font-weight: 700; margin: 20px 0 8px; }
+.share-hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.poster-types { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.poster-types button {
+  display: grid; justify-items: center; gap: 2px; padding: 8px 2px 8px; border-radius: 14px; border: 2px solid transparent;
+  background: var(--surface); cursor: pointer; color: var(--muted); font-size: 11px;
+}
+.poster-types button b { font-size: 13px; color: var(--text); }
+.poster-types button[aria-checked='true'] { border-color: var(--text); color: var(--text); }
+.poster-thumb { width: 30px; height: 38px; border-radius: 4px; background: var(--raised); position: relative; overflow: hidden; margin-bottom: 4px; }
+.poster-thumb::before { content: ''; position: absolute; left: 8px; top: 9px; width: 14px; height: 14px; background: var(--text); border-radius: 2px; }
+.poster-thumb--A::after, .poster-thumb--B::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--mint); }
+.poster-thumb--B::before { left: 5px; top: 5px; width: 18px; height: 4px; box-shadow: 0 6px 0 var(--mint-ink), 0 12px 0 var(--text); background: var(--text); }
+.poster-thumb--C { width: 40px; height: 16px; margin-top: 11px; margin-bottom: 15px; border-left: 4px solid var(--mint); }
+.poster-thumb--C::before { left: 3px; top: 2px; width: 12px; height: 12px; }
+.poster-thumb--D::before { top: 4px; width: 10px; height: 10px; left: 10px; }
+.poster-thumb--D::after { content: ''; position: absolute; left: 10px; top: 24px; width: 10px; height: 10px; background: var(--text); border-radius: 2px; box-shadow: 0 -5px 0 -4px #b9c2be; }
+.poster-thumb--E { width: 32px; height: 32px; margin-top: 3px; margin-bottom: 7px; background: var(--text); border-radius: 8px; }
+.poster-thumb--E::before { background: #fff; left: 8px; top: 8px; width: 16px; height: 16px; }
+
+.input-group .input:last-child { border-radius: 12px; }

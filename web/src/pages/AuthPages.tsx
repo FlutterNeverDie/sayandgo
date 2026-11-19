@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../app/auth';
+import { AppMark } from '../components/ui/AppMark';
 import { PasswordField, TextField } from '../components/ui/Fields';
 import { CategoryPicker } from '../components/ui/StorePickers';
 import type { StoreCategory } from '../lib/types';
@@ -13,17 +14,6 @@ import { auth } from '../lib/firebase';
 import { errorKey } from '../lib/format';
 import { signUp, verifyActionSettings } from '../lib/stores';
 import { checkEmail, checkPassword, checkStoreName, LIMITS } from '../lib/validation';
-
-/** 앱 아이콘 (public/favicon.svg와 같은 모양) */
-function AppMark({ size = 56 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">
-      <rect width="100" height="100" rx="24" fill="#3ccfae" />
-      <circle cx="47" cy="46" r="22" fill="none" stroke="#15201d" strokeWidth="10" />
-      <path d="M68.8 56.1 L77 77 L57.1 67.8 Z" fill="#15201d" stroke="#15201d" strokeWidth="3" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function AuthFrame({ title, subtitle, below, children }: { title: string; subtitle?: string; below?: React.ReactNode; children: React.ReactNode }) {
   return (

@@ -495,5 +495,13 @@ a { color: var(--mint-ink); text-underline-offset: 3px; }
 .auth__alt { background: var(--surface); border-color: transparent; }
 .btn--lg { height: 54px; border-radius: 16px; font-size: 17px; }
 
-.landing__title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.35; }
+.landing-hero { padding: 32px 4px 8px; }
+.landing__title { margin-top: 18px; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.4; white-space: pre-line; }
+.landing__lead { margin-top: 8px; color: var(--muted); }
+.steps { list-style: none; margin: 0; padding: 0; }
+.steps__row { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-top: 1px solid var(--rule); }
+.steps__row:first-child { border-top: 0; }
+.steps__icon { width: 40px; height: 40px; border-radius: 12px; background: var(--mint-soft); color: var(--mint-ink); display: grid; place-items: center; flex: none; }
+.steps__title { display: block; font-weight: 700; }
+.steps__desc { display: block; font-size: var(--fs-14); color: var(--muted); }
 .step__desc { font-size: var(--fs-14); }

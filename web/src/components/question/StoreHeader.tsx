@@ -3,17 +3,18 @@ import { StoreIcon, toneSoft } from '../ui/StoreIcon';
 import type { StoreLook } from './QuestionItem';
 
 /** 가게 머리: 가게 색이 옅게 깔린 카드 + 아이콘 + 상호명 + 소개 + 칩 + 버튼 */
-export function StoreHeader({ store, intro, chips, actions, headerRef }: {
+export function StoreHeader({ store, intro, chips, actions, headerRef, showIcon = true }: {
   store: StoreLook;
   intro?: string;
   chips?: ReactNode;
   actions?: ReactNode;
   headerRef?: React.Ref<HTMLElement>;
+  showIcon?: boolean;
 }) {
   return (
     <header className="hero" ref={headerRef} style={{ ['--tone-soft' as string]: toneSoft(store.tone, 0.18) }}>
-      <StoreIcon category={store.category} tone={store.tone} size={64} />
-      <h1 className="hero__name">{store.storeName}</h1>
+      {showIcon && <StoreIcon category={store.category} tone={store.tone} size={64} />}
+      <h1 className="hero__name" style={showIcon ? undefined : { marginTop: 0 }}>{store.storeName}</h1>
       {intro && <p className="hero__intro">{intro}</p>}
       {chips && <div className="hero__chips">{chips}</div>}
       {actions && <div className="hero__actions">{actions}</div>}

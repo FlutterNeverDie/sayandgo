@@ -156,6 +156,7 @@ function ActiveStore({ store }: { store: Store }) {
       <main className="page" style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
         <StoreHeader
           headerRef={headerRef}
+          showIcon={false}
           store={store}
           intro={store.intro}
           chips={

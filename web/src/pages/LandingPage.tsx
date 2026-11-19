@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router-dom';
-import QRCode from 'qrcode';
 import { useAuth } from '../app/auth';
 import { QuestionItem, type StoreLook } from '../components/question/QuestionItem';
 import { LockIcon } from '../components/ui/Icons';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
+import { AppMark } from '../components/ui/AppMark';
 import { StoreIcon, toneSoft } from '../components/ui/StoreIcon';
 import type { Question, QuestionKind } from '../lib/types';
 
@@ -22,12 +21,6 @@ function sampleQ(id: string, kind: QuestionKind, body: string, answer: string, m
 export function LandingPage() {
   const { t } = useTranslation();
   const { user, ready } = useAuth();
-  const [qrSvg, setQrSvg] = useState('');
-  useEffect(() => {
-    QRCode.toString(`${location.origin}/q/k7m2xp9a`, { type: 'svg', margin: 0, color: { dark: '#15201d', light: '#0000' } })
-      .then(setQrSvg)
-      .catch(() => undefined);
-  }, []);
   if (ready && user?.emailVerified) return <Navigate to="/inbox" replace />;
 
   type Ex = { name: string; category: StoreLook['category']; tone: string; intro: string; kind: QuestionKind; q: string; a: string };
@@ -41,17 +34,11 @@ export function LandingPage() {
   return (
     <>
       <PublicTopbar end={<Link to="/login" className="btn btn--text btn--sm">{t('landing.login')}</Link>} />
-      <main className="page">
-        <section className="hero" style={{ background: 'var(--surface)' }}>
+      <main className="page" style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
+        <section className="landing-hero">
+          <AppMark size={48} />
           <h1 className="landing__title">{t('landing.title')}</h1>
-          <p className="hero__intro" style={{ marginTop: 6 }}>
-            {t('landing.lead')}
-          </p>
-          <div className="hero__actions">
-            <Link to="/signup" className="btn btn--primary">
-              {t('landing.start')}
-            </Link>
-          </div>
+          <p className="landing__lead">{t('landing.lead')}</p>
         </section>
 
         <section className="section" aria-labelledby="ex-h">
@@ -78,47 +65,21 @@ export function LandingPage() {
           <h2 id="how-h" className="section__title">
             {t('landing.howTitle')}
           </h2>
-          <div className="hscroll hscroll--3">
-            <div className="step">
-              <div className="step__art">
-                <div className="mini-poster">
-                  <p>{examples[0].store.storeName}</p>
-                  <span className="mini-poster__qr" dangerouslySetInnerHTML={{ __html: qrSvg }} />
-                  <span className="mini-poster__brand">{t('app.name')}</span>
-                </div>
-              </div>
-              <h3 className="step__title">{t('landing.how1t')}</h3>
-              <p className="step__desc">{t('landing.how1')}</p>
-            </div>
-            <div className="step">
-              <div className="step__art" style={{ alignContent: 'center', justifyItems: 'stretch' }}>
-                <div className="kind-chips" style={{ marginBottom: 8 }} aria-hidden="true">
-                  <button tabIndex={-1}>{t('kind.question')}</button>
-                  <button tabIndex={-1} aria-checked="true">{t('kind.complaint')}</button>
-                </div>
-                <p className="mini-text">{examples[2].q.body}</p>
-                <p className="mini-lock">
-                  <LockIcon size={14} />
-                  {t('store.anonTitle')}
-                </p>
-              </div>
-              <h3 className="step__title">{t('landing.how2t')}</h3>
-              <p className="step__desc">{t('landing.how2')}</p>
-            </div>
-            <div className="step">
-              <div className="step__art" style={{ alignContent: 'center', justifyItems: 'stretch' }}>
-                <div className="qcard__a" style={{ margin: 0, ['--tone-soft' as string]: toneSoft(examples[2].store.tone, 0.18) }}>
-                  <div className="qcard__a-head">
-                    <StoreIcon category={examples[2].store.category} tone={examples[2].store.tone} size={22} />
-                    <b>{examples[2].store.storeName}</b>
-                  </div>
-                  <p className="qcard__a-body" style={{ fontSize: 14 }}>{examples[2].q.answer?.body}</p>
-                </div>
-              </div>
-              <h3 className="step__title">{t('landing.how3t')}</h3>
-              <p className="step__desc">{t('landing.how3')}</p>
-            </div>
-          </div>
+          <ol className="menu-group steps">
+            {[
+              { icon: <QrGlyph />, title: t('landing.how1t'), desc: t('landing.how1') },
+              { icon: <LockIcon size={20} />, title: t('landing.how2t'), desc: t('landing.how2') },
+              { icon: <ReplyGlyph />, title: t('landing.how3t'), desc: t('landing.how3') },
+            ].map((step) => (
+              <li key={step.title} className="steps__row">
+                <span className="steps__icon">{step.icon}</span>
+                <span>
+                  <span className="steps__title">{step.title}</span>
+                  <span className="steps__desc">{step.desc}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
         </section>
 
         <section className="section" aria-labelledby="faq-h">
@@ -135,15 +96,36 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className="section panel" style={{ display: 'grid', gap: 14, justifyItems: 'start' }}>
-          <p style={{ fontSize: 17, fontWeight: 700 }}>{t('landing.closing')}</p>
-          <Link to="/signup" className="btn btn--primary">
-            {t('landing.start')}
-          </Link>
-        </section>
 
         <Footer />
       </main>
+      <div className="cta-bar">
+        <div className="cta-bar__inner">
+          <Link to="/signup" className="btn btn--primary">
+            {t('landing.start')}
+          </Link>
+        </div>
+      </div>
     </>
+  );
+}
+
+function QrGlyph() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="4" width="6" height="6" rx="1" />
+      <rect x="14" y="4" width="6" height="6" rx="1" />
+      <rect x="4" y="14" width="6" height="6" rx="1" />
+      <path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
+    </svg>
+  );
+}
+
+function ReplyGlyph() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 5h16v11H9l-5 4V5Z" />
+      <path d="M8 10h8M8 13h5" />
+    </svg>
   );
 }

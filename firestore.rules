@@ -66,6 +66,8 @@ service cloud.firestore {
         function authorPath()   { return /databases/$(db)/documents/stores/$(code)/authors/$(qid); }
         function throttlePath() { return /databases/$(db)/documents/throttle/$(request.auth.uid); }
         function reportPath()   { return /databases/$(db)/documents/reports/$(qid + '_' + request.auth.uid); }
+        function votePath()     { return /databases/$(db)/documents/stores/$(code)/questions/$(qid)/helpful/$(request.auth.uid); }
+        function isPublic(r)    { return r.hidden == false && r.visibility == 'public' && r.status == 'answered'; }
 
         // 손님에게는 사장님이 답변한 공개 글만. 답변 전 · 가려진 글 · 사장님만 보기 글은 주인 · 운영자만
         allow read: if (resource.data.hidden == false && resource.data.visibility == 'public' && resource.data.status == 'answered')
@@ -75,7 +77,8 @@ service cloud.firestore {
           && store(code).status == 'active' && store(code).acceptingQuestions == true
           && !exists(/databases/$(db)/documents/stores/$(code)/blocked/$(request.auth.uid))
           && d().keys().hasOnly(['body', 'lang', 'kind', 'visibility', 'status', 'answer', 'hidden', 'hiddenBy',
-                                 'reportCount', 'pinned', 'createdAt'])
+                                 'reportCount', 'helpful', 'pinned', 'createdAt'])
+          && d().helpful == 0
           && str(d().body, 2, 500) && str(d().lang, 2, 10)
           && d().kind in ['question', 'suggestion', 'complaint', 'praise']
           && d().visibility in ['public', 'owner']
@@ -104,11 +107,26 @@ service cloud.firestore {
             && (d().reportCount >= 3
                   ? (d().hidden == true && d().hiddenBy == 'report')
                   : (d().hidden == resource.data.hidden && d().hiddenBy == resource.data.hiddenBy)))
+          // 손님 "도움됐어요": 투표 기록과 숫자가 같이 움직여야 함 (한 사람당 한 번)
+          || (signedIn() && changes(['helpful']) && isPublic(resource.data)
+            && ((d().helpful == resource.data.helpful + 1 && !exists(votePath()) && existsAfter(votePath()))
+             || (d().helpful == resource.data.helpful - 1 && exists(votePath()) && !existsAfter(votePath()))))
           // 운영자
           || (isAdmin() && changes(['hidden', 'hiddenBy']));
 
         allow delete: if isOwner(code) || isAdmin()
           || (signedIn() && get(authorPath()).data.uid == request.auth.uid);        // 내가 쓴 질문
+
+        // ---------- 도움됐어요 기록 (문서 ID = 누른 사람) ----------
+        match /helpful/{uid} {
+          function q() { return /databases/$(db)/documents/stores/$(code)/questions/$(qid); }
+          allow read: if signedIn() && request.auth.uid == uid;
+          allow create: if signedIn() && request.auth.uid == uid
+            && d().keys().hasOnly(['at']) && d().at == request.time
+            && getAfter(q()).data.helpful == get(q()).data.helpful + 1;
+          allow delete: if signedIn() && request.auth.uid == uid
+            && getAfter(q()).data.helpful == get(q()).data.helpful - 1;
+        }
       }
 
       // ---------- 작성자 기록 (차단 · 본인 삭제용) ----------

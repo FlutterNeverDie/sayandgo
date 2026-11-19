@@ -56,12 +56,12 @@ export function CategoryGlyph({ category, size = 24 }: { category: StoreCategory
   );
 }
 
-export function StoreIcon({ category, tone, size = 64 }: { category: StoreCategory; tone: string; size?: number }) {
+export function StoreIcon({ category, tone, size = 64, round }: { category: StoreCategory; tone: string; size?: number; round?: boolean }) {
   const bg = HEX_RE.test(tone) ? tone : LEGACY_TONES[tone] ?? PRESET_TONES[0];
   return (
     <span
       className="store-icon"
-      style={{ width: size, height: size, background: bg, color: inkOn(bg), borderRadius: Math.round(size * 0.3) }}
+      style={{ width: size, height: size, background: bg, color: inkOn(bg), borderRadius: round ? '50%' : Math.round(size * 0.3) }}
       aria-hidden="true"
     >
       <CategoryGlyph category={category} size={Math.round(size * 0.52)} />

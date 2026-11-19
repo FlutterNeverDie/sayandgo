@@ -95,6 +95,7 @@ for (const [body, answer, min, kind = 'question', visibility = 'public'] of ques
     hidden: false,
     hiddenBy: null,
     reportCount: 0,
+    helpful: answer ? (i * 7) % 13 : 0,
     pinned: false,
     createdAt: ago(min),
   });
@@ -104,11 +105,11 @@ for (const [body, answer, min, kind = 'question', visibility = 'public'] of ques
 // 숨긴 질문 · 신고로 가려진 질문
 await put(`stores/${CODE}/questions/qh1`, {
   body: '여기 사장님 연락처 좀 알려 주세요', lang: 'ko', kind: 'question', visibility: 'public', status: 'open', answer: null,
-  hidden: true, hiddenBy: 'owner', reportCount: 0, pinned: false, createdAt: ago(200),
+  hidden: true, hiddenBy: 'owner', reportCount: 0, helpful: 0, pinned: false, createdAt: ago(200),
 });
 await put(`stores/${CODE}/questions/qh2`, {
   body: '알바생 OOO 진짜 불친절하네요', lang: 'ko', kind: 'complaint', visibility: 'public', status: 'open', answer: null,
-  hidden: true, hiddenBy: 'report', reportCount: 3, pinned: false, createdAt: ago(500),
+  hidden: true, hiddenBy: 'report', reportCount: 3, helpful: 0, pinned: false, createdAt: ago(500),
 });
 
 console.log(`완료\n  사장님 로그인: ${EMAIL} / ${PASSWORD}\n  손님 화면: http://127.0.0.1:5173/q/${CODE}`);

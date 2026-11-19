@@ -230,7 +230,7 @@
     "sentHidden": "Sent. It will appear here once the owner replies.",
     "anonymousQ": "Anonymous asked",
     "waiting": "Not answered yet",
-    "ask": "Leave a note anonymously",
+    "ask": "Ask anonymously",
     "askTitle": "Leave a note anonymously",
     "statsQ": "questions",
     "statsA": "replies",
@@ -252,7 +252,12 @@
     "anon2": "The owner never sees your device or IP",
     "anon3": "You can delete it from this device any time",
     "ownerOnly": "Owner only",
-    "kindLabel": "Anonymous · {{kind}}"
+    "kindLabel": "Anonymous · {{kind}}",
+    "helpful": "Helpful",
+    "anonShort": "Anonymous",
+    "sortLatest": "Latest",
+    "sortHelpful": "Most helpful",
+    "shareText": "{{name}} answered: {{q}}"
   },
   "report": {
     "title": "Report",
@@ -430,5 +435,11 @@
     "suggestion": "It would be great if…",
     "complaint": "Tell the owner honestly what wasn't right. It really helps.",
     "praise": "What did you like?"
+  },
+  "kindNoun": {
+    "question": "Anonymous question",
+    "suggestion": "Anonymous suggestion",
+    "complaint": "Anonymous concern",
+    "praise": "Anonymous compliment"
   }
 }

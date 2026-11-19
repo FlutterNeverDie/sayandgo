@@ -42,6 +42,7 @@ export interface Question {
   hidden: boolean;
   hiddenBy: HiddenBy;
   reportCount: number;
+  helpful: number;
   pinned: boolean;
   createdAt: Date | null;
 }

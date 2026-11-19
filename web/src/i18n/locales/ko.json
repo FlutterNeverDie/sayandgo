@@ -230,7 +230,7 @@
     "sentHidden": "보냈어요. 사장님이 답변하면 이 페이지에 공개돼요.",
     "anonymousQ": "익명님의 질문",
     "waiting": "아직 답변 전이에요",
-    "ask": "익명으로 남기기",
+    "ask": "익명으로 질문하기",
     "askTitle": "익명으로 남기기",
     "statsQ": "질문",
     "statsA": "답변",
@@ -252,7 +252,12 @@
     "anon2": "사장님께 기기 정보나 IP가 보이지 않아요",
     "anon3": "보낸 글은 이 기기에서 언제든 지울 수 있어요",
     "ownerOnly": "사장님만",
-    "kindLabel": "익명 · {{kind}}"
+    "kindLabel": "익명 · {{kind}}",
+    "helpful": "도움됐어요",
+    "anonShort": "익명 보장",
+    "sortLatest": "최신",
+    "sortHelpful": "도움된 순",
+    "shareText": "{{name}}의 답변: {{q}}"
   },
   "report": {
     "title": "신고하기",
@@ -430,5 +435,11 @@
     "suggestion": "이런 게 있으면 좋겠어요",
     "complaint": "아쉬웠던 점을 솔직하게 적어 주세요. 사장님께 꼭 필요한 이야기예요.",
     "praise": "좋았던 점을 알려 주세요"
+  },
+  "kindNoun": {
+    "question": "익명님의 질문",
+    "suggestion": "익명님의 제안",
+    "complaint": "익명님의 아쉬운 점",
+    "praise": "익명님의 칭찬"
   }
 }

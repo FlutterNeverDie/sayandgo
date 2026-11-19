@@ -8,7 +8,7 @@ import { ReportSheet } from '../components/question/ReportSheet';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
 import { Switch } from '../components/ui/Fields';
-import { LockIcon, ShareIcon } from '../components/ui/Icons';
+import { LockIcon } from '../components/ui/Icons';
 import { ErrorBox, Loading, TicketSkeleton } from '../components/ui/States';
 import { currentLang } from '../i18n';
 import {
@@ -16,6 +16,9 @@ import {
   deleteMyQuestion,
   fetchAnsweredCount,
   fetchPublicPage,
+  toggleHelpful,
+  votedIds,
+  type PublicSort,
   myQuestionIds,
   postQuestion,
   reportQuestion,
@@ -70,8 +73,10 @@ function ActiveStore({ store }: { store: Store }) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
-  const listKey = ['public', store.code];
+  const [sort, setSort] = useState<PublicSort>('latest');
+  const listKey = ['public', store.code, sort];
   const [mine, setMine] = useState(() => myQuestionIds(store.code));
+  const [voted, setVoted] = useState(() => votedIds());
   const [composing, setComposing] = useState(false);
   const [menuFor, setMenuFor] = useState<Question | null>(null);
   const [reporting, setReporting] = useState<Question | 'store' | null>(null);
@@ -79,6 +84,8 @@ function ActiveStore({ store }: { store: Store }) {
 
   useEffect(() => {
     document.title = `${store.storeName} · ${t('app.name')}`;
+    document.body.classList.add('white');
+    return () => document.body.classList.remove('white');
   }, [store.storeName, t]);
 
   const [headerRef, past] = useScrolledPast<HTMLElement>();
@@ -87,7 +94,7 @@ function ActiveStore({ store }: { store: Store }) {
   // 사장님이 답변한 공개 글만, 10개씩, 60초 캐시, 실시간 구독 없음 (읽기 절감)
   const list = useInfiniteQuery({
     queryKey: listKey,
-    queryFn: ({ pageParam }) => fetchPublicPage(store.code, pageParam),
+    queryFn: ({ pageParam }) => fetchPublicPage(store.code, sort, pageParam),
     initialPageParam: null as Page['cursor'],
     getNextPageParam: (last) => last.cursor ?? undefined,
     staleTime: 60_000,
@@ -105,6 +112,42 @@ function ActiveStore({ store }: { store: Store }) {
     return () => io.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  /** 두 탭의 캐시를 같이 고친다 (다시 읽지 않음) */
+  const patchAll = (fn: (q: Question) => Question | null) => {
+    for (const s of ['latest', 'helpful'] as PublicSort[]) {
+      qc.setQueryData<InfiniteData<Page>>(['public', store.code, s], (old) =>
+        old ? { ...old, pages: old.pages.map((p) => ({ ...p, items: p.items.flatMap((i) => { const r = fn(i); return r ? [r] : []; }) })) } : old,
+      );
+    }
+  };
+
+  async function onVote(q: Question) {
+    const on = !voted.has(q.id);
+    const apply = (state: boolean, delta: number) => {
+      setVoted((v) => {
+        const n = new Set(v);
+        if (state) n.add(q.id);
+        else n.delete(q.id);
+        return n;
+      });
+      patchAll((i) => (i.id === q.id ? { ...i, helpful: Math.max(0, i.helpful + delta) } : i));
+    };
+    apply(on, on ? 1 : -1); // 바로 반영하고
+    try {
+      const real = await toggleHelpful(store.code, q.id, on);
+      if (real !== on) apply(real, real ? 1 : -1);
+    } catch {
+      apply(!on, on ? -1 : 1); // 실패하면 되돌림
+      toast(t('errors.generic'));
+    }
+  }
+
+  function onShare(q: Question) {
+    const text = t('store.shareText', { name: store.storeName, q: q.body });
+    if (typeof navigator.share === 'function') navigator.share({ title: store.storeName, text, url }).catch(() => undefined);
+    else navigator.clipboard.writeText(`${text}\n${url}`).then(() => toast(t('common.copied')));
+  }
+
   function onPosted(q: Question) {
     setComposing(false);
     setMine(myQuestionIds(store.code));
@@ -116,9 +159,7 @@ function ActiveStore({ store }: { store: Store }) {
     setConfirmDelete(null);
     try {
       await deleteMyQuestion(store.code, q.id);
-      qc.setQueryData<InfiniteData<Page>>(listKey, (old) =>
-        old ? { ...old, pages: old.pages.map((p) => ({ ...p, items: p.items.filter((i) => i.id !== q.id) })) } : old,
-      );
+      patchAll((i) => (i.id === q.id ? null : i));
       setMine(myQuestionIds(store.code));
       toast(t('store.deletedMine'));
     } catch {
@@ -139,6 +180,10 @@ function ActiveStore({ store }: { store: Store }) {
   }
 
   const url = storeUrl(store.code);
+  const shareStore = () =>
+    typeof navigator.share === 'function'
+      ? navigator.share({ title: store.storeName, url }).catch(() => undefined)
+      : navigator.clipboard.writeText(url).then(() => toast(t('common.copied')));
 
   return (
     <>
@@ -146,36 +191,41 @@ function ActiveStore({ store }: { store: Store }) {
         title={store.storeName}
         showTitle={past}
         end={
-          'share' in navigator ? (
-            <button className="icon-btn" aria-label={t('store.shareStore')} onClick={() => navigator.share({ title: store.storeName, url }).catch(() => undefined)}>
-              <ShareIcon />
-            </button>
-          ) : undefined
+          <button className="btn btn--text btn--sm" onClick={shareStore}>
+            {t('common.share')}
+          </button>
         }
       />
-      <main className="page" style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
+      <main className="page" style={{ paddingBottom: 'calc(110px + env(safe-area-inset-bottom))' }}>
         <StoreHeader
           headerRef={headerRef}
-          showIcon={false}
           store={store}
           intro={store.intro}
-          chips={
+          answered={answered.data ?? null}
+          extra={!store.acceptingQuestions && <span className="chip chip--paused" style={{ marginLeft: 8 }}>{t('store.pausedChip')}</span>}
+          actions={
             <>
-              <span className="chip" style={{ color: 'var(--mint-ink)', fontWeight: 700 }}>
-                <LockIcon />
-                {t('store.anonBadge')}
-              </span>
-              {answered.data != null && answered.data > 0 && (
-                <span className="chip num">
-                  {t('store.statsA')} <b>{answered.data}</b>
-                </span>
+              {store.acceptingQuestions && (
+                <button className="btn btn--black" onClick={() => setComposing(true)}>
+                  {t('store.ask')}
+                </button>
               )}
-              {!store.acceptingQuestions && <span className="chip chip--paused">{t('store.pausedChip')}</span>}
+              <button className="btn btn--line" style={{ flex: store.acceptingQuestions ? '0 0 88px' : 1 }} onClick={shareStore}>
+                {t('common.share')}
+              </button>
             </>
           }
         />
 
-        <section className="feed" aria-label={t('store.listTitle')} style={{ marginTop: 12 }}>
+        <div className="utabs" role="tablist">
+          {(['latest', 'helpful'] as PublicSort[]).map((k) => (
+            <button key={k} role="tab" aria-selected={sort === k} onClick={() => setSort(k)}>
+              {k === 'latest' ? t('store.sortLatest') : t('store.sortHelpful')}
+            </button>
+          ))}
+        </div>
+
+        <section className="posts" aria-label={t('store.listTitle')}>
           {list.isLoading && (
             <>
               <TicketSkeleton />
@@ -184,18 +234,27 @@ function ActiveStore({ store }: { store: Store }) {
             </>
           )}
           {list.isError && (
-            <div style={{ padding: 16 }}>
+            <div style={{ padding: 20 }}>
               <ErrorBox onRetry={() => list.refetch()} />
             </div>
           )}
           {list.isSuccess && items.length === 0 && (
-            <div className="center-state panel" style={{ padding: '40px 16px' }}>
+            <div className="center-state" style={{ padding: '48px 20px' }}>
               <h2 style={{ fontSize: 16 }}>{t('store.emptyTitle')}</h2>
               <p>{t('store.emptyDesc')}</p>
             </div>
           )}
           {items.map((q) => (
-            <QuestionItem key={q.id} q={q} store={store} mine={mine.has(q.id)} onMenu={() => setMenuFor(q)} />
+            <QuestionItem
+              key={q.id}
+              q={q}
+              store={store}
+              mine={mine.has(q.id)}
+              voted={voted.has(q.id)}
+              onVote={() => onVote(q)}
+              onShare={() => onShare(q)}
+              onMenu={() => setMenuFor(q)}
+            />
           ))}
           <div ref={sentinel} />
           {list.isFetchingNextPage && <TicketSkeleton />}
@@ -216,17 +275,13 @@ function ActiveStore({ store }: { store: Store }) {
         />
       </main>
 
-      <div className="cta-bar">
-        <div className="cta-bar__inner">
-          {store.acceptingQuestions ? (
-            <button className="btn btn--primary" onClick={() => setComposing(true)}>
-              {t('store.ask')}
-            </button>
-          ) : (
-            <p className="notice">{t('store.paused')}</p>
-          )}
+      {store.acceptingQuestions && (
+        <div className={`ask-bar${past && !composing ? ' ask-bar--show' : ''}`} aria-hidden={!past}>
+          <button className="btn btn--black" tabIndex={past ? 0 : -1} onClick={() => setComposing(true)}>
+            {t('store.ask')}
+          </button>
         </div>
-      </div>
+      )}
 
       {composing && <ComposeSheet store={store} onClose={() => setComposing(false)} onPosted={onPosted} />}
 
@@ -408,7 +463,7 @@ function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () 
           </ul>
         </div>
 
-        <button className="btn btn--primary btn--block" style={{ marginTop: 16 }} disabled={busy || wait > 0 || length === 0}>
+        <button className="btn btn--black btn--block btn--lg" style={{ marginTop: 16 }} disabled={busy || wait > 0 || length === 0}>
           {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
         </button>
         <p className="field__hint" id="q-hint" style={{ marginTop: 12 }}>

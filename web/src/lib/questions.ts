@@ -47,6 +47,7 @@ export function toQuestion(snap: DocumentSnapshot): Question {
     hidden: d.hidden,
     hiddenBy: d.hiddenBy ?? null,
     reportCount: d.reportCount ?? 0,
+    helpful: d.helpful ?? 0,
     pinned: d.pinned ?? false,
     createdAt: toDate(d.createdAt),
   };
@@ -57,8 +58,8 @@ export interface Page {
   cursor: QueryDocumentSnapshot | null; // 다음 페이지가 없으면 null
 }
 
-async function fetchPage(code: string, constraints: QueryConstraint[], cursor: QueryDocumentSnapshot | null): Promise<Page> {
-  const parts = [...constraints, orderBy('createdAt', 'desc')];
+async function fetchPage(code: string, constraints: QueryConstraint[], cursor: QueryDocumentSnapshot | null, byHelpful = false): Promise<Page> {
+  const parts = [...constraints, ...(byHelpful ? [orderBy('helpful', 'desc')] : []), orderBy('createdAt', 'desc')];
   if (cursor) parts.push(startAfter(cursor));
   parts.push(limit(PAGE_SIZE));
   const snap = await getDocs(query(qcol(code), ...parts));
@@ -73,9 +74,55 @@ async function fetchPage(code: string, constraints: QueryConstraint[], cursor: Q
 /** 손님에게 보이는 글 = 사장님이 답변한 공개 글 (보안 규칙과 같은 조건) */
 const publicOnly = () => [where('hidden', '==', false), where('visibility', '==', 'public'), where('status', '==', 'answered')];
 
-/** 손님 목록: 10개씩. 실시간 구독 안 함(읽기 절감). */
-export function fetchPublicPage(code: string, cursor: QueryDocumentSnapshot | null) {
-  return fetchPage(code, publicOnly(), cursor);
+export type PublicSort = 'latest' | 'helpful';
+
+/** 손님 목록: 10개씩, 최신 또는 도움된 순. 실시간 구독 안 함(읽기 절감). */
+export function fetchPublicPage(code: string, sort: PublicSort, cursor: QueryDocumentSnapshot | null) {
+  return fetchPage(code, publicOnly(), cursor, sort === 'helpful');
+}
+
+// ---------- 도움됐어요 ----------
+
+const votedKey = 'qplace:helpful';
+
+export function votedIds(): Set<string> {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(votedKey) ?? '[]'));
+  } catch {
+    return new Set();
+  }
+}
+
+function rememberVote(id: string, on: boolean) {
+  try {
+    const ids = votedIds();
+    if (on) ids.add(id);
+    else ids.delete(id);
+    localStorage.setItem(votedKey, JSON.stringify([...ids].slice(-1000)));
+  } catch {
+    /* 무시 */
+  }
+}
+
+/** 투표 기록과 숫자를 한 배치로 (규칙이 둘 다 요구). 성공하면 새 상태를 돌려준다. */
+export async function toggleHelpful(code: string, id: string, on: boolean): Promise<boolean> {
+  const user = await ensureSignedIn();
+  const b = writeBatch(db);
+  const vote = doc(db, 'stores', code, 'questions', id, 'helpful', user.uid);
+  if (on) b.set(vote, { at: serverTimestamp() });
+  else b.delete(vote);
+  b.update(qdoc(code, id), { helpful: increment(on ? 1 : -1) });
+  try {
+    await b.commit();
+  } catch (e) {
+    // 다른 기기 · 저장소 초기화로 상태가 어긋났을 수 있다 → 서버 기준으로 맞춘다
+    const exists = (await getDocFromServer(vote).catch(() => null))?.exists() ?? !on;
+    rememberVote(id, exists);
+    if (exists !== on) return exists;
+    throw e;
+  }
+  rememberVote(id, on);
+  return on;
 }
 
 /** 가게 머리의 "답변 N". count()는 1,000건당 읽기 1회. */
@@ -124,6 +171,7 @@ export async function postQuestion(code: string, body: string, lang: string, kin
     hidden: false,
     hiddenBy: null,
     reportCount: 0,
+    helpful: 0,
     pinned: false,
     createdAt: serverTimestamp(),
   });
@@ -131,7 +179,7 @@ export async function postQuestion(code: string, body: string, lang: string, kin
   b.set(doc(db, 'throttle', user.uid), { lastPostAt: serverTimestamp() });
   await b.commit();
   rememberMine(code, ref.id);
-  return { id: ref.id, body, lang, kind, visibility, status: 'open', answer: null, hidden: false, hiddenBy: null, reportCount: 0, pinned: false, createdAt: new Date() };
+  return { id: ref.id, body, lang, kind, visibility, status: 'open', answer: null, hidden: false, hiddenBy: null, reportCount: 0, helpful: 0, pinned: false, createdAt: new Date() };
 }
 
 export async function deleteMyQuestion(code: string, id: string) {

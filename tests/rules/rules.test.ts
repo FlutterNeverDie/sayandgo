@@ -61,6 +61,7 @@ const questionData = (over: Record<string, unknown> = {}) => ({
   hidden: false,
   hiddenBy: null,
   reportCount: 0,
+  helpful: 0,
   pinned: false,
   createdAt: Timestamp.now(),
   ...over,
@@ -382,5 +383,47 @@ describe('신고', () => {
   it('신고 목록은 운영자만 읽는다', async () => {
     await assertSucceeds(getDocs(collection(admin(), 'reports')));
     await assertFails(getDocs(collection(owner(), 'reports')));
+  });
+});
+
+describe('도움됐어요', () => {
+  const answered = { status: 'answered', answer: { body: '네', at: Timestamp.now(), editedAt: null } };
+  beforeEach(async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, `stores/${CODE}/questions/qa`), questionData(answered));
+      await setDoc(doc(db, `stores/${CODE}/questions/qo`), questionData());
+    });
+  });
+  const vote = (db: Firestore, uid: string, qid: string, on: boolean, opts: { withDoc?: boolean; by?: number } = {}) => {
+    const b = writeBatch(db);
+    const ref = doc(db, `stores/${CODE}/questions/${qid}/helpful/${uid}`);
+    if (opts.withDoc !== false) {
+      if (on) b.set(ref, { at: serverTimestamp() });
+      else b.delete(ref);
+    }
+    b.update(doc(db, `stores/${CODE}/questions/${qid}`), { helpful: increment(opts.by ?? (on ? 1 : -1)) });
+    return b.commit();
+  };
+
+  it('누르기 · 취소', async () => {
+    await assertSucceeds(vote(anon('v1'), 'v1', 'qa', true));
+    await assertSucceeds(vote(anon('v1'), 'v1', 'qa', false));
+  });
+  it('같은 사람이 두 번 누르면 거부', async () => {
+    await assertSucceeds(vote(anon('v1'), 'v1', 'qa', true));
+    await assertFails(vote(anon('v1'), 'v1', 'qa', true));
+  });
+  it('기록 없이 숫자만 올리면 거부', async () => {
+    await assertFails(vote(anon('v1'), 'v1', 'qa', true, { withDoc: false }));
+  });
+  it('숫자를 2 올리면 거부', async () => {
+    await assertFails(vote(anon('v1'), 'v1', 'qa', true, { by: 2 }));
+  });
+  it('답변 전 글에는 못 누른다', async () => {
+    await assertFails(vote(anon('v1'), 'v1', 'qo', true));
+  });
+  it('남의 기록은 못 읽는다', async () => {
+    await assertSucceeds(vote(anon('v1'), 'v1', 'qa', true));
+    await assertFails(getDoc(doc(anon('v2'), `stores/${CODE}/questions/qa/helpful/v1`)));
   });
 });

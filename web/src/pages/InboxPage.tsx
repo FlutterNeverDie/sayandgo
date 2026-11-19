@@ -188,6 +188,10 @@ function Inbox({ store }: { store: Store }) {
 
   const openCount = counts.data?.open ?? 0;
   useEffect(() => {
+    document.body.classList.add('white');
+    return () => document.body.classList.remove('white');
+  }, []);
+  useEffect(() => {
     document.title = openCount ? `(${openCount}) ${t('app.name')}` : t('app.name');
     return () => {
       document.title = t('app.name');
@@ -236,13 +240,14 @@ function Inbox({ store }: { store: Store }) {
         <StoreHeader
           store={store}
           intro={store.intro}
+          answered={counts.data?.answered ?? null}
           actions={
             <>
-              <Link to="/settings" className="btn">
-                {t('store.editInfo')}
-              </Link>
-              <Link to="/share" className="btn btn--primary">
+              <Link to="/share" className="btn btn--black">
                 {t('store.qrShare')}
+              </Link>
+              <Link to="/settings" className="btn btn--line" style={{ flex: '0 0 auto' }}>
+                {t('store.editInfo')}
               </Link>
             </>
           }
@@ -257,7 +262,7 @@ function Inbox({ store }: { store: Store }) {
           </div>
         )}
 
-        <div className="segmented" role="tablist" style={{ marginTop: 16 }}>
+        <div className="utabs" role="tablist">
           {TABS.map((k) => (
             <button
               key={k}
@@ -274,7 +279,7 @@ function Inbox({ store }: { store: Store }) {
           ))}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '6px 0 0' }}>
           <button
             className="btn btn--text btn--sm"
             onClick={() => {
@@ -287,7 +292,7 @@ function Inbox({ store }: { store: Store }) {
           </button>
         </div>
 
-        <div className="feed">
+        <div className="posts">
           {list.loading && (
             <>
               <TicketSkeleton />
@@ -300,7 +305,7 @@ function Inbox({ store }: { store: Store }) {
             </div>
           )}
           {!list.loading && !list.error && visibleItems.length === 0 && (
-            <div style={{ padding: 16 }}>
+            <div style={{ padding: 20 }}>
               <EmptyInbox tab={activeTab} store={store} />
             </div>
           )}
@@ -317,7 +322,7 @@ function Inbox({ store }: { store: Store }) {
                 selecting ? (
                   <input
                     type="checkbox"
-                    className="qitem__select"
+                    className="post__select"
                     checked={selected.has(q.id)}
                     aria-label={t('inbox.select')}
                     onChange={(e) =>
@@ -333,7 +338,7 @@ function Inbox({ store }: { store: Store }) {
               }
               actions={
                 !selecting && !q.answer ? (
-                  <button className="btn btn--sm btn--primary" onClick={() => setEditing(q.id)}>
+                  <button className="btn btn--sm btn--black" onClick={() => setEditing(q.id)}>
                     {t('inbox.answer')}
                   </button>
                 ) : undefined

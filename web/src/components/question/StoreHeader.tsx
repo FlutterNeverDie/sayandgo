@@ -1,28 +1,41 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { StoreIcon, toneSoft } from '../ui/StoreIcon';
+import { useTranslation } from 'react-i18next';
+import { LockIcon } from '../ui/Icons';
 import type { StoreLook } from './QuestionItem';
 
-/** 가게 머리: 가게 색이 옅게 깔린 카드 + 아이콘 + 상호명 + 소개 + 칩 + 버튼 */
-export function StoreHeader({ store, intro, chips, actions, headerRef, showIcon = true }: {
+/** 가게 머리 (에스크식 프로필): 상호명 · 소개 · 익명 보장 · 답변 수 · 버튼 */
+export function StoreHeader({ store, intro, answered, extra, actions, headerRef }: {
   store: StoreLook;
   intro?: string;
-  chips?: ReactNode;
+  answered?: number | null;
+  extra?: ReactNode;
   actions?: ReactNode;
   headerRef?: React.Ref<HTMLElement>;
-  showIcon?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
-    <header className="hero" ref={headerRef} style={{ ['--tone-soft' as string]: toneSoft(store.tone, 0.18) }}>
-      {showIcon && <StoreIcon category={store.category} tone={store.tone} size={64} />}
-      <h1 className="hero__name" style={showIcon ? undefined : { marginTop: 0 }}>{store.storeName}</h1>
-      {intro && <p className="hero__intro">{intro}</p>}
-      {chips && <div className="hero__chips">{chips}</div>}
-      {actions && <div className="hero__actions">{actions}</div>}
+    <header className="prof" ref={headerRef}>
+      <h1 className="prof__name">{store.storeName}</h1>
+      {intro && <p className="prof__intro">{intro}</p>}
+      <p className="prof__meta">
+        <span className="prof__lock">
+          <LockIcon size={14} />
+          {t('store.anonShort')}
+        </span>
+        {answered != null && (
+          <>
+            {' · '}
+            {t('store.statsA')} <b className="num">{answered}</b>
+          </>
+        )}
+        {extra}
+      </p>
+      {actions && <div className="prof__btns">{actions}</div>}
     </header>
   );
 }
 
-/** 요소가 화면 위로 지나갔는지 (상단 바에 상호명 띄우기용) */
+/** 요소가 화면 위로 지나갔는지 (상단 바 상호명 · 따라오는 버튼용) */
 export function useScrolledPast<T extends Element>() {
   const ref = useRef<T>(null);
   const [past, setPast] = useState(false);

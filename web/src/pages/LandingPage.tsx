@@ -14,7 +14,7 @@ function sampleQ(id: string, kind: QuestionKind, body: string, answer: string, m
   return {
     id, body, kind, lang: 'ko', visibility: 'public', status: 'answered',
     answer: { body: answer, at: ago(min - 5), editedAt: null },
-    hidden: false, hiddenBy: null, reportCount: 0, pinned: false, createdAt: ago(min),
+    hidden: false, hiddenBy: null, reportCount: 0, helpful: 0, pinned: false, createdAt: ago(min),
   };
 }
 

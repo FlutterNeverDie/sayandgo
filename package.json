@@ -5,11 +5,15 @@
   "scripts": {
     "emulators": "firebase emulators:start --project demo-qplace",
     "test:rules": "firebase emulators:exec --only firestore --project demo-qplace \"vitest run --root tests/rules\"",
-    "dev": "npm --prefix web run dev"
+    "dev": "npm --prefix web run dev",
+    "deploy": "npm --prefix web run build && cd web && npx -y wrangler@latest pages deploy dist --project-name qplace --branch main --commit-dirty=true",
+    "preview": "wrangler dev",
+    "deploy:firebase": "npx -y firebase-tools@latest deploy --only firestore,auth --project prod --non-interactive"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.2",
     "firebase": "^12.19.0",
-    "vitest": "^5.1.1"
+    "vitest": "^5.1.1",
+    "wrangler": "^4.165.0"
   }
 }

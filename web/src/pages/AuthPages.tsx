@@ -12,7 +12,7 @@ import { Loading } from '../components/ui/States';
 import { currentLang } from '../i18n';
 import { auth } from '../lib/firebase';
 import { errorKey } from '../lib/format';
-import { signUp, verifyActionSettings } from '../lib/stores';
+import { signUp, verifyActionSettings, withContinueFallback } from '../lib/stores';
 import { checkEmail, checkPassword, checkStoreName, LIMITS } from '../lib/validation';
 
 function AuthFrame({ title, subtitle, below, children }: { title: string; subtitle?: string; below?: React.ReactNode; children: React.ReactNode }) {
@@ -259,7 +259,7 @@ export function VerifyPage() {
     if (!user) return;
     try {
       auth.languageCode = currentLang();
-      await sendEmailVerification(user, verifyActionSettings());
+      await withContinueFallback((withUrl) => sendEmailVerification(user, withUrl ? verifyActionSettings() : undefined));
       sessionStorage.setItem(RESEND_KEY, String(Date.now()));
       setNow(Date.now());
       setMessage(t('verify.resent'));
@@ -318,7 +318,9 @@ export function ResetPage() {
     setBusy(true);
     try {
       auth.languageCode = currentLang();
-      await sendPasswordResetEmail(auth, email.trim(), { url: `${location.origin}/login` });
+      await withContinueFallback((withUrl) =>
+        sendPasswordResetEmail(auth, email.trim(), withUrl ? { url: `${location.origin}/login` } : undefined),
+      );
     } catch (e2) {
       // 가입 여부를 드러내지 않도록 네트워크 오류만 알린다
       if (errorKey(e2) === 'errors.network') {

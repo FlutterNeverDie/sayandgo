@@ -44,6 +44,17 @@ export function verifyActionSettings() {
   return { url: `${location.origin}/verify` };
 }
 
+/** 돌아올 주소가 Firebase 허용 도메인에 없으면(auth/unauthorized-continue-uri) 주소 없이 다시 보낸다 */
+export async function withContinueFallback(send: (withUrl: boolean) => Promise<void>) {
+  try {
+    await send(true);
+  } catch (e) {
+    const code = (e as { code?: string }).code ?? '';
+    if (code.includes('unauthorized-continue-uri') || code.includes('invalid-continue-uri')) await send(false);
+    else throw e;
+  }
+}
+
 /** 가입: Auth 계정 → 가게 + users 한 배치 → 인증 메일. 가게 생성이 끝내 실패하면 계정을 지운다. */
 export async function signUp(input: { email: string; password: string; storeName: string; lang: string; category: StoreCategory }) {
   auth.languageCode = input.lang;
@@ -63,7 +74,8 @@ export async function signUp(input: { email: string; password: string; storeName
     await deleteUser(user).catch(() => undefined);
     throw e;
   }
-  await sendEmailVerification(user, verifyActionSettings()).catch(() => undefined); // 실패해도 /verify에서 다시 보낼 수 있다
+  // 실패해도 /verify에서 다시 보낼 수 있다
+  await withContinueFallback((withUrl) => sendEmailVerification(user, withUrl ? verifyActionSettings() : undefined)).catch(() => undefined);
   return code;
 }
 

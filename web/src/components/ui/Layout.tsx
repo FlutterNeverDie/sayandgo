@@ -1,27 +1,28 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AppMark } from './AppMark';
 import { BackIcon } from './Icons';
 import { LanguageSelect } from './Fields';
 
 export function Footer({ extra }: { extra?: ReactNode }) {
   const { t } = useTranslation();
+  const { pathname } = useLocation();
+  // 지금 보고 있는 화면의 링크는 빼기 (눌러도 아무 일이 없으니까)
+  const link = (to: string, label: ReactNode) => (pathname === to ? null : <Link to={to}>{label}</Link>);
   return (
     <footer className="footer">
       {/* 자주 누르는 것(소개 · 문의)과 약관 · 정책을 나눠서, 휴대폰에서도 줄이 아무 데서나 끊기지 않게 */}
       <nav aria-label="footer" className="footer__main">
-        <Link to="/">{t('legal.about')}</Link>
-        <Link to="/contact">{t('legal.contact')}</Link>
+        {link('/', t('legal.about'))}
+        {link('/contact', t('legal.contact'))}
         {extra}
       </nav>
       <nav aria-label="legal" className="footer__legal">
-        <Link to="/terms">{t('legal.terms')}</Link>
-        <Link to="/privacy">
-          <strong>{t('legal.privacy')}</strong>
-        </Link>
-        <Link to="/policy">{t('legal.policy')}</Link>
-        <Link to="/rights">{t('legal.rights')}</Link>
+        {link('/terms', t('legal.terms'))}
+        {link('/privacy', <strong>{t('legal.privacy')}</strong>)}
+        {link('/policy', t('legal.policy'))}
+        {link('/rights', t('legal.rights'))}
       </nav>
       <span>© {new Date().getFullYear()} {t('app.name')}</span>
     </footer>

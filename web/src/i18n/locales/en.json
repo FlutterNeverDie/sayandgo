@@ -401,7 +401,11 @@
     "customPlaceholder": "Leave empty for the default text",
     "customHint": "{{n}} / {{max}} · Write it in your own voice",
     "reset": "Clear",
-    "tipD": "Print on A4 at actual size, then fold along the dotted line"
+    "tipD": "Print on A4 at actual size, then fold along the dotted line",
+    "customize": "Customize poster",
+    "change": "Change",
+    "customOn": "Custom text",
+    "apply": "Apply"
   },
   "settings": {
     "title": "Settings",

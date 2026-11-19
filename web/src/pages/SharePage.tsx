@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RequireOwner } from '../app/auth';
 import { currentLang } from '../i18n';
-import { CopyIcon, DownloadIcon, ShareIcon } from '../components/ui/Icons';
+import { CloseIcon, CopyIcon, DownloadIcon, ShareIcon } from '../components/ui/Icons';
 import { OwnerShell } from '../components/ui/Layout';
-import { useToast } from '../components/ui/Overlay';
+import { Sheet, useToast } from '../components/ui/Overlay';
 import { canvasToBlob, POSTER_SIZE, POSTER_TYPES, renderPoster, type PosterLang, type PosterType } from '../lib/posters';
 import { storeUrl } from '../lib/storeCode';
 import type { Store } from '../lib/types';
@@ -40,6 +40,7 @@ function Share({ store }: { store: Store }) {
   const isLocal = /^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname);
   const [pref, setPref] = useState<Pref>(readPref);
   const [draft, setDraft] = useState(pref.caption);
+  const [customizing, setCustomizing] = useState(false);
   const [poster, setPoster] = useState<{ blob: Blob; src: string } | null>(null);
   const fileName = `sayandgo-${store.code}-${pref.type}.png`;
   const captionError = draft.trim() && hasBannedWord(draft) ? t('errors.banned') : null;
@@ -125,49 +126,17 @@ function Share({ store }: { store: Store }) {
           )}
         </div>
 
-        <p className="share-label">{t('share.design')}</p>
-        <div className="poster-types" role="radiogroup" aria-label={t('share.design')}>
-          {POSTER_TYPES.map((k) => (
-            <button key={k} type="button" role="radio" aria-checked={pref.type === k} onClick={() => setPref((p) => ({ ...p, type: k }))}>
-              <span className={`poster-thumb poster-thumb--${k}`} aria-hidden="true" />
-              <b>{k}</b>
-              <span>{t(`share.types.${k}`)}</span>
-            </button>
-          ))}
-        </div>
-        <p className="share-hint">{t(`share.typeHints.${pref.type}`)}</p>
-
-        <p className="share-label">{t('share.captionLang')}</p>
-        <div className="segmented" role="radiogroup" aria-label={t('share.captionLang')}>
-          {(['ko', 'en', 'both'] as PosterLang[]).map((l) => (
-            <button key={l} type="button" role="radio" aria-selected={pref.lang === l} onClick={() => setPref((p) => ({ ...p, lang: l }))}>
-              {t(`share.langs.${l}`)}
-            </button>
-          ))}
-        </div>
-
-        <div className="field" style={{ marginTop: 16 }}>
-          <label className="field__label" htmlFor="poster-caption">
-            {t('share.customCaption')}
-          </label>
-          <div className="input-group">
-            <input
-              id="poster-caption"
-              className="input"
-              value={draft}
-              maxLength={CAPTION_MAX}
-              placeholder={t('share.customPlaceholder')}
-              onChange={(e) => setDraft(e.target.value)}
-              aria-invalid={!!captionError}
-            />
-            {draft && (
-              <button type="button" className="btn" onClick={() => setDraft('')}>
-                {t('share.reset')}
-              </button>
-            )}
-          </div>
-          {captionError ? <p className="field__error">{captionError}</p> : <p className="field__hint">{t('share.customHint', { n: draft.trim().length, max: CAPTION_MAX })}</p>}
-        </div>
+        <button type="button" className="poster-pick" onClick={() => setCustomizing(true)}>
+          <span className={`poster-thumb poster-thumb--${pref.type}`} aria-hidden="true" />
+          <span className="poster-pick__text">
+            <b>{t('share.customize')}</b>
+            <span>
+              {t(`share.types.${pref.type}`)} · {t(`share.langs.${pref.lang}`)}
+              {pref.caption ? ` · ${t('share.customOn')}` : ''}
+            </span>
+          </span>
+          <span className="poster-pick__go">{t('share.change')}</span>
+        </button>
 
         <div className="share-actions">
           <a className="btn btn--black btn--lg" href={poster?.src} download={fileName} aria-disabled={!poster} onClick={(e) => !poster && e.preventDefault()}>
@@ -194,6 +163,60 @@ function Share({ store }: { store: Store }) {
           </button>
         </section>
       </main>
+      {customizing && (
+        <Sheet title={t('share.customize')} onClose={() => setCustomizing(false)}>
+          <div className="poster-mini">
+            {poster ? <img src={poster.src} alt="" /> : <div className="skeleton" style={{ aspectRatio: `${w} / ${h}`, height: '100%' }} />}
+          </div>
+          <p className="share-label">{t('share.design')}</p>
+          <div className="poster-types" role="radiogroup" aria-label={t('share.design')}>
+            {POSTER_TYPES.map((k) => (
+              <button key={k} type="button" role="radio" aria-checked={pref.type === k} onClick={() => setPref((p) => ({ ...p, type: k }))}>
+                <span className={`poster-thumb poster-thumb--${k}`} aria-hidden="true" />
+                <b>{k}</b>
+                <span>{t(`share.types.${k}`)}</span>
+              </button>
+            ))}
+          </div>
+          <p className="share-hint">{t(`share.typeHints.${pref.type}`)}</p>
+
+          <p className="share-label">{t('share.captionLang')}</p>
+          <div className="segmented" role="radiogroup" aria-label={t('share.captionLang')}>
+            {(['ko', 'en', 'both'] as PosterLang[]).map((l) => (
+              <button key={l} type="button" role="radio" aria-selected={pref.lang === l} onClick={() => setPref((p) => ({ ...p, lang: l }))}>
+                {t(`share.langs.${l}`)}
+              </button>
+            ))}
+          </div>
+
+          <div className="field" style={{ marginTop: 16 }}>
+            <label className="field__label" htmlFor="poster-caption">
+              {t('share.customCaption')}
+            </label>
+            <div className="input-clear">
+              <input
+                id="poster-caption"
+                className="input"
+                value={draft}
+                maxLength={CAPTION_MAX}
+                placeholder={t('share.customPlaceholder')}
+                onChange={(e) => setDraft(e.target.value)}
+                aria-invalid={!!captionError}
+              />
+              {draft && (
+                <button type="button" className="input-clear__btn" onClick={() => setDraft('')} aria-label={t('share.reset')}>
+                  <CloseIcon />
+                </button>
+              )}
+            </div>
+            {captionError ? <p className="field__error">{captionError}</p> : <p className="field__hint">{t('share.customHint', { n: draft.trim().length, max: CAPTION_MAX })}</p>}
+          </div>
+
+          <button type="button" className="btn btn--black btn--lg" style={{ width: '100%', marginTop: 20 }} onClick={() => setCustomizing(false)}>
+            {t('share.apply')}
+          </button>
+        </Sheet>
+      )}
     </OwnerShell>
   );
 }

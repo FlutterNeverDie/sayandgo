@@ -401,7 +401,11 @@
     "customPlaceholder": "비우면 기본 문구가 들어가요",
     "customHint": "{{n}} / {{max}} · 가게 말투로 바꿔도 돼요",
     "reset": "지우기",
-    "tipD": "A4 용지에 실제 크기로 인쇄한 뒤 가운데 점선을 따라 접으세요"
+    "tipD": "A4 용지에 실제 크기로 인쇄한 뒤 가운데 점선을 따라 접으세요",
+    "customize": "포스터 꾸미기",
+    "change": "바꾸기",
+    "customOn": "문구 직접 씀",
+    "apply": "적용"
   },
   "settings": {
     "title": "설정",

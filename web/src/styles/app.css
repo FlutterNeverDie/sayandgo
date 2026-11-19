@@ -583,7 +583,7 @@ body.white .topbar { background: #ffffff; }
 
 /* ---------- 링크 · QR ---------- */
 .qr-stage { background: var(--surface); border-radius: 24px; padding: 20px; display: grid; place-items: center; }
-.qr-stage { min-height: 300px; }
+.qr-stage { min-height: 260px; }
 .qr-stage__img { width: 100%; max-width: 300px; height: auto; border-radius: 12px; outline: 1px solid var(--rule); }
 .qr-stage__img--C { max-width: 100%; }
 .qr-stage__img--D { max-width: 260px; }
@@ -744,7 +744,6 @@ body.warm .topbar { background: #f3f2ef; }
 .poster-thumb--E { width: 32px; height: 32px; margin-top: 3px; margin-bottom: 7px; background: var(--text); border-radius: 8px; }
 .poster-thumb--E::before { background: #fff; left: 8px; top: 8px; width: 16px; height: 16px; }
 
-.input-group .input:last-child { border-radius: 12px; }
 
 /* 홈 슬라이드: 비포·애프터 */
 .hp-s4 { height: 390px; background: #f1ede6; padding: 34px 22px; }
@@ -779,3 +778,29 @@ body.warm .topbar { background: #f3f2ef; }
 .hp-s3__c--good { outline: 2px solid var(--mint); }
 .hp-s3__q { margin-top: 10px; font-size: 13px; font-weight: 600; }
 .hp-s3__a { margin-top: 10px; background: var(--mint-soft); border-radius: 10px; padding: 8px; font-size: 12px; color: var(--mint-ink); font-weight: 600; }
+
+/* 입력칸 안 오른쪽 지우기(x) */
+.input-clear { position: relative; }
+.input-clear .input { padding-right: 48px; }
+.input-clear__btn {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 50%;
+  background: transparent; color: var(--muted); cursor: pointer;
+}
+.input-clear__btn svg { width: 18px; height: 18px; }
+.input-clear__btn:active { background: var(--raised); }
+
+/* 포스터 꾸미기: 페이지에는 요약 한 줄, 옵션은 시트로 */
+.poster-pick {
+  display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 16px; padding: 12px 14px;
+  background: var(--surface); border: 0; border-radius: 16px; text-align: left; cursor: pointer; color: var(--text);
+}
+.poster-pick .poster-thumb { margin-bottom: 0; flex: none; }
+.poster-pick__text { display: grid; gap: 2px; min-width: 0; }
+.poster-pick__text b { font-size: var(--fs-16); }
+.poster-pick__text span { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.poster-pick__go { margin-left: auto; flex: none; font-size: var(--fs-14); font-weight: 600; color: var(--mint-ink); }
+.poster-mini { height: 150px; display: flex; justify-content: center; margin-bottom: 4px; }
+.poster-mini img { height: 100%; width: auto; max-width: 100%; object-fit: contain; border-radius: 8px; outline: 1px solid var(--rule); }
+.sheet .share-label:first-of-type { margin-top: 12px; }
+.sheet .poster-types button { background: var(--raised); }

@@ -144,7 +144,7 @@ a { color: var(--mint-ink); text-underline-offset: 3px; }
 .btn--text:hover:not(:disabled) { background: var(--raised); color: var(--text); }
 .btn--sm { height: 38px; padding: 0 14px; font-size: var(--fs-14); border-radius: 12px; }
 .btn--block { width: 100%; }
-.btn:disabled { cursor: not-allowed; color: var(--faint); background: var(--raised); border-color: var(--border); }
+.btn:disabled { cursor: not-allowed; color: var(--muted); background: var(--raised); border-color: var(--border); }
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .icon-btn {
@@ -611,3 +611,27 @@ body.white .topbar { background: #ffffff; }
 .legal table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 520px; }
 .legal th, .legal td { border-top: 1px solid var(--rule); padding: 8px 6px; text-align: left; vertical-align: top; }
 .legal th { color: var(--muted); font-weight: 700; }
+
+/* 시트 닫기 버튼 */
+.sheet { position: fixed; }
+.sheet__close { position: absolute; top: 8px; right: 8px; }
+.sheet__title { padding-right: 40px; }
+
+/* ---------- 피드백 쓰기 (전체 화면) ---------- */
+.compose-bar {
+  position: sticky; top: 0; z-index: 10; background: var(--ground);
+  display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 var(--gutter);
+  max-width: var(--max); margin: 0 auto;
+}
+.compose-bar__title { flex: 1; min-width: 0; display: grid; line-height: 1.25; }
+.compose-bar__title h1 { font-size: var(--fs-16); font-weight: 700; }
+.compose-bar__title span { font-size: 12px; color: var(--faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.compose { padding-top: 8px; }
+.compose__text {
+  width: 100%; min-height: 180px; resize: none; border: 0; border-radius: 18px; padding: 16px;
+  background: var(--surface); font-size: 17px; line-height: 1.6;
+}
+.compose__text:focus { outline: 2px solid var(--mint-ink); outline-offset: 0; }
+.compose__text::placeholder { color: var(--faint); }
+.compose__meta { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-top: 8px; font-size: 13px; }
+.compose__meta .num { white-space: nowrap; flex: none; }

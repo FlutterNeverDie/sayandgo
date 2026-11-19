@@ -8,6 +8,7 @@ import { AuthProvider } from './app/auth';
 import { ToastProvider } from './components/ui/Overlay';
 import { Loading } from './components/ui/States';
 import { StorePage } from './pages/StorePage';
+import { ComposePage } from './pages/ComposePage';
 
 // 손님 화면은 바로, 사장님 · 문서 화면은 필요할 때 불러온다 (전송량 절감)
 const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
@@ -39,6 +40,7 @@ createRoot(document.getElementById('root')!).render(
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/q/:code" element={<StorePage />} />
+                <Route path="/q/:code/write" element={<ComposePage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/verify" element={<VerifyPage />} />

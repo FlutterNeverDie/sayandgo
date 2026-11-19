@@ -255,7 +255,8 @@
     "sortHelpful": "Most helpful",
     "shareText": "{{name}} answered: {{q}}",
     "noDelete": "Once sent, it can't be edited or deleted. Please check before sending.",
-    "invite": "It's anonymous, so be honest. We read every word, even the harsh ones, and use it to get better."
+    "invite": "It's anonymous, so be honest. We read every word, even the harsh ones, and use it to get better.",
+    "sendShort": "Send"
   },
   "report": {
     "title": "Report",

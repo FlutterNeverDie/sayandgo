@@ -1,14 +1,13 @@
 import { useInfiniteQuery, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { QuestionItem } from '../components/question/QuestionItem';
 import { StoreHeader, useScrolledPast } from '../components/question/StoreHeader';
 import { ReportSheet } from '../components/question/ReportSheet';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
-import { Switch } from '../components/ui/Fields';
-import { LockIcon, ShareIcon } from '../components/ui/Icons';
+import { ShareIcon } from '../components/ui/Icons';
 import { ErrorBox, Loading, TicketSkeleton } from '../components/ui/States';
 import i18n, { currentLang } from '../i18n';
 import { CategoryGlyph } from '../components/ui/StoreIcon';
@@ -20,18 +19,14 @@ import {
   votedIds,
   type PublicSort,
   myQuestionIds,
-  postQuestion,
   reportQuestion,
   reportStore,
   type Page,
 } from '../lib/questions';
 import { CODE_RE, storeUrl } from '../lib/storeCode';
 import { getStore } from '../lib/stores';
-import { QUESTION_KINDS, type Question, type QuestionKind, type Store } from '../lib/types';
-import { checkQuestion, LIMITS, tidyText } from '../lib/validation';
+import type { Question, Store } from '../lib/types';
 
-const LAST_POST_KEY = 'sayandgo:lastPost';
-const WAIT_SEC = 30;
 
 export function StorePage() {
   const { code = '' } = useParams();
@@ -77,13 +72,13 @@ function StoreState({ title, desc }: { title: string; desc: string }) {
 
 function ActiveStore({ store }: { store: Store }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const toast = useToast();
   const qc = useQueryClient();
   const [sort, setSort] = useState<PublicSort>('latest');
   const listKey = ['public', store.code, sort];
-  const [mine, setMine] = useState(() => myQuestionIds(store.code));
+  const [mine] = useState(() => myQuestionIds(store.code));
   const [voted, setVoted] = useState(() => votedIds());
-  const [composing, setComposing] = useState(false);
   const [menuFor, setMenuFor] = useState<Question | null>(null);
   const [reporting, setReporting] = useState<Question | 'store' | null>(null);
 
@@ -153,12 +148,18 @@ function ActiveStore({ store }: { store: Store }) {
     else navigator.clipboard.writeText(message).then(() => toast(t('common.copied')));
   }
 
-  function onPosted(q: Question) {
-    setComposing(false);
-    setMine(myQuestionIds(store.code));
-    // 답변 전 글은 공개되지 않으므로 목록은 그대로 (읽기 0)
-    toast(q.visibility === 'owner' ? t('store.sentPrivate') : t('store.sentHidden'), { ms: 3600 });
+  /** 쓰기 페이지로: 지금 스크롤 위치를 기억해 두고 돌아오면 복원 */
+  const scrollKey = `sayandgo:scroll:${store.code}`;
+  function openCompose() {
+    sessionStorage.setItem(scrollKey, String(window.scrollY));
+    navigate(`/q/${store.code}/write`, { state: { fromStore: true } });
   }
+  useLayoutEffect(() => {
+    const y = sessionStorage.getItem(scrollKey);
+    if (y == null || !list.data) return;
+    sessionStorage.removeItem(scrollKey);
+    window.scrollTo(0, Number(y)); // 목록은 캐시에서 바로 그려져 다시 읽지 않는다
+  }, [scrollKey, list.data]);
 
   async function onReport(reason: Parameters<typeof reportStore>[1], detail: string) {
     const target = reporting;
@@ -199,7 +200,7 @@ function ActiveStore({ store }: { store: Store }) {
           extra={!store.acceptingQuestions && <span className="chip chip--paused" style={{ marginLeft: 8 }}>{t('store.pausedChip')}</span>}
           actions={
             store.acceptingQuestions && (
-              <button className="btn btn--black" onClick={() => setComposing(true)}>
+              <button className="btn btn--black" onClick={openCompose}>
                 {t('store.ask')}
               </button>
             )
@@ -265,14 +266,12 @@ function ActiveStore({ store }: { store: Store }) {
       </main>
 
       {store.acceptingQuestions && (
-        <div className={`ask-bar${past && !composing ? ' ask-bar--show' : ''}`} aria-hidden={!past}>
-          <button className="btn btn--black" tabIndex={past ? 0 : -1} onClick={() => setComposing(true)}>
+        <div className={`ask-bar${past ? ' ask-bar--show' : ''}`} aria-hidden={!past}>
+          <button className="btn btn--black" tabIndex={past ? 0 : -1} onClick={openCompose}>
             {t('store.ask')}
           </button>
         </div>
       )}
-
-      {composing && <ComposeSheet store={store} onClose={() => setComposing(false)} onPosted={onPosted} />}
 
       {menuFor && (
         <Sheet onClose={() => setMenuFor(null)}>
@@ -294,148 +293,5 @@ function ActiveStore({ store }: { store: Store }) {
 
       {reporting && <ReportSheet onClose={() => setReporting(null)} onSubmit={onReport} />}
     </>
-  );
-}
-
-function readLastPost(): number {
-  try {
-    return Number(localStorage.getItem(LAST_POST_KEY) ?? 0) || 0;
-  } catch {
-    return 0;
-  }
-}
-
-/** 남기기: 종류 고르기 + 사장님만 보기 + 익명 안내. 버튼을 눌렀을 때만 열린다. */
-function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () => void; onPosted: (q: Question) => void }) {
-  const { t } = useTranslation();
-  const draftKey = `sayandgo:draft:${store.code}`;
-  const [text, setText] = useState(() => sessionStorage.getItem(draftKey) ?? '');
-  const [kind, setKind] = useState<QuestionKind>('question');
-  const [ownerOnly, setOwnerOnly] = useState(false);
-  const [touchedPrivate, setTouchedPrivate] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [now, setNow] = useState(Date.now());
-  const ref = useRef<HTMLTextAreaElement>(null);
-  const wait = Math.max(0, WAIT_SEC - Math.floor((now - readLastPost()) / 1000));
-
-  useEffect(() => {
-    ref.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (wait <= 0) return;
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, [wait]);
-
-  useEffect(() => {
-    sessionStorage.setItem(draftKey, text);
-  }, [draftKey, text]);
-
-  function pickKind(k: QuestionKind) {
-    setKind(k);
-    // 아쉬운 점은 기본으로 사장님만 (직접 바꿨으면 그대로 둔다)
-    if (!touchedPrivate) setOwnerOnly(k === 'complaint');
-  }
-
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    const body = tidyText(text);
-    const err = checkQuestion(body, store.blockedWords);
-    setError(err);
-    if (err || wait > 0) return;
-    setBusy(true);
-    try {
-      const q = await postQuestion(store.code, body, currentLang(), kind, ownerOnly ? 'owner' : 'public');
-      try {
-        localStorage.setItem(LAST_POST_KEY, String(Date.now()));
-      } catch {
-        /* 무시 */
-      }
-      sessionStorage.removeItem(draftKey);
-      onPosted(q);
-    } catch (e2) {
-      const code = (e2 as { code?: string }).code;
-      setError(code === 'unavailable' ? 'errors.network' : 'errors.cantPost');
-      setBusy(false);
-    }
-  }
-
-  const length = text.trim().length;
-  return (
-    <Sheet title={t('store.askTitle')} onClose={onClose}>
-      <form onSubmit={onSubmit} noValidate>
-        <div className="kind-chips" role="radiogroup" aria-label={t('store.label')}>
-          {QUESTION_KINDS.map((k) => (
-            <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => pickKind(k)}>
-              {t(`kind.${k}`)}
-            </button>
-          ))}
-        </div>
-        <label htmlFor="q-body" className="sr-only">
-          {t('store.label')}
-        </label>
-        <textarea
-          id="q-body"
-          ref={ref}
-          className="textarea"
-          rows={5}
-          maxLength={LIMITS.questionMax + 50}
-          placeholder={t(`kindPlaceholder.${kind}`)}
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            if (error) setError(null);
-          }}
-          aria-invalid={!!error}
-          aria-describedby="q-hint q-err"
-          style={{ resize: 'none', background: 'var(--raised)', border: 0, borderRadius: 14 }}
-        />
-        {error && (
-          <p className="field__error" id="q-err" role="alert" style={{ marginTop: 8 }}>
-            {t(error)}
-          </p>
-        )}
-        <p className="num" style={{ fontSize: 12, color: length > LIMITS.questionMax ? 'var(--negative)' : 'var(--muted)', textAlign: 'right', marginTop: 6 }}>
-          {length} / {LIMITS.questionMax}
-        </p>
-
-        <div className="switch-row" style={{ paddingTop: 4 }}>
-          <div className="switch-row__text">
-            <p className="switch-row__title">{t('store.privateTitle')}</p>
-            <p className="switch-row__desc">{t('store.privateDesc')}</p>
-          </div>
-          <Switch
-            checked={ownerOnly}
-            onChange={(v) => {
-              setOwnerOnly(v);
-              setTouchedPrivate(true);
-            }}
-            label={t('store.privateTitle')}
-          />
-        </div>
-
-        <div className="anon-box">
-          <p className="anon-box__title">
-            <LockIcon />
-            {t('store.anonTitle')}
-          </p>
-          <ul>
-            <li>{t('store.anon1')}</li>
-            <li>{t('store.anon2')}</li>
-            <li>{t('store.anon3')}</li>
-          </ul>
-        </div>
-
-        <p className="no-delete">{t('store.noDelete')}</p>
-        <button className="btn btn--black btn--block btn--lg" style={{ marginTop: 10 }} disabled={busy || wait > 0 || length === 0}>
-          {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
-        </button>
-        <p className="field__hint" id="q-hint" style={{ marginTop: 12 }}>
-          <Trans i18nKey="store.consent" components={{ 1: <Link to="/policy" /> }} />
-        </p>
-      </form>
-    </Sheet>
   );
 }

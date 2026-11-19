@@ -402,7 +402,8 @@
     "customOn": "Custom text",
     "apply": "Apply",
     "zoom": "View larger",
-    "langHint": "Switch to your guests’ language if many visit from abroad"
+    "langHint": "Switch to your guests’ language if many visit from abroad",
+    "langHintCustom": "Your own text stays as written. The language applies only to the remaining default text"
   },
   "settings": {
     "title": "Settings",

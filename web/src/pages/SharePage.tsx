@@ -232,7 +232,7 @@ function Share({ store }: { store: Store }) {
                 </option>
               ))}
             </select>
-            <p className="field__hint">{t('share.langHint')}</p>
+            <p className="field__hint">{pref.caption ? t('share.langHintCustom') : t('share.langHint')}</p>
           </div>
           <button type="button" className="btn btn--black btn--lg" style={{ width: '100%', marginTop: 20 }} onClick={() => setCustomizing(false)}>
             {t('share.apply')}

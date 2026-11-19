@@ -23,6 +23,7 @@ export function LandingPage() {
     createdAt: new Date(Date.now() - 2 * 3600_000),
   };
   const faqs = [1, 2, 3, 4];
+  const sampleStore = { storeName: t('landing.sampleStore'), category: 'cafe' as const, tone: 'mint' as const };
 
   return (
     <>
@@ -48,8 +49,8 @@ export function LandingPage() {
             {t('landing.sampleTitle')}
           </h2>
           <div className="feed" style={{ borderTop: '1px solid var(--rule)' }}>
-            <QuestionItem q={sample} storeName={t('landing.sampleStore')} />
-            <QuestionItem q={{ ...sample, id: 'sample2', body: t('landing.sampleQ2'), status: 'open', answer: null, createdAt: new Date() }} storeName={t('landing.sampleStore')} />
+            <QuestionItem q={sample} store={sampleStore} />
+            <QuestionItem q={{ ...sample, id: 'sample2', body: t('landing.sampleQ2'), status: 'open', answer: null, createdAt: new Date() }} store={sampleStore} />
           </div>
         </section>
 

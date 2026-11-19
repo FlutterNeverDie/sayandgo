@@ -49,6 +49,8 @@ await call(`${AUTH}/identitytoolkit.googleapis.com/v1/projects/${PROJECT}/accoun
 await put(`stores/${CODE}`, {
   storeName: '연남동 로스터리',
   intro: '평일 8시, 주말 10시에 열어요',
+  category: 'cafe',
+  tone: 'mint',
   ownerUid: uid,
   lang: 'ko',
   status: 'active',

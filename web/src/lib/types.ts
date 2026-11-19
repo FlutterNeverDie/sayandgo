@@ -1,9 +1,13 @@
 export type StoreStatus = 'pending' | 'active' | 'deleted' | 'suspended';
+export type StoreCategory = 'cafe' | 'restaurant' | 'bar' | 'bakery' | 'pc' | 'beauty' | 'shop' | 'other';
+export type StoreTone = 'mint' | 'lemon' | 'coral' | 'sky' | 'sand' | 'ink';
 
 export interface Store {
   code: string;
   storeName: string;
   intro: string;
+  category: StoreCategory;
+  tone: StoreTone;
   ownerUid: string;
   lang: string;
   status: StoreStatus;

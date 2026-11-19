@@ -1,12 +1,15 @@
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { relativeTime } from '../../lib/format';
-import type { Question } from '../../lib/types';
+import type { Question, Store } from '../../lib/types';
 import { MoreIcon } from '../ui/Icons';
+import { StoreIcon } from '../ui/StoreIcon';
+
+export type StoreLook = Pick<Store, 'storeName' | 'category' | 'tone'>;
 
 interface Props {
   q: Question;
-  storeName: string;
+  store: StoreLook;
   mine?: boolean;
   owner?: boolean;
   fresh?: boolean;
@@ -16,18 +19,10 @@ interface Props {
   actions?: ReactNode;
 }
 
-export function Avatar({ name, small }: { name: string; small?: boolean }) {
-  return (
-    <span className={small ? 'avatar avatar--sm' : 'avatar'} aria-hidden="true">
-      {Array.from(name.trim())[0] ?? 'Q'}
-    </span>
-  );
-}
-
 const isLong = (s: string) => s.length > 180 || s.split('\n').length > 5;
 
 /** 가게의 글 한 개: 인용된 익명 질문 + 그 아래 펼쳐진 답변 */
-export function QuestionItem({ q, storeName, mine, owner, fresh, selected, onMenu, leading, actions }: Props) {
+export function QuestionItem({ q, store, mine, owner, fresh, selected, onMenu, leading, actions }: Props) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const long = !!q.answer && isLong(q.answer.body);
@@ -36,10 +31,10 @@ export function QuestionItem({ q, storeName, mine, owner, fresh, selected, onMen
 
   return (
     <article className={cls}>
-      <div className="qitem__side">{leading ?? <Avatar name={storeName} />}</div>
+      <div className="qitem__side">{leading ?? <StoreIcon category={store.category} tone={store.tone} size={40} />}</div>
       <div className="qitem__main">
         <div className="qitem__head">
-          <span className="who">{storeName}</span>
+          <span className="who">{store.storeName}</span>
           <time dateTime={when?.toISOString()}>· {relativeTime(when)}</time>
           {mine && <span className="pill pill--mine">{t('store.mine')}</span>}
           {owner && q.hidden && (

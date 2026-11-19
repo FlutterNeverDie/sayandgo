@@ -93,7 +93,9 @@
     "terms": "[필수] 이용약관 동의",
     "privacy": "[필수] 개인정보 수집 · 이용 동의",
     "submit": "가입하고 인증 메일 받기",
-    "haveAccount": "이미 가입했나요?"
+    "haveAccount": "이미 가입했나요?",
+    "category": "업종 (선택)",
+    "categoryHint": "가게 아이콘이 돼요. 나중에 바꿀 수 있어요."
   },
   "login": {
     "title": "로그인",
@@ -165,7 +167,8 @@
     "moreText": "더보기",
     "less": "접기",
     "editInfo": "정보 편집",
-    "qrShare": "QR · 공유"
+    "qrShare": "QR · 공유",
+    "pausedChip": "질문 잠시 멈춤"
   },
   "report": {
     "title": "신고하기",
@@ -281,7 +284,10 @@
     "deleteDesc": "받은 질문과 답변이 모두 지워지고 되돌릴 수 없어요. 링크와 QR은 더 이상 쓸 수 없고 다른 가게에 다시 주어지지 않아요.",
     "deleteConfirm": "확인을 위해 비밀번호를 입력해 주세요",
     "deleteButton": "모든 정보를 지우고 탈퇴",
-    "deleting": "지우는 중"
+    "deleting": "지우는 중",
+    "look": "가게 아이콘",
+    "lookDesc": "사진 대신 업종 아이콘과 색으로 가게를 보여 줘요.",
+    "tone": "색"
   },
   "legal": {
     "terms": "이용약관",
@@ -294,5 +300,23 @@
   "notFound": {
     "title": "페이지를 찾을 수 없어요",
     "home": "처음으로"
+  },
+  "category": {
+    "cafe": "카페",
+    "restaurant": "식당",
+    "bar": "술집",
+    "bakery": "베이커리",
+    "pc": "PC방",
+    "beauty": "미용",
+    "shop": "상점",
+    "other": "기타"
+  },
+  "tone": {
+    "mint": "민트",
+    "lemon": "레몬",
+    "coral": "코랄",
+    "sky": "하늘",
+    "sand": "모래",
+    "ink": "잉크"
   }
 }

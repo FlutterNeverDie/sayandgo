@@ -2,7 +2,8 @@ import { useInfiniteQuery, useQuery, useQueryClient, type InfiniteData } from '@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { Avatar, QuestionItem } from '../components/question/QuestionItem';
+import { QuestionItem } from '../components/question/QuestionItem';
+import { StoreHeader, useScrolledPast } from '../components/question/StoreHeader';
 import { ReportSheet } from '../components/question/ReportSheet';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
@@ -83,6 +84,7 @@ function ActiveStore({ store }: { store: Store }) {
     document.title = `${store.storeName} · ${t('app.name')}`;
   }, [store.storeName, t]);
 
+  const [headerRef, past] = useScrolledPast<HTMLElement>();
   const counts = useQuery({ queryKey: ['counts', store.code], queryFn: () => fetchCounts(store.code), staleTime: 10 * 60_000 });
 
   // 10개씩, 60초 캐시, 실시간 구독 없음 (읽기 절감)
@@ -156,41 +158,45 @@ function ActiveStore({ store }: { store: Store }) {
 
   return (
     <>
-      <PublicTopbar />
+      <PublicTopbar title={store.storeName} showTitle={past} />
       <main className="page">
-        <header className="profile">
-          <h1 className="profile__name">{store.storeName}</h1>
-          <Avatar name={store.storeName} />
-          {store.intro && <p className="profile__intro">{store.intro}</p>}
-          <p className="profile__stats num">
-            {counts.data ? (
-              <>
-                {t('store.statsQ')} <b>{counts.data.total}</b> · {t('store.statsA')} <b>{counts.data.answered}</b>
-              </>
-            ) : (
-              ' '
-            )}
-          </p>
-          <div className="profile__actions">
-            {store.acceptingQuestions ? (
-              <button className="btn btn--primary" onClick={() => setComposing(true)}>
-                {t('store.ask')}
-              </button>
-            ) : (
-              <p className="notice" style={{ flex: 1 }}>
-                {t('store.paused')}
-              </p>
-            )}
-            {'share' in navigator && (
-              <button className="btn" onClick={() => navigator.share({ title: store.storeName, url }).catch(() => undefined)}>
-                {t('store.shareStore')}
-              </button>
-            )}
-          </div>
-        </header>
+        <StoreHeader
+          headerRef={headerRef}
+          store={store}
+          intro={store.intro}
+          chips={
+            <>
+              {counts.data && (
+                <>
+                  <span className="chip num">
+                    {t('store.statsQ')} <b>{counts.data.total}</b>
+                  </span>
+                  <span className="chip num">
+                    {t('store.statsA')} <b>{counts.data.answered}</b>
+                  </span>
+                </>
+              )}
+              {!store.acceptingQuestions && <span className="chip chip--paused">{t('store.pausedChip')}</span>}
+            </>
+          }
+          actions={
+            <>
+              {store.acceptingQuestions && (
+                <button className="btn btn--primary" onClick={() => setComposing(true)}>
+                  {t('store.ask')}
+                </button>
+              )}
+              {'share' in navigator && (
+                <button className="btn" style={{ flex: store.acceptingQuestions ? '0 0 auto' : 1 }} onClick={() => navigator.share({ title: store.storeName, url }).catch(() => undefined)}>
+                  {t('store.shareStore')}
+                </button>
+              )}
+            </>
+          }
+        />
 
         {store.showUnanswered && (
-          <div className="uline-tabs" role="tablist">
+          <div className="segmented" role="tablist">
             {(['all', 'answered'] as Tab[]).map((k) => (
               <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>
                 {k === 'all' ? t('store.tabAll') : t('store.tabAnswered')}
@@ -222,7 +228,7 @@ function ActiveStore({ store }: { store: Store }) {
             <QuestionItem
               key={q.id}
               q={q}
-              storeName={store.storeName}
+              store={store}
               mine={mine.has(q.id)}
               fresh={q.id === freshId}
               onMenu={() => setMenuFor(q)}
@@ -246,6 +252,14 @@ function ActiveStore({ store }: { store: Store }) {
           }
         />
       </main>
+
+      {store.acceptingQuestions && (
+        <div className={`ask-bar${past && !composing ? ' ask-bar--show' : ''}`} aria-hidden={!past}>
+          <button className="btn btn--primary" tabIndex={past ? 0 : -1} onClick={() => setComposing(true)}>
+            {t('store.ask')}
+          </button>
+        </div>
+      )}
 
       {composing && <ComposeSheet store={store} onClose={() => setComposing(false)} onPosted={onPosted} />}
 

@@ -93,7 +93,9 @@
     "terms": "[Required] Terms of service",
     "privacy": "[Required] Collection and use of personal data",
     "submit": "Sign up and get the email",
-    "haveAccount": "Already signed up?"
+    "haveAccount": "Already signed up?",
+    "category": "Type of place (optional)",
+    "categoryHint": "Used as your shop icon. You can change it later."
   },
   "login": {
     "title": "Log in",
@@ -165,7 +167,8 @@
     "moreText": "More",
     "less": "Less",
     "editInfo": "Edit info",
-    "qrShare": "QR · Share"
+    "qrShare": "QR · Share",
+    "pausedChip": "Questions paused"
   },
   "report": {
     "title": "Report",
@@ -281,7 +284,10 @@
     "deleteDesc": "All questions and replies are erased and can't be recovered. Your link and QR stop working and are never given to another shop.",
     "deleteConfirm": "Enter your password to confirm",
     "deleteButton": "Erase everything and delete account",
-    "deleting": "Deleting"
+    "deleting": "Deleting",
+    "look": "Shop icon",
+    "lookDesc": "Your shop is shown with a type icon and colour instead of a photo.",
+    "tone": "Colour"
   },
   "legal": {
     "terms": "Terms",
@@ -294,5 +300,23 @@
   "notFound": {
     "title": "Page not found",
     "home": "Go home"
+  },
+  "category": {
+    "cafe": "Café",
+    "restaurant": "Restaurant",
+    "bar": "Bar",
+    "bakery": "Bakery",
+    "pc": "PC café",
+    "beauty": "Salon",
+    "shop": "Shop",
+    "other": "Other"
+  },
+  "tone": {
+    "mint": "Mint",
+    "lemon": "Lemon",
+    "coral": "Coral",
+    "sky": "Sky",
+    "sand": "Sand",
+    "ink": "Ink"
   }
 }

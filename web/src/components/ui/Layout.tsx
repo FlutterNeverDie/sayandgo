@@ -23,14 +23,18 @@ export function Footer({ extra }: { extra?: ReactNode }) {
 }
 
 /** 공개 화면 상단: 워드마크 + 언어 */
-export function PublicTopbar({ end }: { end?: ReactNode }) {
+export function PublicTopbar({ end, title, showTitle }: { end?: ReactNode; title?: string; showTitle?: boolean }) {
   const { t } = useTranslation();
   return (
     <header className="topbar">
       <div className="topbar__inner">
-        <Link to="/" className="wordmark">
-          {t('app.name')}
-        </Link>
+        {title && showTitle ? (
+          <span className="topbar__title topbar__title--show">{title}</span>
+        ) : (
+          <Link to="/" className="wordmark">
+            {t('app.name')}
+          </Link>
+        )}
         <div className="topbar__end">
           <LanguageSelect />
           {end}

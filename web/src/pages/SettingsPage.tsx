@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { RequireOwner, useAuth } from '../app/auth';
 import { LanguageSelect, PasswordField, Switch, TextField } from '../components/ui/Fields';
 import { CloseIcon } from '../components/ui/Icons';
+import { StoreIcon } from '../components/ui/StoreIcon';
+import { CategoryPicker, TonePicker } from '../components/ui/StorePickers';
 import { OwnerShell } from '../components/ui/Layout';
 import { useToast } from '../components/ui/Overlay';
 import { ErrorBox } from '../components/ui/States';
@@ -45,6 +47,24 @@ function Settings({ store }: { store: Store }) {
           <h1 className="title">{t('settings.title')}</h1>
         </div>
         <StoreInfo store={store} onSave={save} />
+        <section className="section" aria-labelledby="look-h">
+          <h2 id="look-h" className="section__title">
+            {t('settings.look')}
+          </h2>
+          <div className="panel" style={{ display: 'grid', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <StoreIcon category={store.category} tone={store.tone} size={56} />
+              <p className="subtitle">{t('settings.lookDesc')}</p>
+            </div>
+            <CategoryPicker value={store.category} onChange={(c) => save({ category: c ?? 'other' })} label={t('signup.category')} />
+            <div>
+              <p className="field__label" style={{ marginBottom: 8 }}>
+                {t('settings.tone')}
+              </p>
+              <TonePicker value={store.tone} onChange={(v) => save({ tone: v })} label={t('settings.tone')} />
+            </div>
+          </div>
+        </section>
         <section className="section">
           <div className="panel divided" style={{ padding: '0 16px' }}>
             <div className="switch-row">

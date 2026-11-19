@@ -41,6 +41,8 @@ const guest = () => env.unauthenticatedContext().firestore();
 const storeData = (ownerUid: string, status = 'active') => ({
   storeName: '연남동 로스터리',
   intro: '',
+  category: 'cafe',
+  tone: 'mint',
   ownerUid,
   lang: 'ko',
   status,
@@ -168,6 +170,11 @@ describe('가게 설정', () => {
   it('주인은 상호명 · 소개 변경 가능, 남은 불가', async () => {
     await assertSucceeds(updateDoc(doc(owner(), `stores/${CODE}`), { storeName: '새 이름', intro: '주말 10시 오픈' }));
     await assertFails(updateDoc(doc(anon(), `stores/${CODE}`), { storeName: '해킹' }));
+  });
+  it('업종 · 색은 정해진 값만', async () => {
+    await assertSucceeds(updateDoc(doc(owner(), `stores/${CODE}`), { category: 'bar', tone: 'ink' }));
+    await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { category: 'casino' }));
+    await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { tone: 'purple' }));
   });
   it('주인이 ownerUid는 못 바꾼다', async () => {
     await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { ownerUid: 'other' }));

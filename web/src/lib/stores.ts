@@ -7,7 +7,7 @@ import {
 import { doc, getDoc, serverTimestamp, updateDoc, writeBatch, type DocumentSnapshot } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import { generateStoreCode } from './storeCode';
-import { TERMS_VERSION, type Store } from './types';
+import { TERMS_VERSION, type Store, type StoreCategory } from './types';
 
 const toDate = (v: unknown): Date | null =>
   v && typeof (v as { toDate?: () => Date }).toDate === 'function' ? (v as { toDate: () => Date }).toDate() : null;
@@ -19,6 +19,8 @@ export function toStore(snap: DocumentSnapshot): Store | null {
     code: snap.id,
     storeName: d.storeName,
     intro: d.intro ?? '',
+    category: d.category ?? 'other',
+    tone: d.tone ?? 'mint',
     ownerUid: d.ownerUid,
     lang: d.lang,
     status: d.status,
@@ -43,7 +45,7 @@ export function verifyActionSettings() {
 }
 
 /** 가입: Auth 계정 → 가게 + users 한 배치 → 인증 메일. 가게 생성이 끝내 실패하면 계정을 지운다. */
-export async function signUp(input: { email: string; password: string; storeName: string; lang: string }) {
+export async function signUp(input: { email: string; password: string; storeName: string; lang: string; category: StoreCategory }) {
   auth.languageCode = input.lang;
   const { user } = await createUserWithEmailAndPassword(auth, input.email.trim(), input.password);
   let code = '';
@@ -51,7 +53,7 @@ export async function signUp(input: { email: string; password: string; storeName
     for (let attempt = 0; ; attempt++) {
       code = generateStoreCode();
       try {
-        await createStore(user, code, input.storeName.trim(), input.lang);
+        await createStore(user, code, input.storeName.trim(), input.lang, input.category);
         break;
       } catch (e) {
         if (attempt >= 2) throw e; // 코드 충돌이면 새 코드로 재시도
@@ -65,11 +67,13 @@ export async function signUp(input: { email: string; password: string; storeName
   return code;
 }
 
-async function createStore(user: User, code: string, storeName: string, lang: string) {
+async function createStore(user: User, code: string, storeName: string, lang: string, category: StoreCategory) {
   const b = writeBatch(db);
   b.set(doc(db, 'stores', code), {
     storeName,
     intro: '',
+    category,
+    tone: 'mint',
     ownerUid: user.uid,
     lang,
     status: 'pending',
@@ -93,7 +97,7 @@ export async function activateStore(user: User, code: string) {
   await updateDoc(doc(db, 'stores', code), { status: 'active' });
 }
 
-export type StoreSettings = Pick<Store, 'storeName' | 'intro' | 'acceptingQuestions' | 'showUnanswered' | 'blockedWords'>;
+export type StoreSettings = Pick<Store, 'storeName' | 'intro' | 'category' | 'tone' | 'acceptingQuestions' | 'showUnanswered' | 'blockedWords'>;
 
 export async function updateStore(code: string, patch: Partial<StoreSettings>) {
   await updateDoc(doc(db, 'stores', code), patch);

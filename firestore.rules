@@ -32,6 +32,8 @@ service cloud.firestore {
     match /stores/{code} {
       function validSettings() {
         return str(d().storeName, 1, 30) && str(d().intro, 0, 60) && str(d().lang, 2, 10)
+          && d().category in ['cafe', 'restaurant', 'bar', 'bakery', 'pc', 'beauty', 'shop', 'other']
+          && d().tone in ['mint', 'lemon', 'coral', 'sky', 'sand', 'ink']
           && d().acceptingQuestions is bool && d().showUnanswered is bool
           && d().blockedWords is list && d().blockedWords.size() <= 30;
       }
@@ -40,7 +42,7 @@ service cloud.firestore {
 
       allow create: if signedIn() && !isAnon()
         && code.matches('^[23456789abcdefghjkmnpqrstuvwxyz]{8}$')
-        && d().keys().hasOnly(['storeName', 'intro', 'ownerUid', 'lang', 'status',
+        && d().keys().hasOnly(['storeName', 'intro', 'category', 'tone', 'ownerUid', 'lang', 'status',
                                'acceptingQuestions', 'showUnanswered', 'blockedWords', 'createdAt'])
         && d().ownerUid == request.auth.uid && d().status == 'pending'
         && d().createdAt == request.time && validSettings()
@@ -49,7 +51,7 @@ service cloud.firestore {
 
       allow update: if
         (isOwner(code) && resource.data.status in ['pending', 'active']
-          && changes(['storeName', 'intro', 'lang', 'acceptingQuestions', 'showUnanswered', 'blockedWords', 'status'])
+          && changes(['storeName', 'intro', 'category', 'tone', 'lang', 'acceptingQuestions', 'showUnanswered', 'blockedWords', 'status'])
           && validSettings()
           && (d().status == resource.data.status
               || (resource.data.status == 'pending' && d().status == 'active')

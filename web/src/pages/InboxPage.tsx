@@ -3,7 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { RequireOwner } from '../app/auth';
-import { Avatar, QuestionItem } from '../components/question/QuestionItem';
+import { QuestionItem } from '../components/question/QuestionItem';
+import { StoreHeader } from '../components/question/StoreHeader';
 import { OwnerShell } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
 import { ErrorBox, TicketSkeleton } from '../components/ui/States';
@@ -232,19 +233,20 @@ function Inbox({ store }: { store: Store }) {
   return (
     <OwnerShell storeName={store.storeName} openCount={openCount}>
       <main className="page">
-        <header className="profile">
-          <h1 className="profile__name">{store.storeName}</h1>
-          <Avatar name={store.storeName} />
-          {store.intro && <p className="profile__intro">{store.intro}</p>}
-          <div className="profile__actions">
-            <Link to="/settings" className="btn" style={{ flex: 1 }}>
-              {t('store.editInfo')}
-            </Link>
-            <Link to="/share" className="btn btn--primary" style={{ flex: 1 }}>
-              {t('store.qrShare')}
-            </Link>
-          </div>
-        </header>
+        <StoreHeader
+          store={store}
+          intro={store.intro}
+          actions={
+            <>
+              <Link to="/settings" className="btn">
+                {t('store.editInfo')}
+              </Link>
+              <Link to="/share" className="btn btn--primary">
+                {t('store.qrShare')}
+              </Link>
+            </>
+          }
+        />
 
         {!store.acceptingQuestions && (
           <div className="notice" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -255,7 +257,7 @@ function Inbox({ store }: { store: Store }) {
           </div>
         )}
 
-        <div className="uline-tabs" role="tablist">
+        <div className="segmented" role="tablist">
           {TABS.map((k) => (
             <button
               key={k}
@@ -285,7 +287,7 @@ function Inbox({ store }: { store: Store }) {
           </button>
         </div>
 
-        <div className="feed" style={{ borderTop: '1px solid var(--rule)' }}>
+        <div className="feed">
           {list.loading && (
             <>
               <TicketSkeleton />
@@ -307,7 +309,7 @@ function Inbox({ store }: { store: Store }) {
             <QuestionItem
               key={q.id}
               q={q}
-              storeName={store.storeName}
+              store={store}
               owner
               selected={selected.has(q.id)}
               onMenu={selecting ? undefined : () => setMenuFor(q)}

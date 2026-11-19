@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../app/auth';
 import { PasswordField, TextField } from '../components/ui/Fields';
+import { CategoryPicker } from '../components/ui/StorePickers';
+import type { StoreCategory } from '../lib/types';
 import { PublicTopbar } from '../components/ui/Layout';
 import { Loading } from '../components/ui/States';
 import { currentLang } from '../i18n';
@@ -32,6 +34,7 @@ export function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [storeName, setStoreName] = useState('');
+  const [category, setCategory] = useState<StoreCategory | null>(null);
   const [agree, setAgree] = useState({ age14: false, terms: false, privacy: false });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -51,7 +54,7 @@ export function SignupPage() {
     if (!allAgreed) return setFormError('errors.agreeRequired');
     setBusy(true);
     try {
-      await signUp({ email, password, storeName, lang: currentLang() });
+      await signUp({ email, password, storeName, lang: currentLang(), category: category ?? 'other' });
       navigate('/verify', { replace: true });
     } catch (err) {
       setFormError(errorKey(err));
@@ -94,6 +97,14 @@ export function SignupPage() {
           error={show('storeName')}
           hint={t('signup.storeNameHint')}
         />
+
+        <div className="field">
+          <span className="field__label" id="cat-label">
+            {t('signup.category')}
+          </span>
+          <CategoryPicker value={category} onChange={setCategory} label={t('signup.category')} />
+          <p className="field__hint">{t('signup.categoryHint')}</p>
+        </div>
 
         <fieldset className="panel" style={{ margin: '4px 0 20px', display: 'grid', gap: 4 }}>
           <legend className="sr-only">{t('signup.agreeAll')}</legend>

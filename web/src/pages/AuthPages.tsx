@@ -1,5 +1,5 @@
-import { sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { useEffect, useState, type FormEvent } from 'react';
+import { applyActionCode, confirmPasswordReset, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, verifyPasswordResetCode } from 'firebase/auth';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../app/auth';
@@ -350,6 +350,138 @@ export function ResetPage() {
           </button>
         </form>
       )}
+    </AuthFrame>
+  );
+}
+
+type ActionState = 'checking' | 'verified' | 'resetForm' | 'resetDone' | 'recovered' | 'expired' | 'used' | 'invalid';
+
+/**
+ * 메일 링크를 눌렀을 때 뜨는 화면 (Firebase 기본 페이지 대신).
+ * Firebase 콘솔 → Authentication → 템플릿 → 작업 URL을 이 주소(/auth/action)로 바꿔야 쓰인다.
+ */
+export function AuthActionPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const params = new URLSearchParams(location.search);
+  const mode = params.get('mode');
+  const code = params.get('oobCode') ?? '';
+  const [state, setState] = useState<ActionState>(code ? 'checking' : 'invalid');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [pwError, setPwError] = useState<string | null>(null);
+  const { busy, run } = useLock();
+  const ran = useRef(false); // 링크는 한 번만 쓸 수 있어서, 두 번 실행되지 않게
+
+  useEffect(() => {
+    if (ran.current || !code) return;
+    ran.current = true;
+    const fail = (e: unknown) => setState((e as { code?: string }).code === 'auth/expired-action-code' ? 'expired' : 'used');
+    if (mode === 'verifyEmail') {
+      applyActionCode(auth, code)
+        .then(async () => {
+          await auth.currentUser?.reload().catch(() => undefined);
+          setState('verified');
+        })
+        .catch(async (e) => {
+          // 이미 인증을 마친 링크를 다시 누른 경우는 성공으로 보여 준다
+          await auth.currentUser?.reload().catch(() => undefined);
+          if (auth.currentUser?.emailVerified) setState('verified');
+          else fail(e);
+        });
+    } else if (mode === 'resetPassword') {
+      verifyPasswordResetCode(auth, code)
+        .then((em) => {
+          setEmail(em);
+          setState('resetForm');
+        })
+        .catch(fail);
+    } else if (mode === 'recoverEmail') {
+      applyActionCode(auth, code).then(() => setState('recovered')).catch(fail);
+    } else setState('invalid');
+  }, [code, mode]);
+
+  async function onReset(e: FormEvent) {
+    e.preventDefault();
+    const err = checkPassword(password);
+    if (err) return setPwError(err);
+    await run(async () => {
+      try {
+        await confirmPasswordReset(auth, code, password);
+        setState('resetDone');
+      } catch (e2) {
+        const c = (e2 as { code?: string }).code;
+        if (c === 'auth/weak-password') setPwError('errors.passwordShort');
+        else setState(c === 'auth/expired-action-code' ? 'expired' : 'used');
+      }
+    });
+  }
+
+  const signedIn = !!auth.currentUser && !auth.currentUser.isAnonymous;
+  const isReset = mode === 'resetPassword';
+
+  if (state === 'checking')
+    return (
+      <AuthFrame title={t('action.checking')}>
+        <div className="action-wait" aria-busy="true">
+          <span className="action-spinner" />
+        </div>
+      </AuthFrame>
+    );
+
+  if (state === 'resetForm')
+    return (
+      <AuthFrame title={t('action.resetTitle')} subtitle={t('action.resetDesc', { email })}>
+        <form onSubmit={onReset} noValidate>
+          <PasswordField
+            label={t('action.newPassword')}
+            autoComplete="new-password"
+            hint={t('signup.passwordHint')}
+            value={password}
+            showStrength
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setPwError(null);
+            }}
+            error={pwError ? t(pwError) : undefined}
+          />
+          <button className="btn btn--primary btn--block btn--lg" disabled={busy || !password}>
+            {busy ? t('common.loading') : t('action.resetSubmit')}
+          </button>
+        </form>
+      </AuthFrame>
+    );
+
+  const ok = state === 'verified' || state === 'resetDone' || state === 'recovered';
+  const title = t(`action.${state}Title`);
+  const desc =
+    state === 'expired' ? t(isReset ? 'action.expiredDescReset' : 'action.expiredDescVerify') : t(`action.${state}Desc`);
+
+  // 다음에 할 일 버튼
+  let primary: { label: string; to: string };
+  if (state === 'verified') primary = signedIn ? { label: t('action.goStore'), to: '/inbox' } : { label: t('action.goLogin'), to: '/login' };
+  else if (state === 'resetDone' || state === 'recovered') primary = { label: t('action.login'), to: '/login' };
+  else if (isReset) primary = { label: t('action.retryReset'), to: '/reset' };
+  else primary = { label: t('action.login'), to: signedIn ? '/verify' : '/login' };
+
+  return (
+    <AuthFrame title={title} subtitle={desc}>
+      <div className="action-result">
+        <span className={`action-icon ${ok ? 'action-icon--ok' : 'action-icon--warn'}`} aria-hidden="true">
+          {ok ? (
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12.5l4.5 4.5L19 7.5" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+              <path d="M12 7v6M12 17h.01" />
+            </svg>
+          )}
+        </span>
+        <button type="button" className="btn btn--primary btn--block btn--lg" onClick={() => navigate(primary.to, { replace: true })}>
+          {primary.label}
+        </button>
+      </div>
     </AuthFrame>
   );
 }

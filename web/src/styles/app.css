@@ -844,3 +844,12 @@ body.warm .topbar { background: #f3f2ef; }
 .home-share { margin-top: 32px; display: grid; gap: 12px; padding: 18px 20px 20px; border-radius: 18px; background: var(--surface); }
 .home-share p { font-weight: 700; font-size: var(--fs-16); text-align: center; }
 .home-share .btn { width: 100%; justify-content: center; }
+
+/* 메일 링크 처리 화면 (/auth/action) */
+.action-wait { display: grid; place-items: center; padding: 24px 0; }
+.action-spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--rule); border-top-color: var(--mint-ink); animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.action-result { display: grid; justify-items: center; gap: 20px; padding: 6px 0 2px; }
+.action-icon { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; }
+.action-icon--ok { background: var(--mint-soft); color: var(--mint-ink); }
+.action-icon--warn { background: #fdf0e1; color: #a35a00; }

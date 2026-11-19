@@ -20,6 +20,7 @@ const SignupPage = lazy(() => auth().then((m) => ({ default: m.SignupPage })));
 const LoginPage = lazy(() => auth().then((m) => ({ default: m.LoginPage })));
 const VerifyPage = lazy(() => auth().then((m) => ({ default: m.VerifyPage })));
 const ResetPage = lazy(() => auth().then((m) => ({ default: m.ResetPage })));
+const AuthActionPage = lazy(() => auth().then((m) => ({ default: m.AuthActionPage })));
 const InboxPage = lazy(() => import('./pages/InboxPage').then((m) => ({ default: m.InboxPage })));
 const SharePage = lazy(() => import('./pages/SharePage').then((m) => ({ default: m.SharePage })));
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
@@ -52,6 +53,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/verify" element={<VerifyPage />} />
                 <Route path="/reset" element={<ResetPage />} />
+                <Route path="/auth/action" element={<AuthActionPage />} />
                 <Route path="/inbox" element={<InboxPage />} />
                 <Route path="/share" element={<SharePage />} />
                 <Route path="/settings" element={<SettingsPage />} />

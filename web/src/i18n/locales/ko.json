@@ -522,5 +522,29 @@
     ],
     "note": "확인하는 대로 답장드릴게요. 특정 글의 삭제 요청은 권리침해 신고 안내를 함께 봐 주세요.",
     "shareText": "Say&Go 문의 메일이에요. 피드백이나 그 밖의 연락 모두 환영해요."
+  },
+  "action": {
+    "checking": "링크를 확인하고 있어요",
+    "verifiedTitle": "이메일 인증이 끝났어요",
+    "verifiedDesc": "이제 손님 피드백을 받을 수 있어요. 가입하던 화면으로 돌아가면 자동으로 이어져요.",
+    "goStore": "내 가게로 가기",
+    "goLogin": "로그인하고 시작하기",
+    "login": "로그인하기",
+    "usedTitle": "이미 쓴 링크예요",
+    "usedDesc": "이미 처리했거나 더는 쓸 수 없는 링크예요. 로그인해 보시고, 안 되면 메일을 다시 받아 주세요.",
+    "expiredTitle": "링크가 만료됐어요",
+    "expiredDescVerify": "로그인하면 인증 메일을 다시 보낼 수 있어요.",
+    "expiredDescReset": "비밀번호 찾기에서 메일을 다시 받아 주세요.",
+    "resetTitle": "새 비밀번호 만들기",
+    "resetDesc": "{{email}} 계정에서 쓸 새 비밀번호를 정해 주세요.",
+    "newPassword": "새 비밀번호",
+    "resetSubmit": "비밀번호 바꾸기",
+    "resetDoneTitle": "비밀번호를 바꿨어요",
+    "resetDoneDesc": "새 비밀번호로 로그인해 주세요.",
+    "retryReset": "재설정 메일 다시 받기",
+    "recoveredTitle": "이메일을 되돌렸어요",
+    "recoveredDesc": "계정 이메일을 원래 주소로 되돌렸어요. 비밀번호도 새로 바꿔 두는 걸 추천해요.",
+    "invalidTitle": "열 수 없는 링크예요",
+    "invalidDesc": "메일에 있는 링크를 그대로 눌러 주세요."
   }
 }

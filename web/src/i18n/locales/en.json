@@ -522,5 +522,29 @@
     ],
     "note": "We'll reply as soon as we can. To request removal of a specific post, please also see the rights infringement page.",
     "shareText": "Say&Go contact email. Feedback or any other message is welcome."
+  },
+  "action": {
+    "checking": "Checking your link",
+    "verifiedTitle": "Your email is verified",
+    "verifiedDesc": "You can start getting guest feedback now. Go back to the sign-up screen and it will continue automatically.",
+    "goStore": "Go to my store",
+    "goLogin": "Log in to start",
+    "login": "Log in",
+    "usedTitle": "This link was already used",
+    "usedDesc": "It was already processed or can no longer be used. Try logging in, or request a new email.",
+    "expiredTitle": "This link has expired",
+    "expiredDescVerify": "Log in to send a new verification email.",
+    "expiredDescReset": "Request a new email from Forgot password.",
+    "resetTitle": "Set a new password",
+    "resetDesc": "Choose a new password for {{email}}.",
+    "newPassword": "New password",
+    "resetSubmit": "Change password",
+    "resetDoneTitle": "Password changed",
+    "resetDoneDesc": "Log in with your new password.",
+    "retryReset": "Get a new reset email",
+    "recoveredTitle": "Email restored",
+    "recoveredDesc": "Your account email was restored. We recommend changing your password too.",
+    "invalidTitle": "This link can't be opened",
+    "invalidDesc": "Please open the link exactly as it appears in the email."
   }
 }

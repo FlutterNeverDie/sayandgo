@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { AppMark } from './AppMark';
 import { BackIcon } from './Icons';
 import { LanguageSelect } from './Fields';
 
@@ -33,6 +34,7 @@ export function PublicTopbar({ end, title, showTitle }: { end?: ReactNode; title
           <span className="topbar__title topbar__title--show">{title}</span>
         ) : (
           <Link to="/" className="wordmark">
+            <AppMark size={26} />
             {t('app.name')}
           </Link>
         )}
@@ -62,6 +64,7 @@ export function OwnerShell({ storeName, title, back, children }: { storeName: st
           ) : (
             <>
               <Link to="/inbox" className="wordmark">
+                <AppMark size={26} />
                 {t('app.name')}
               </Link>
               <span className="topbar__store">{storeName}</span>

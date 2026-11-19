@@ -4,7 +4,6 @@ import { useAuth } from '../app/auth';
 import { QuestionItem, type StoreLook } from '../components/question/QuestionItem';
 import { LockIcon } from '../components/ui/Icons';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
-import { AppMark } from '../components/ui/AppMark';
 import { StoreIcon, toneSoft } from '../components/ui/StoreIcon';
 import type { Question, QuestionKind } from '../lib/types';
 
@@ -36,7 +35,6 @@ export function LandingPage() {
       <PublicTopbar end={<Link to="/login" className="btn btn--text btn--sm">{t('landing.login')}</Link>} />
       <main className="page" style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
         <section className="landing-hero">
-          <AppMark size={48} />
           <h1 className="landing__title">{t('landing.title')}</h1>
           <p className="landing__lead">{t('landing.lead')}</p>
         </section>

@@ -4,4 +4,15 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        // 자주 안 바뀌는 큰 라이브러리를 따로 떼어 두면 배포 후에도 휴대폰 캐시를 그대로 쓴다
+        manualChunks(id) {
+          if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) return 'firebase';
+          if (/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler|@tanstack|i18next|react-i18next)\//.test(id)) return 'vendor';
+        },
+      },
+    },
+  },
 })

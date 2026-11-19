@@ -1,5 +1,4 @@
 import { initializeApp } from 'firebase/app';
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 import { connectAuthEmulator, getAuth } from 'firebase/auth';
 import {
   connectFirestoreEmulator,
@@ -27,10 +26,12 @@ const app = initializeApp(
 // App Check: 우리 웹앱이 아닌 스크립트의 Firestore 접근을 막는다 (도움됐어요 · 질문 도배 방지).
 // 배포 때 reCAPTCHA 키를 VITE_RECAPTCHA_SITE_KEY에 넣고, 콘솔에서 Firestore 강제 적용을 켠다.
 if (!usingEmulator && env.VITE_RECAPTCHA_SITE_KEY) {
-  initializeAppCheck(app, {
-    provider: new ReCaptchaEnterpriseProvider(env.VITE_RECAPTCHA_SITE_KEY),
-    isTokenAutoRefreshEnabled: true,
-  });
+  import('firebase/app-check').then(({ initializeAppCheck, ReCaptchaEnterpriseProvider }) =>
+    initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(env.VITE_RECAPTCHA_SITE_KEY),
+      isTokenAutoRefreshEnabled: true,
+    }),
+  );
 }
 
 export const auth = getAuth(app);

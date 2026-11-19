@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './i18n';
 import './styles/app.css';
 import { AuthProvider } from './app/auth';
+import { ErrorBoundary } from './app/Recovery';
 import { UpdateWatcher } from './app/UpdateWatcher';
 import { ToastProvider } from './components/ui/Overlay';
 import { Loading } from './components/ui/States';
@@ -33,6 +34,7 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ToastProvider>
@@ -62,5 +64,6 @@ createRoot(document.getElementById('root')!).render(
         </ToastProvider>
       </AuthProvider>
     </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
 );

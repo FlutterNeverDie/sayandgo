@@ -1,7 +1,8 @@
 export type StoreStatus = 'pending' | 'active' | 'deleted' | 'suspended';
 export type StoreCategory =
   | 'cafe' | 'restaurant' | 'bar' | 'bakery' | 'pc' | 'beauty' | 'shop' | 'person'
-  | 'other' | 'flower' | 'fitness' | 'study' | 'karaoke' | 'pet' | 'stay' | 'car';
+  | 'other' | 'flower' | 'fitness' | 'study' | 'karaoke' | 'pet' | 'stay' | 'car'
+  | 'hospital' | 'pharmacy' | 'academy' | 'laundry';
 /** 색 코드 #rrggbb */
 export type StoreTone = string;
 

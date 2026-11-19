@@ -179,6 +179,7 @@ describe('가게 설정', () => {
   });
   it('업종 · 색은 정해진 값만', async () => {
     await assertSucceeds(updateDoc(doc(owner(), `stores/${CODE}`), { category: 'person', tone: '#ab12ef' }));
+    await assertSucceeds(updateDoc(doc(owner(), `stores/${CODE}`), { category: 'hospital' }));
     await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { category: 'casino' }));
     await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { tone: 'mint' }));
   });

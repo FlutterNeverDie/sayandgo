@@ -18,11 +18,15 @@ const PATHS: Record<StoreCategory, string> = {
   pet: 'M12 20c-3 0-5-1.5-5-3.5S9.5 12 12 12s5 2.5 5 4.5-2 3.5-5 3.5ZM7.6 10a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 1 1 3.2 0ZM11.1 6.5a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 1 1 3.2 0ZM16.1 6.5a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 1 1 3.2 0ZM19.6 10a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 1 1 3.2 0Z',
   stay: 'M3 19V6M3 14h18v5M21 14v-1.5A2.5 2.5 0 0 0 18.5 10H11v4M6.5 12.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z',
   car: 'M5 16v-4.5L7 6.5h10l2 5V16M3.5 16h17M6 16v2.5M18 16v2.5M5 11.5h14M7.5 13.5h.01M16.5 13.5h.01',
+  hospital: 'M10.5 3h3a1 1 0 0 1 1 1v5.5H20a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-5.5V20a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-5.5H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h5.5V4a1 1 0 0 1 1-1Z',
+  pharmacy: 'M10.5 20.5 20.5 10.5a4.95 4.95 0 1 0-7-7L3.5 13.5a4.95 4.95 0 1 0 7 7ZM8.5 8.5l7 7',
+  academy: 'M21.4 10.9a1 1 0 0 0 0-1.8L12.8 5.2a2 2 0 0 0-1.6 0L2.6 9.1a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.6 0ZM22 10v6M6 12.5V16a6 3 0 0 0 12 0v-3.5',
+  laundry: 'M5 2h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2ZM3 6h18M7 4h2M7 13.5a5 5 0 1 0 10 0 5 5 0 1 0-10 0M12 18.5a2.5 2.5 0 0 0 0-5 2.5 2.5 0 0 1 0-5',
 };
 
-/** 처음 보이는 8개 + "아이콘 더보기"로 보이는 8개. firestore.rules의 목록과 같아야 한다. */
+/** 처음 보이는 8개 + "아이콘 더보기"로 보이는 12개. firestore.rules의 목록과 같아야 한다. */
 export const CATEGORIES_MAIN: StoreCategory[] = ['cafe', 'restaurant', 'bar', 'bakery', 'pc', 'beauty', 'shop', 'person'];
-export const CATEGORIES_MORE: StoreCategory[] = ['other', 'flower', 'fitness', 'study', 'karaoke', 'pet', 'stay', 'car'];
+export const CATEGORIES_MORE: StoreCategory[] = ['other', 'flower', 'fitness', 'study', 'karaoke', 'pet', 'stay', 'car', 'hospital', 'pharmacy', 'academy', 'laundry'];
 
 /** 미리 정한 색 12개. 이 밖의 색은 직접 고르기(#rrggbb). */
 export const PRESET_TONES = [

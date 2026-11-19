@@ -483,7 +483,11 @@
     "karaoke": "노래방",
     "pet": "반려동물",
     "stay": "숙소",
-    "car": "자동차"
+    "car": "자동차",
+    "hospital": "병원",
+    "pharmacy": "약국",
+    "academy": "학원",
+    "laundry": "세탁소"
   },
   "tone": {
     "mint": "민트",

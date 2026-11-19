@@ -33,7 +33,8 @@ service cloud.firestore {
       function validSettings() {
         return str(d().storeName, 1, 20) && str(d().intro, 0, 30) && str(d().lang, 2, 10)
           && d().category in ['cafe', 'restaurant', 'bar', 'bakery', 'pc', 'beauty', 'shop', 'person',
-                              'other', 'flower', 'fitness', 'study', 'karaoke', 'pet', 'stay', 'car']
+                              'other', 'flower', 'fitness', 'study', 'karaoke', 'pet', 'stay', 'car',
+                              'hospital', 'pharmacy', 'academy', 'laundry']
           && d().tone is string && d().tone.matches('^#[0-9a-fA-F]{6}$')
           && d().acceptingQuestions is bool
           && d().blockedWords is list && d().blockedWords.size() <= 30;

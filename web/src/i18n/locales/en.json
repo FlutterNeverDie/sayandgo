@@ -483,7 +483,11 @@
     "karaoke": "Karaoke",
     "pet": "Pets",
     "stay": "Stay",
-    "car": "Car"
+    "car": "Car",
+    "hospital": "Clinic",
+    "pharmacy": "Pharmacy",
+    "academy": "Academy",
+    "laundry": "Laundry"
   },
   "tone": {
     "mint": "Mint",

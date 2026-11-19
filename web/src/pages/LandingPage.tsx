@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../app/auth';
+import { HeroSceneA, HeroSceneB } from '../components/landing/HeroScenes';
 import { QuestionItem, type StoreLook } from '../components/question/QuestionItem';
 import { LockIcon } from '../components/ui/Icons';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
@@ -29,15 +30,28 @@ export function LandingPage() {
     q: sampleQ(`ex${i}`, e.kind, e.q, e.a, 60 + i * 97),
   }));
   const faqs = [2, 3, 4];
+  // 미리보기: ?hero=a | ?hero=b (홈 개편 시안 비교용)
+  const heroParam = new URLSearchParams(location.search).get('hero');
+  const hero = heroParam === 'a' || heroParam === 'b' ? heroParam : null;
 
   return (
     <>
       <PublicTopbar end={<Link to="/login" className="btn btn--text btn--sm">{t('landing.login')}</Link>} />
       <main className="page" style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
-        <section className="landing-hero">
-          <h1 className="landing__title">{t('landing.title')}</h1>
-          <p className="landing__lead">{t('landing.lead')}</p>
-        </section>
+        {hero ? (
+          <section className="landing-hero landing-hero--scene">
+            {hero === 'a' ? <HeroSceneA name={t('landing.examples.0.name')} /> : <HeroSceneB name={t('landing.examples.0.name')} />}
+            <h1 className="landing__title" style={{ marginTop: 24 }}>
+              {t('landing.titleV2')}
+            </h1>
+            <p className="landing__lead">{t('landing.leadV2')}</p>
+          </section>
+        ) : (
+          <section className="landing-hero">
+            <h1 className="landing__title">{t('landing.title')}</h1>
+            <p className="landing__lead">{t('landing.lead')}</p>
+          </section>
+        )}
 
         <section className="section" aria-labelledby="ex-h">
           <h2 id="ex-h" className="section__title">

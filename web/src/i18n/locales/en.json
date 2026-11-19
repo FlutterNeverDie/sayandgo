@@ -145,7 +145,11 @@
         "q": "A place to sit and read would be great",
         "a": "We put two chairs by the window. Stay and read."
       }
-    ]
+    ],
+    "titleV2": "Just put it up,\nand guests speak first",
+    "leadV2": "Sign up and your QR is ready. Print it and put it on the table.",
+    "heroSampleQ": "There are never seats on weekends",
+    "heroSampleA": "We'll add two more tables on weekend mornings."
   },
   "signup": {
     "title": "Create your feedback box",

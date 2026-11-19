@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>손님 화면 시안 5개</title>
+<title>손님 화면 시안 2차</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -12,26 +12,33 @@
   .wrap { padding: 32px 24px 64px; }
   .wrap > h1 { font-size: 24px; font-weight: 800; }
   .wrap > p { color: #5b6b67; margin-top: 6px; }
-  .grid { display: grid; grid-auto-flow: column; grid-auto-columns: 390px; gap: 28px; overflow-x: auto; padding: 28px 0 12px; }
-  .opt h2 { font-size: 18px; font-weight: 800; }
+  .family { margin-top: 36px; }
+  .family > h2 { font-size: 20px; font-weight: 800; }
+  .grid { display: grid; grid-auto-flow: column; grid-auto-columns: 390px; gap: 28px; overflow-x: auto; padding: 18px 0 12px; }
+  .opt h3 { font-size: 17px; font-weight: 800; }
   .opt .desc { font-size: 14px; color: #5b6b67; margin: 4px 0 12px; min-height: 40px; }
-  .phone { width: 390px; border-radius: 36px; overflow: hidden; border: 1px solid #e3e7e5; position: relative; }
-  .phone .scroll { height: 780px; overflow-y: auto; scrollbar-width: none; }
+  .phone { width: 390px; height: 780px; border-radius: 36px; overflow: hidden; border: 1px solid #e3e7e5; position: relative; }
+  .phone .scroll { height: 100%; overflow-y: auto; scrollbar-width: none; }
   .phone .scroll::-webkit-scrollbar { display: none; }
   svg { display: block; }
+  .k { font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 7px; }
+  .k-q { background: #e5f1ff; color: #1d5a96; }
+  .k-c { background: #ffe8e1; color: #9c3418; }
+  .k-s { background: #fff3cc; color: #7a5600; }
+  .muted { color: #8a9490; }
+  .lockline { display: inline-flex; gap: 4px; align-items: center; color: #0b6b58; font-weight: 600; }
 
-  /* ===== A. 에스크 라이트 ===== */
+  /* ---------- A 계열 공통 ---------- */
   .A { background: #fff; }
   .A .bar { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-weight: 700; font-size: 15px; }
   .A .bar span { color: #8a9490; font-weight: 500; font-size: 14px; }
   .A .prof { padding: 12px 20px 20px; }
-  .A .prof h3 { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; }
+  .A .prof h4 { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; }
   .A .prof .intro { margin-top: 4px; color: #4f5c57; font-size: 15px; }
-  .A .prof .meta { margin-top: 10px; display: flex; gap: 6px; align-items: center; font-size: 14px; color: #6b7672; }
+  .A .prof .meta { margin-top: 10px; font-size: 14px; color: #6b7672; }
   .A .prof .meta b { color: #15201d; }
-  .A .prof .lock { display: inline-flex; gap: 4px; align-items: center; color: #0b6b58; font-weight: 600; }
   .A .btns { display: flex; gap: 8px; margin-top: 18px; }
-  .A .btn { flex: 1; height: 44px; border-radius: 12px; display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+  .A .btn { flex: 1; height: 46px; border-radius: 12px; display: grid; place-items: center; font-weight: 700; font-size: 15px; }
   .A .btn.p { background: #15201d; color: #fff; }
   .A .btn.s { border: 1px solid #dfe4e1; flex: 0 0 88px; }
   .A .tab { display: flex; border-bottom: 1px solid #edf0ee; padding: 0 20px; }
@@ -46,237 +53,233 @@
   .A .quote .lab i { width: 18px; height: 18px; border-radius: 50%; background: #cfd6d2; display: inline-block; }
   .A .quote p { margin-top: 4px; font-size: 15px; }
   .A .ans { margin-top: 10px; font-size: 16px; line-height: 1.55; }
-  .A .act { display: flex; gap: 18px; margin-top: 12px; color: #9aa39f; }
 
-  /* ===== B. 매거진 Q&A ===== */
-  .B { background: #fbfaf7; }
-  .B .head { padding: 44px 24px 26px; border-bottom: 1px solid #e8e5dc; }
-  .B .kicker { font-size: 13px; color: #0b6b58; font-weight: 700; }
-  .B .head h3 { margin-top: 8px; font-size: 32px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
-  .B .head p { margin-top: 10px; color: #5f5a4f; font-size: 15px; }
-  .B .qa { padding: 28px 24px; border-bottom: 1px solid #ece9e1; }
-  .B .row { display: grid; grid-template-columns: 30px 1fr; gap: 6px; }
-  .B .mk { font-size: 22px; font-weight: 800; line-height: 1.2; }
-  .B .mk.q { color: #15201d; }
-  .B .mk.a { color: #2fb898; }
-  .B .qtext { font-size: 19px; font-weight: 700; line-height: 1.4; letter-spacing: -0.01em; }
-  .B .tag { font-size: 12px; color: #8b8577; margin-bottom: 6px; }
-  .B .atext { font-size: 16px; line-height: 1.65; color: #2c3330; }
-  .B .row + .row { margin-top: 16px; }
-  .B .sig { margin-top: 6px; font-size: 13px; color: #8b8577; }
-  .B .cta { position: absolute; left: 20px; right: 20px; bottom: 20px; height: 54px; border-radius: 27px; background: #15201d; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 16px; }
+  /* A1 카드형 */
+  .A1 { background: #f2f4f3; }
+  .A1 .prof { margin: 4px 12px 0; padding: 22px 20px; border-radius: 24px; background: rgba(60, 207, 174, 0.16); }
+  .A1 .btn.p { background: #3ccfae; color: #15201d; }
+  .A1 .btn.s { background: #fff; border: 0; }
+  .A1 .list { padding: 14px 12px; display: grid; gap: 12px; }
+  .A1 .post { background: #fff; border-radius: 22px; border: 0; padding: 18px; }
 
-  /* ===== C. 대화형 ===== */
-  .C { background: #f5f7f6; }
-  .C .head { background: #fff; padding: 16px 20px 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e9ecea; }
-  .C .head .av { width: 44px; height: 44px; border-radius: 14px; background: #3ccfae; display: grid; place-items: center; color: #15201d; }
-  .C .head h3 { font-size: 17px; font-weight: 800; }
-  .C .head p { font-size: 13px; color: #6b7672; }
-  .C .day { text-align: center; font-size: 12px; color: #8a9490; margin: 20px 0 10px; }
-  .C .msg { padding: 0 16px; display: grid; gap: 6px; margin-bottom: 18px; }
-  .C .l { justify-self: start; max-width: 78%; }
-  .C .r { justify-self: end; max-width: 78%; text-align: right; }
-  .C .lab { font-size: 12px; color: #8a9490; margin: 0 6px 4px; }
-  .C .bub { display: inline-block; text-align: left; padding: 11px 14px; font-size: 15px; line-height: 1.5; }
-  .C .l .bub { background: #fff; border-radius: 18px 18px 18px 6px; }
-  .C .r .bub { background: #3ccfae; color: #0f1f1a; border-radius: 18px 18px 6px 18px; }
-  .C .kind { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; margin-right: 4px; }
-  .C .input { position: absolute; left: 12px; right: 12px; bottom: 14px; height: 52px; border-radius: 26px; background: #fff; border: 1px solid #e3e7e5; display: flex; align-items: center; padding: 0 8px 0 18px; color: #9aa39f; font-size: 15px; justify-content: space-between; }
-  .C .input b { width: 38px; height: 38px; border-radius: 50%; background: #15201d; color: #fff; display: grid; place-items: center; }
+  /* A2 미니멀 */
+  .A2 .prof h4 { font-size: 30px; }
+  .A2 .post { display: block; padding: 22px 20px; }
+  .A2 .quote { margin-top: 0; }
+  .A2 .quote .lab { gap: 8px; }
+  .A2 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .A2 .when { font-size: 13px; color: #8a9490; margin-top: 8px; }
+  .A2 .cta { position: absolute; left: 16px; right: 16px; bottom: 16px; height: 54px; border-radius: 16px; background: #15201d; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 16px; }
 
-  /* ===== D. 다크 ===== */
-  .D { background: #0d1110; color: #eef2f0; }
-  .D .bar { height: 52px; display: flex; align-items: center; padding: 0 20px; font-size: 15px; font-weight: 700; color: #9aa6a1; }
-  .D .prof { padding: 8px 20px 22px; }
-  .D .prof h3 { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; }
-  .D .prof .intro { color: #a7b2ad; margin-top: 4px; }
-  .D .prof .meta { margin-top: 12px; display: flex; gap: 8px; }
-  .D .chip { height: 28px; padding: 0 11px; border-radius: 14px; background: #1a201e; font-size: 13px; display: inline-flex; align-items: center; gap: 4px; color: #c7d0cc; }
-  .D .chip.m { color: #3ccfae; }
-  .D .btn { margin-top: 18px; height: 48px; border-radius: 14px; background: #3ccfae; color: #0d1110; display: grid; place-items: center; font-weight: 800; }
-  .D .post { margin: 0 12px 12px; background: #151a18; border-radius: 22px; padding: 18px; }
-  .D .top { display: flex; justify-content: space-between; font-size: 13px; color: #7f8b86; }
-  .D .q { margin-top: 10px; font-size: 17px; font-weight: 700; line-height: 1.45; }
-  .D .a { margin-top: 14px; padding-left: 14px; border-left: 2px solid #3ccfae; }
-  .D .a .who { font-size: 13px; color: #3ccfae; font-weight: 700; }
-  .D .a p { margin-top: 4px; color: #d8e0dc; line-height: 1.6; }
+  /* A3 소셜 */
+  .A3 .acts { display: flex; gap: 8px; margin-top: 12px; }
+  .A3 .acts span { height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid #e3e7e5; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #4f5c57; }
+  .A3 .acts span.on { background: #e2f6ef; border-color: #e2f6ef; color: #0b6b58; font-weight: 700; }
 
-  /* ===== E. 스레드형 ===== */
+  /* ---------- E 계열 공통 ---------- */
   .E { background: #fff; }
-  .E .head { padding: 30px 20px 20px; display: flex; justify-content: space-between; align-items: flex-start; }
-  .E .head h3 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
+  .E .head { padding: 30px 20px 18px; }
+  .E .head h4 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
   .E .head p { color: #6b7672; margin-top: 4px; font-size: 15px; }
   .E .head .meta { margin-top: 12px; font-size: 14px; color: #8a9490; }
   .E .head .meta b { color: #15201d; }
-  .E .ask { margin: 0 20px 6px; height: 48px; border-radius: 24px; border: 1px solid #dfe4e1; display: flex; align-items: center; gap: 10px; padding: 0 6px 0 16px; color: #9aa39f; font-size: 15px; }
+  .E .ask { margin: 0 20px 8px; height: 48px; border-radius: 24px; border: 1px solid #dfe4e1; display: flex; align-items: center; padding: 0 6px 0 16px; color: #9aa39f; font-size: 15px; }
   .E .ask b { margin-left: auto; height: 36px; padding: 0 16px; border-radius: 18px; background: #15201d; color: #fff; display: grid; place-items: center; font-size: 14px; }
   .E .th { display: grid; grid-template-columns: 36px 1fr; column-gap: 12px; padding: 18px 20px 6px; border-bottom: 1px solid #f0f2f1; }
   .E .col { display: grid; justify-items: center; grid-template-rows: 36px 1fr 30px; }
-  .E .anon { width: 36px; height: 36px; border-radius: 50%; background: #eef1ef; display: grid; place-items: center; color: #8a9490; }
+  .E .anon { width: 36px; height: 36px; border-radius: 50%; background: #eef1ef; display: grid; place-items: center; color: #8a9490; font-weight: 700; }
   .E .line { width: 2px; background: #e6eae8; margin: 6px 0; border-radius: 1px; }
   .E .shop { width: 30px; height: 30px; border-radius: 50%; background: #3ccfae; display: grid; place-items: center; color: #15201d; }
-  .E .name { font-size: 15px; font-weight: 700; }
-  .E .name span { font-weight: 400; color: #8a9490; font-size: 13px; margin-left: 4px; }
+  .E .name { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .E .name span.t { font-weight: 400; color: #8a9490; font-size: 13px; }
   .E .txt { margin-top: 3px; font-size: 16px; line-height: 1.5; }
   .E .gap { height: 18px; }
   .E .reply { padding-bottom: 14px; }
-  .E .k { font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 7px; margin-left: 4px; }
 
-  .k-q { background: #e5f1ff; color: #1d5a96; }
-  .k-c { background: #ffe8e1; color: #9c3418; }
-  .k-s { background: #fff3cc; color: #7a5600; }
+  /* E1 민트 강조 */
+  .E1 .line { background: #3ccfae; opacity: 0.5; }
+  .E1 .shop { width: 34px; height: 34px; }
+  .E1 .col { grid-template-rows: 36px 1fr 34px; }
+  .E1 .reply .name { color: #0b6b58; }
+  .E1 .k { background: none; padding: 0; }
+  .E1 .dock { position: absolute; left: 12px; right: 12px; bottom: 14px; height: 54px; border-radius: 27px; background: #fff; border: 1px solid #dfe4e1; display: flex; align-items: center; padding: 0 7px 0 18px; color: #9aa39f; font-size: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .E1 .dock b { margin-left: auto; height: 40px; padding: 0 18px; border-radius: 20px; background: #3ccfae; color: #15201d; display: grid; place-items: center; font-size: 15px; }
+
+  /* E2 타임라인 */
+  .E2 .tl { padding: 8px 20px 0 20px; }
+  .E2 .item { display: grid; grid-template-columns: 14px 1fr; column-gap: 14px; padding-bottom: 26px; }
+  .E2 .rail { display: grid; justify-items: center; grid-template-rows: 14px 1fr 14px; }
+  .E2 .dq { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #b9c2be; margin-top: 6px; }
+  .E2 .rl { width: 2px; background: #e6eae8; margin: 4px 0; }
+  .E2 .da { width: 10px; height: 10px; border-radius: 50%; background: #3ccfae; margin-top: 6px; }
+  .E2 .meta2 { font-size: 13px; color: #8a9490; display: flex; gap: 6px; align-items: center; }
+  .E2 .q2 { margin-top: 2px; font-size: 17px; font-weight: 700; line-height: 1.45; }
+  .E2 .a2 { margin-top: 14px; }
+  .E2 .a2 .meta2 { color: #0b6b58; font-weight: 700; }
+  .E2 .a2 p { margin-top: 2px; font-size: 16px; line-height: 1.55; color: #2c3330; }
+
+  /* E3 카드 스레드 */
+  .E3 { background: #f2f4f3; }
+  .E3 .head { padding-bottom: 14px; }
+  .E3 .ask { background: #fff; border: 0; }
+  .E3 .cards { padding: 8px 12px; display: grid; gap: 12px; }
+  .E3 .th { background: #fff; border-radius: 22px; border: 0; padding: 18px 16px 6px; }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9Zm11 1h1.5a2.5 2.5 0 0 1 0 5H16"/></symbol>
+  <symbol id="lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></g></symbol>
+  <symbol id="heart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z"/></symbol>
+  <symbol id="share" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></symbol>
+</svg>
+
 <div class="wrap">
-  <h1>손님 화면 시안 5개</h1>
-  <p>같은 가게 · 같은 질문 3개로 그린 손님 화면입니다. 옆으로 넘겨 보시고, 마음에 드는 시안(또는 섞고 싶은 부분)을 알려 주세요.</p>
+  <h1>손님 화면 시안 2차 · A와 E 계열</h1>
+  <p>B · C · D는 폐기. 각 계열 맨 앞이 지난번 원본이고, 그 뒤가 파생형 3개입니다. 옆으로 넘겨 보세요.</p>
 
-  <div class="grid">
+  <!-- ================= A 계열 ================= -->
+  <section class="family">
+    <h2>A 계열 · 에스크 라이트</h2>
+    <div class="grid">
 
-    <!-- A -->
-    <section class="opt">
-      <h2>A. 에스크 라이트</h2>
-      <p class="desc">에스크 구조 그대로, 더 정돈된 밝은 화면. 가게가 쓴 글처럼 인용 질문 + 답변.</p>
-      <div class="phone A"><div class="scroll">
-        <div class="bar">Q 플레이스 <span>공유</span></div>
-        <div class="prof">
-          <h3>연남동 로스터리</h3>
-          <p class="intro">평일 8시, 주말 10시에 열어요</p>
-          <p class="meta"><span class="lock"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>익명 보장</span> · 답변 <b>10</b></p>
-          <div class="btns"><div class="btn p">익명으로 질문하기</div><div class="btn s">공유</div></div>
-        </div>
-        <div class="tab"><div class="on">답변 10</div></div>
-        <article class="post">
-          <div class="av"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9Zm11 1h1.5a2.5 2.5 0 0 1 0 5H16"/></svg></div>
-          <div>
-            <p class="who">연남동 로스터리<span>· 3분 전</span></p>
-            <div class="quote"><p class="lab"><i></i>익명님의 질문 · 궁금해요</p><p>와이파이 비밀번호가 뭐예요?</p></div>
-            <p class="ans">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p>
+      <div class="opt">
+        <h3>A (원본)</h3>
+        <p class="desc">에스크 구조. 가게가 쓴 글 안에 익명 질문 인용 + 답변.</p>
+        <div class="phone A"><div class="scroll">
+          <div class="bar">Q 플레이스 <span>공유</span></div>
+          <div class="prof">
+            <h4>연남동 로스터리</h4>
+            <p class="intro">평일 8시, 주말 10시에 열어요</p>
+            <p class="meta"><span class="lockline"><svg width="14" height="14"><use href="#lock"/></svg>익명 보장</span> · 답변 <b>10</b></p>
+            <div class="btns"><div class="btn p">익명으로 질문하기</div><div class="btn s">공유</div></div>
           </div>
-        </article>
-        <article class="post">
-          <div class="av"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9Zm11 1h1.5a2.5 2.5 0 0 1 0 5H16"/></svg></div>
-          <div>
-            <p class="who">연남동 로스터리<span>· 1일 전</span></p>
-            <div class="quote"><p class="lab"><i></i>익명님의 제안</p><p>테라스에 담요가 있으면 좋겠어요</p></div>
-            <p class="ans">좋은 생각이에요. 다음 주부터 준비할게요.</p>
-          </div>
-        </article>
-        <article class="post">
-          <div class="av"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9Zm11 1h1.5a2.5 2.5 0 0 1 0 5H16"/></svg></div>
-          <div>
-            <p class="who">연남동 로스터리<span>· 2일 전</span></p>
-            <div class="quote"><p class="lab"><i></i>익명님의 아쉬운 점</p><p>음악 소리가 조금 커요</p></div>
-            <p class="ans">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p>
-          </div>
-        </article>
-      </div></div>
-    </section>
-
-    <!-- B -->
-    <section class="opt">
-      <h2>B. 매거진 Q&amp;A</h2>
-      <p class="desc">인터뷰 기사처럼 Q. / A.로 읽히는 구성. 큰 글자, 넓은 여백, 장식 없음.</p>
-      <div class="phone B"><div class="scroll">
-        <div class="head">
-          <p class="kicker">익명 Q&amp;A · 답변 10</p>
-          <h3>연남동<br>로스터리</h3>
-          <p>평일 8시, 주말 10시에 열어요</p>
-        </div>
-        <div class="qa">
-          <div class="row"><span class="mk q">Q.</span><div><p class="tag">익명 · 궁금해요</p><p class="qtext">와이파이 비밀번호가 뭐예요?</p></div></div>
-          <div class="row"><span class="mk a">A.</span><div><p class="atext">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p><p class="sig">사장님 · 3분 전</p></div></div>
-        </div>
-        <div class="qa">
-          <div class="row"><span class="mk q">Q.</span><div><p class="tag">익명 · 제안해요</p><p class="qtext">테라스에 담요가 있으면 좋겠어요</p></div></div>
-          <div class="row"><span class="mk a">A.</span><div><p class="atext">좋은 생각이에요. 다음 주부터 준비할게요.</p><p class="sig">사장님 · 1일 전</p></div></div>
-        </div>
-        <div class="qa">
-          <div class="row"><span class="mk q">Q.</span><div><p class="tag">익명 · 아쉬워요</p><p class="qtext">음악 소리가 조금 커요</p></div></div>
-          <div class="row"><span class="mk a">A.</span><div><p class="atext">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p><p class="sig">사장님 · 2일 전</p></div></div>
-        </div>
-        <div style="height:100px"></div>
+          <div class="tab"><div class="on">답변 10</div></div>
+          <article class="post"><div class="av"><svg width="20" height="20"><use href="#cup"/></svg></div><div><p class="who">연남동 로스터리<span>· 3분 전</span></p><div class="quote"><p class="lab"><i></i>익명님의 질문 · 궁금해요</p><p>와이파이 비밀번호가 뭐예요?</p></div><p class="ans">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p></div></article>
+          <article class="post"><div class="av"><svg width="20" height="20"><use href="#cup"/></svg></div><div><p class="who">연남동 로스터리<span>· 1일 전</span></p><div class="quote"><p class="lab"><i></i>익명님의 제안</p><p>테라스에 담요가 있으면 좋겠어요</p></div><p class="ans">좋은 생각이에요. 다음 주부터 준비할게요.</p></div></article>
+          <article class="post"><div class="av"><svg width="20" height="20"><use href="#cup"/></svg></div><div><p class="who">연남동 로스터리<span>· 2일 전</span></p><div class="quote"><p class="lab"><i></i>익명님의 아쉬운 점</p><p>음악 소리가 조금 커요</p></div><p class="ans">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p></div></article>
+        </div></div>
       </div>
-      <div class="cta">익명으로 남기기</div></div>
-    </section>
 
-    <!-- C -->
-    <section class="opt">
-      <h2>C. 대화형</h2>
-      <p class="desc">질문은 왼쪽, 사장님 답변은 오른쪽 말풍선. 가게와 대화하는 느낌. 입력창이 아래에 늘 있음.</p>
-      <div class="phone C"><div class="scroll">
-        <div class="head">
-          <div class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9Zm11 1h1.5a2.5 2.5 0 0 1 0 5H16"/></svg></div>
-          <div><h3>연남동 로스터리</h3><p>익명 보장 · 답변 10</p></div>
-        </div>
-        <p class="day">2일 전</p>
-        <div class="msg">
-          <div class="l"><p class="lab">익명 손님</p><span class="bub"><span class="kind k-c">아쉬워요</span>음악 소리가 조금 커요</span></div>
-          <div class="r"><p class="lab">사장님</p><span class="bub">말씀 감사해요. 오후엔 볼륨을 줄였어요.</span></div>
-        </div>
-        <p class="day">1일 전</p>
-        <div class="msg">
-          <div class="l"><p class="lab">익명 손님</p><span class="bub"><span class="kind k-s">제안해요</span>테라스에 담요가 있으면 좋겠어요</span></div>
-          <div class="r"><p class="lab">사장님</p><span class="bub">좋은 생각이에요. 다음 주부터 준비할게요.</span></div>
-        </div>
-        <p class="day">오늘</p>
-        <div class="msg">
-          <div class="l"><p class="lab">익명 손님</p><span class="bub"><span class="kind k-q">궁금해요</span>와이파이 비밀번호가 뭐예요?</span></div>
-          <div class="r"><p class="lab">사장님</p><span class="bub">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</span></div>
-        </div>
-        <div style="height:90px"></div>
+      <div class="opt">
+        <h3>A1 · 카드형</h3>
+        <p class="desc">회색 바탕 위 흰 카드. 가게 머리에 가게 색을 옅게. 민트 버튼.</p>
+        <div class="phone A A1"><div class="scroll">
+          <div class="bar">Q 플레이스 <span>공유</span></div>
+          <div class="prof">
+            <h4>연남동 로스터리</h4>
+            <p class="intro">평일 8시, 주말 10시에 열어요</p>
+            <p class="meta"><span class="lockline"><svg width="14" height="14"><use href="#lock"/></svg>익명 보장</span> · 답변 <b>10</b></p>
+            <div class="btns"><div class="btn p">익명으로 질문하기</div><div class="btn s">공유</div></div>
+          </div>
+          <div class="list">
+            <article class="post"><div class="av"><svg width="20" height="20"><use href="#cup"/></svg></div><div><p class="who">연남동 로스터리<span>· 3분 전</span></p><div class="quote"><p class="lab"><i></i>익명님의 질문 · 궁금해요</p><p>와이파이 비밀번호가 뭐예요?</p></div><p class="ans">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p></div></article>
+            <article class="post"><div class="av"><svg width="20" height="20"><use href="#cup"/></svg></div><div><p class="who">연남동 로스터리<span>· 1일 전</span></p><div class="quote"><p class="lab"><i></i>익명님의 제안</p><p>테라스에 담요가 있으면 좋겠어요</p></div><p class="ans">좋은 생각이에요. 다음 주부터 준비할게요.</p></div></article>
+            <article class="post"><div class="av"><svg width="20" height="20"><use href="#cup"/></svg></div><div><p class="who">연남동 로스터리<span>· 2일 전</span></p><div class="quote"><p class="lab"><i></i>익명님의 아쉬운 점</p><p>음악 소리가 조금 커요</p></div><p class="ans">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p></div></article>
+          </div>
+        </div></div>
       </div>
-      <div class="input">익명으로 남기기… <b>↑</b></div></div>
-    </section>
 
-    <!-- D -->
-    <section class="opt">
-      <h2>D. 다크</h2>
-      <p class="desc">에스크 다크 모드 느낌. 어두운 바탕에 민트 포인트, 답변은 민트 세로선으로 구분.</p>
-      <div class="phone D"><div class="scroll">
-        <div class="bar">Q 플레이스</div>
-        <div class="prof">
-          <h3>연남동 로스터리</h3>
-          <p class="intro">평일 8시, 주말 10시에 열어요</p>
-          <div class="meta"><span class="chip m">익명 보장</span><span class="chip">답변 10</span></div>
-          <div class="btn">익명으로 남기기</div>
+      <div class="opt">
+        <h3>A2 · 미니멀</h3>
+        <p class="desc">글마다 아바타 · 이름 생략. 인용 질문 + 답변만. 버튼은 아래 고정.</p>
+        <div class="phone A A2"><div class="scroll">
+          <div class="bar">Q 플레이스 <span>공유</span></div>
+          <div class="prof">
+            <h4>연남동 로스터리</h4>
+            <p class="intro">평일 8시, 주말 10시에 열어요</p>
+            <p class="meta"><span class="lockline"><svg width="14" height="14"><use href="#lock"/></svg>익명 보장</span> · 답변 <b>10</b></p>
+          </div>
+          <div class="tab"><div class="on">답변 10</div></div>
+          <article class="post"><div class="quote"><p class="lab"><span class="dot" style="background:#5aa2e6"></span>궁금해요</p><p>와이파이 비밀번호가 뭐예요?</p></div><p class="ans">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p><p class="when">사장님 답변 · 3분 전</p></article>
+          <article class="post"><div class="quote"><p class="lab"><span class="dot" style="background:#e3b008"></span>제안해요</p><p>테라스에 담요가 있으면 좋겠어요</p></div><p class="ans">좋은 생각이에요. 다음 주부터 준비할게요.</p><p class="when">사장님 답변 · 1일 전</p></article>
+          <article class="post"><div class="quote"><p class="lab"><span class="dot" style="background:#e86a4a"></span>아쉬워요</p><p>음악 소리가 조금 커요</p></div><p class="ans">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p><p class="when">사장님 답변 · 2일 전</p></article>
+          <div style="height:90px"></div>
         </div>
-        <article class="post"><div class="top"><span>익명 · 궁금해요</span><span>3분 전</span></div><p class="q">와이파이 비밀번호가 뭐예요?</p><div class="a"><p class="who">사장님 답변</p><p>영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p></div></article>
-        <article class="post"><div class="top"><span>익명 · 제안해요</span><span>1일 전</span></div><p class="q">테라스에 담요가 있으면 좋겠어요</p><div class="a"><p class="who">사장님 답변</p><p>좋은 생각이에요. 다음 주부터 준비할게요.</p></div></article>
-        <article class="post"><div class="top"><span>익명 · 아쉬워요</span><span>2일 전</span></div><p class="q">음악 소리가 조금 커요</p><div class="a"><p class="who">사장님 답변</p><p>말씀 감사해요. 오후엔 볼륨을 줄였어요.</p></div></article>
-      </div></div>
-    </section>
+        <div class="cta">익명으로 남기기</div></div>
+      </div>
 
-    <!-- E -->
-    <section class="opt">
-      <h2>E. 스레드형</h2>
-      <p class="desc">Threads처럼 익명 질문에서 사장님 답변으로 선이 이어짐. 박스 없이 가볍고 세련된 흰 화면.</p>
-      <div class="phone E"><div class="scroll">
-        <div class="head">
-          <div><h3>연남동 로스터리</h3><p>평일 8시, 주말 10시에 열어요</p><p class="meta">익명 보장 · 답변 <b>10</b></p></div>
+      <div class="opt">
+        <h3>A3 · 소셜</h3>
+        <p class="desc">글마다 "도움됐어요" + 공유, 탭은 최신 · 도움된 순. (공감 기능 추가 필요)</p>
+        <div class="phone A A3"><div class="scroll">
+          <div class="bar">Q 플레이스 <span>공유</span></div>
+          <div class="prof">
+            <h4>연남동 로스터리</h4>
+            <p class="intro">평일 8시, 주말 10시에 열어요</p>
+            <p class="meta"><span class="lockline"><svg width="14" height="14"><use href="#lock"/></svg>익명 보장</span> · 답변 <b>10</b></p>
+            <div class="btns"><div class="btn p">익명으로 질문하기</div><div class="btn s">공유</div></div>
+          </div>
+          <div class="tab"><div class="on">최신</div><div>도움된 순</div></div>
+          <article class="post"><div class="av"><svg width="20" height="20"><use href="#cup"/></svg></div><div><p class="who">연남동 로스터리<span>· 3분 전</span></p><div class="quote"><p class="lab"><i></i>익명님의 질문 · 궁금해요</p><p>와이파이 비밀번호가 뭐예요?</p></div><p class="ans">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p><div class="acts"><span class="on"><svg width="14" height="14"><use href="#heart"/></svg>도움됐어요 12</span><span><svg width="14" height="14"><use href="#share"/></svg>공유</span></div></div></article>
+          <article class="post"><div class="av"><svg width="20" height="20"><use href="#cup"/></svg></div><div><p class="who">연남동 로스터리<span>· 1일 전</span></p><div class="quote"><p class="lab"><i></i>익명님의 제안</p><p>테라스에 담요가 있으면 좋겠어요</p></div><p class="ans">좋은 생각이에요. 다음 주부터 준비할게요.</p><div class="acts"><span><svg width="14" height="14"><use href="#heart"/></svg>도움됐어요 5</span><span><svg width="14" height="14"><use href="#share"/></svg>공유</span></div></div></article>
+          <article class="post"><div class="av"><svg width="20" height="20"><use href="#cup"/></svg></div><div><p class="who">연남동 로스터리<span>· 2일 전</span></p><div class="quote"><p class="lab"><i></i>익명님의 아쉬운 점</p><p>음악 소리가 조금 커요</p></div><p class="ans">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p><div class="acts"><span><svg width="14" height="14"><use href="#heart"/></svg>도움됐어요 3</span><span><svg width="14" height="14"><use href="#share"/></svg>공유</span></div></div></article>
+        </div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= E 계열 ================= -->
+  <section class="family">
+    <h2>E 계열 · 스레드형</h2>
+    <div class="grid">
+
+      <div class="opt">
+        <h3>E (원본)</h3>
+        <p class="desc">익명 질문에서 가게 답변으로 선이 이어짐. 박스 없음.</p>
+        <div class="phone E"><div class="scroll">
+          <div class="head"><h4>연남동 로스터리</h4><p>평일 8시, 주말 10시에 열어요</p><p class="meta">익명 보장 · 답변 <b>10</b></p></div>
+          <div class="ask">손님 속마음을 익명으로 <b>남기기</b></div>
+          <article class="th"><div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="16" height="16"><use href="#cup"/></svg></span></div><div><p class="name">익명 <span class="k k-q">궁금해요</span> <span class="t">3분 전</span></p><p class="txt">와이파이 비밀번호가 뭐예요?</p><div class="gap"></div><div class="reply"><p class="name">연남동 로스터리</p><p class="txt">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p></div></div></article>
+          <article class="th"><div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="16" height="16"><use href="#cup"/></svg></span></div><div><p class="name">익명 <span class="k k-s">제안해요</span> <span class="t">1일 전</span></p><p class="txt">테라스에 담요가 있으면 좋겠어요</p><div class="gap"></div><div class="reply"><p class="name">연남동 로스터리</p><p class="txt">좋은 생각이에요. 다음 주부터 준비할게요.</p></div></div></article>
+          <article class="th"><div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="16" height="16"><use href="#cup"/></svg></span></div><div><p class="name">익명 <span class="k k-c">아쉬워요</span> <span class="t">2일 전</span></p><p class="txt">음악 소리가 조금 커요</p><div class="gap"></div><div class="reply"><p class="name">연남동 로스터리</p><p class="txt">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p></div></div></article>
+        </div></div>
+      </div>
+
+      <div class="opt">
+        <h3>E1 · 민트 강조</h3>
+        <p class="desc">연결선과 가게 쪽을 민트로. 종류는 글자색만. 아래에 떠 있는 입력창.</p>
+        <div class="phone E E1"><div class="scroll">
+          <div class="head"><h4>연남동 로스터리</h4><p>평일 8시, 주말 10시에 열어요</p><p class="meta"><span class="lockline"><svg width="14" height="14"><use href="#lock"/></svg>익명 보장</span> · 답변 <b>10</b></p></div>
+          <article class="th"><div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="18" height="18"><use href="#cup"/></svg></span></div><div><p class="name">익명 <span class="k k-q">궁금해요</span> <span class="t">3분 전</span></p><p class="txt">와이파이 비밀번호가 뭐예요?</p><div class="gap"></div><div class="reply"><p class="name">연남동 로스터리</p><p class="txt">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p></div></div></article>
+          <article class="th"><div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="18" height="18"><use href="#cup"/></svg></span></div><div><p class="name">익명 <span class="k k-s">제안해요</span> <span class="t">1일 전</span></p><p class="txt">테라스에 담요가 있으면 좋겠어요</p><div class="gap"></div><div class="reply"><p class="name">연남동 로스터리</p><p class="txt">좋은 생각이에요. 다음 주부터 준비할게요.</p></div></div></article>
+          <article class="th"><div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="18" height="18"><use href="#cup"/></svg></span></div><div><p class="name">익명 <span class="k k-c">아쉬워요</span> <span class="t">2일 전</span></p><p class="txt">음악 소리가 조금 커요</p><div class="gap"></div><div class="reply"><p class="name">연남동 로스터리</p><p class="txt">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p></div></div></article>
+          <div style="height:90px"></div>
         </div>
-        <div class="ask">손님 속마음을 익명으로 <b>남기기</b></div>
-        <div style="height:8px"></div>
-        <article class="th">
-          <div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9Zm11 1h1.5a2.5 2.5 0 0 1 0 5H16"/></svg></span></div>
-          <div><p class="name">익명<span class="k k-q">궁금해요</span><span>3분 전</span></p><p class="txt">와이파이 비밀번호가 뭐예요?</p><div class="gap"></div>
-            <div class="reply"><p class="name">연남동 로스터리</p><p class="txt">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p></div></div>
-        </article>
-        <article class="th">
-          <div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9Zm11 1h1.5a2.5 2.5 0 0 1 0 5H16"/></svg></span></div>
-          <div><p class="name">익명<span class="k k-s">제안해요</span><span>1일 전</span></p><p class="txt">테라스에 담요가 있으면 좋겠어요</p><div class="gap"></div>
-            <div class="reply"><p class="name">연남동 로스터리</p><p class="txt">좋은 생각이에요. 다음 주부터 준비할게요.</p></div></div>
-        </article>
-        <article class="th">
-          <div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9Zm11 1h1.5a2.5 2.5 0 0 1 0 5H16"/></svg></span></div>
-          <div><p class="name">익명<span class="k k-c">아쉬워요</span><span>2일 전</span></p><p class="txt">음악 소리가 조금 커요</p><div class="gap"></div>
-            <div class="reply"><p class="name">연남동 로스터리</p><p class="txt">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p></div></div>
-        </article>
-      </div></div>
-    </section>
+        <div class="dock">익명으로 남기기… <b>보내기</b></div></div>
+      </div>
 
-  </div>
+      <div class="opt">
+        <h3>E2 · 타임라인</h3>
+        <p class="desc">아바타 없이 점과 선으로만 질문 → 답변. 가장 가볍고 여백이 많음.</p>
+        <div class="phone E E2"><div class="scroll">
+          <div class="head"><h4>연남동 로스터리</h4><p>평일 8시, 주말 10시에 열어요</p><p class="meta">익명 보장 · 답변 <b>10</b></p></div>
+          <div class="ask">손님 속마음을 익명으로 <b>남기기</b></div>
+          <div class="tl">
+            <div class="item"><div class="rail"><span class="dq"></span><span class="rl"></span><span class="da"></span></div><div><p class="meta2">익명 · 궁금해요 · 3분 전</p><p class="q2">와이파이 비밀번호가 뭐예요?</p><div class="a2"><p class="meta2">사장님</p><p>영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p></div></div></div>
+            <div class="item"><div class="rail"><span class="dq"></span><span class="rl"></span><span class="da"></span></div><div><p class="meta2">익명 · 제안해요 · 1일 전</p><p class="q2">테라스에 담요가 있으면 좋겠어요</p><div class="a2"><p class="meta2">사장님</p><p>좋은 생각이에요. 다음 주부터 준비할게요.</p></div></div></div>
+            <div class="item"><div class="rail"><span class="dq"></span><span class="rl"></span><span class="da"></span></div><div><p class="meta2">익명 · 아쉬워요 · 2일 전</p><p class="q2">음악 소리가 조금 커요</p><div class="a2"><p class="meta2">사장님</p><p>말씀 감사해요. 오후엔 볼륨을 줄였어요.</p></div></div></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="opt">
+        <h3>E3 · 카드 스레드</h3>
+        <p class="desc">스레드 하나를 흰 카드 하나에. 회색 바탕이라 글이 또렷하게 나뉨.</p>
+        <div class="phone E E3"><div class="scroll">
+          <div class="head"><h4>연남동 로스터리</h4><p>평일 8시, 주말 10시에 열어요</p><p class="meta">익명 보장 · 답변 <b>10</b></p></div>
+          <div class="ask">손님 속마음을 익명으로 <b>남기기</b></div>
+          <div class="cards">
+            <article class="th"><div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="16" height="16"><use href="#cup"/></svg></span></div><div><p class="name">익명 <span class="k k-q">궁금해요</span> <span class="t">3분 전</span></p><p class="txt">와이파이 비밀번호가 뭐예요?</p><div class="gap"></div><div class="reply"><p class="name">연남동 로스터리</p><p class="txt">영수증 하단에 적혀 있어요. 카운터에 물어보셔도 돼요!</p></div></div></article>
+            <article class="th"><div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="16" height="16"><use href="#cup"/></svg></span></div><div><p class="name">익명 <span class="k k-s">제안해요</span> <span class="t">1일 전</span></p><p class="txt">테라스에 담요가 있으면 좋겠어요</p><div class="gap"></div><div class="reply"><p class="name">연남동 로스터리</p><p class="txt">좋은 생각이에요. 다음 주부터 준비할게요.</p></div></div></article>
+            <article class="th"><div class="col"><span class="anon">?</span><span class="line"></span><span class="shop"><svg width="16" height="16"><use href="#cup"/></svg></span></div><div><p class="name">익명 <span class="k k-c">아쉬워요</span> <span class="t">2일 전</span></p><p class="txt">음악 소리가 조금 커요</p><div class="gap"></div><div class="reply"><p class="name">연남동 로스터리</p><p class="txt">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p></div></div></article>
+          </div>
+        </div></div>
+      </div>
+
+    </div>
+  </section>
 </div>
 </body>
 </html>

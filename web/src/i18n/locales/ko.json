@@ -39,7 +39,8 @@
     "generic": "문제가 생겼어요. 잠시 후 다시 시도해 주세요.",
     "cantPost": "지금은 이 가게에 피드백을 보낼 수 없어요.",
     "agreeRequired": "필수 항목에 동의해 주세요.",
-    "wrongPassword": "현재 비밀번호가 맞지 않아요."
+    "wrongPassword": "현재 비밀번호가 맞지 않아요.",
+    "bannedStore": "이 가게가 정한 금지어가 들어 있어요. 다른 말로 다시 써 주세요."
   },
   "lang": {
     "label": "언어"

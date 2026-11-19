@@ -39,7 +39,8 @@
     "generic": "Something went wrong. Please try again.",
     "cantPost": "You can't send feedback to this place right now.",
     "agreeRequired": "Please accept the required items.",
-    "wrongPassword": "Current password is incorrect."
+    "wrongPassword": "Current password is incorrect.",
+    "bannedStore": "This contains a word this place doesn't allow. Please rephrase."
   },
   "lang": {
     "label": "Language"

@@ -63,7 +63,7 @@ export function checkQuestion(v: string, storeWords: string[] = []): FieldError 
   const s = v.trim();
   if (s.length < LIMITS.questionMin) return 'errors.questionShort';
   if (s.length > LIMITS.questionMax) return 'errors.tooLong';
-  if (hasBannedWord(s, storeWords)) return 'errors.banned';
+  if (hasBannedWord(s, storeWords)) return 'errors.bannedStore'; // 손님 피드백용 문구
   return null;
 }
 

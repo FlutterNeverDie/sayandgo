@@ -49,6 +49,7 @@ describe('입력 검증', () => {
     expect(checkQuestion('아')).toBe('errors.questionShort');
     expect(checkQuestion('  아아  ')).toBe('errors.questionShort');
     expect(checkQuestion('아아아')).toBeNull();
+    expect(checkQuestion('옆집 경쟁카페 가세요', ['경쟁카페'])).toBe('errors.bannedStore');
     expect(checkQuestion('가'.repeat(501))).toBe('errors.tooLong');
     expect(checkQuestion('주차 돼요?')).toBeNull();
   });

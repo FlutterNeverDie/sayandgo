@@ -63,7 +63,7 @@ export function OwnerShell({ storeName, title, back, children }: { storeName: st
             </>
           ) : (
             <>
-              <Link to="/inbox" className="wordmark">
+              <Link to="/" className="wordmark">
                 <AppMark size={26} />
                 {t('app.name')}
               </Link>

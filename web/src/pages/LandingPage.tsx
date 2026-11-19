@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../app/auth';
+import { SessionButton } from '../components/ui/SessionButton';
 import { HeroCarousel } from '../components/landing/HeroScenes';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
 import type { QuestionKind } from '../lib/types';
@@ -11,14 +12,12 @@ type Ex = { name: string; kind: QuestionKind; q: string; a: string };
 /** 홈: QR 스탠드 그림 → 한 줄 설명 · 시작 버튼 → 손님 쪽지 예시 → 자주 묻는 질문 */
 export function LandingPage() {
   const { t } = useTranslation();
-  const { user, ready } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     document.body.classList.add('warm');
     return () => document.body.classList.remove('warm');
   }, []);
-
-  if (ready && user?.emailVerified) return <Navigate to="/inbox" replace />;
 
   const examples = t('landing.examples', { returnObjects: true }) as Ex[];
   const notes = examples.filter((e) => e.kind === 'complaint' || e.kind === 'suggestion').slice(0, 3);
@@ -26,15 +25,15 @@ export function LandingPage() {
 
   return (
     <>
-      <PublicTopbar end={<Link to="/login" className="btn btn--text btn--sm">{t('landing.login')}</Link>} />
+      <PublicTopbar end={<SessionButton />} />
       <main className="page">
         <HeroCarousel name={examples[0].name} />
 
         <section className="home-lead">
           <h1 className="landing__title">{t('landing.titleV2')}</h1>
           <p className="landing__lead">{t('landing.leadV2')}</p>
-          <Link to="/signup" className="btn btn--black btn--block btn--lg" style={{ marginTop: 18 }}>
-            {t('landing.start')}
+          <Link to={user?.emailVerified ? '/share' : '/signup'} className="btn btn--black btn--block btn--lg" style={{ marginTop: 18 }}>
+            {user?.emailVerified ? t('landing.myQr') : t('landing.start')}
           </Link>
         </section>
 

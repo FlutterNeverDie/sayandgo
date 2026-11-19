@@ -703,3 +703,10 @@ body.warm .topbar { background: #f3f2ef; }
 .hero-carousel__dots { position: absolute; left: 0; right: 0; bottom: 12px; display: flex; justify-content: center; gap: 6px; }
 .hero-carousel__dots button { width: 8px; height: 8px; border-radius: 4px; border: 0; padding: 0; background: rgba(21, 32, 29, 0.25); cursor: pointer; transition: width 200ms var(--ease), background-color 200ms var(--ease); }
 .hero-carousel__dots button[aria-selected='true'] { width: 22px; background: var(--text); }
+
+/* 위쪽 바: 로그인한 사장님의 내 가게 버튼 */
+.session-btn {
+  display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px 0 6px; border-radius: 18px;
+  background: var(--surface); color: var(--text); text-decoration: none; font-size: var(--fs-14); font-weight: 700; max-width: 160px;
+}
+.session-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

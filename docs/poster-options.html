@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light">
+<title>QR 포스터 디자인 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#fff;color:#15201d;font-family:"Pretendard Variable",Pretendard,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;word-break:keep-all}
+:root{--mint:#3ccfae;--mint-ink:#0b6b58;--mint-soft:#e2f6ef;--ink:#15201d;--muted:#5f6b67}
+.wrap{padding:32px 24px 64px;max-width:1500px}
+h1{font-size:24px;font-weight:800} .lead{color:#5b6b67;margin-top:6px}
+h2{font-size:20px;font-weight:800;margin:40px 0 14px}
+.row{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.item h3{font-size:16px;font-weight:800;margin-bottom:4px} .item p.d{font-size:13px;color:#5b6b67;margin-bottom:10px;max-width:260px}
+.paper{background:#e9ecea;padding:14px;border-radius:14px}
+svg.qr{display:block}
+/* 포스터 공통: 1080x1350 비율을 240x300으로 */
+.pA,.pB,.pC{width:240px;height:300px;position:relative;overflow:hidden;text-align:center}
+.pA{background:#fff;padding:22px 18px 0}
+.pA b{font-size:17px;font-weight:800;display:block}
+.pA svg.qr{width:150px;height:150px;margin:14px auto 10px}
+.pA .cap{font-size:10.5px;font-weight:600} .pA .cap2{font-size:9px;color:#5f6b67;margin-top:2px}
+.band{position:absolute;left:0;right:0;bottom:0;height:30px;background:var(--mint);font-size:11px;font-weight:800;display:grid;place-items:center}
+.pB{background:#fff;padding:24px 20px 0;text-align:left}
+.pB .big{font-size:26px;font-weight:900;line-height:1.15;letter-spacing:-.03em}
+.pB .big em{font-style:normal;color:var(--mint-ink)}
+.pB .sub{font-size:10px;color:#5f6b67;margin-top:6px}
+.pB .bot{position:absolute;left:20px;right:20px;bottom:40px;display:flex;align-items:flex-end;justify-content:space-between}
+.pB svg.qr{width:110px;height:110px} .pB .nm{font-size:12px;font-weight:800;text-align:right}
+.pC{background:#8cc8ff;padding:18px}
+.pC .card{background:#fff;border-radius:16px;height:100%;padding:16px 14px;display:flex;flex-direction:column;align-items:center}
+.pC .ic{width:40px;height:40px;border-radius:12px;background:#8cc8ff;display:grid;place-items:center;color:#15201d}
+.pC b{font-size:15px;font-weight:800;margin-top:6px} .pC svg.qr{width:120px;height:120px;margin:10px 0 8px}
+.pC .cap{font-size:10px;font-weight:600} .pC .brand{margin-top:auto;font-size:10px;font-weight:800;color:#0b6b58}
+/* D 텐트: A4 가로를 반으로 접음 */
+.pD{width:260px;height:368px;background:#fff;position:relative;display:grid;grid-template-rows:1fr 1fr}
+.pD .half{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.pD .half.top{transform:rotate(180deg);border-bottom:1px dashed #b9c2be}
+.pD svg.qr{width:96px;height:96px;flex:none} .pD b{font-size:14px;font-weight:800;display:block} .pD .cap{font-size:9.5px;font-weight:600;margin-top:4px}
+.pD .fold{position:absolute;left:0;right:0;top:50%;font-size:9px;color:#8a9490;text-align:center;transform:translateY(-50%);background:#fff;width:max-content;margin:auto;padding:0 6px}
+.pD .tag{display:inline-block;margin-top:6px;background:var(--mint);font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:4px}
+/* E 스티커 */
+.pE{width:200px;height:200px;background:#15201d;border-radius:28px;color:#fff;display:grid;place-items:center;text-align:center;padding:14px}
+.pE .w{background:#fff;border-radius:16px;padding:10px} .pE svg.qr{width:96px;height:96px}
+.pE .t{font-size:11px;font-weight:800;margin-top:8px} .pE .t span{color:var(--mint)}
+/* 화면 시안 */
+.phone{width:360px;border-radius:32px;border:1px solid #e3e7e5;background:#f2f4f3;overflow:hidden}
+.ph-bar{height:52px;display:flex;align-items:center;padding:0 16px;font-weight:700;gap:8px}
+.ph{padding:0 16px 20px}
+.ph h4{font-size:22px;font-weight:800;margin:6px 0 12px}
+.stage{background:#fff;border-radius:20px;padding:16px;display:grid;place-items:center}
+.lbl{font-size:13px;font-weight:700;margin:16px 0 8px}
+.thumbs{display:flex;gap:8px;overflow-x:auto}
+.th{flex:none;width:58px;height:72px;border-radius:10px;background:#fff;border:2px solid transparent;display:grid;place-items:center;font-size:11px;font-weight:800;color:#5f6b67}
+.th.on{border-color:#15201d;color:#15201d}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:#e3e7e5;border-radius:12px;padding:4px;gap:4px}
+.seg span{height:36px;border-radius:9px;display:grid;place-items:center;font-size:13px;color:#5f6b67}
+.seg span.on{background:#fff;color:#15201d;font-weight:800}
+.inp{background:#fff;border-radius:12px;padding:12px;font-size:13px;color:#15201d;margin-top:8px}
+.inp small{display:block;color:#8a9490;font-size:11px;margin-bottom:2px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.b{height:48px;border-radius:14px;display:grid;place-items:center;font-weight:700;font-size:15px}
+.b.k{background:#15201d;color:#fff} .b.l{background:#fff}
+table{border-collapse:collapse;margin-top:10px;font-size:14px;max-width:900px} td{border-top:1px solid #e6eae8;padding:9px 8px;vertical-align:top} td:first-child{font-weight:700;white-space:nowrap}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><symbol id="qr" viewBox="0 0 29 29"><path fill="#ffffff" d="M0 0h29v29H0z"/><path stroke="#15201d" d="M0 0.5h7m4 0h1m4 0h4m2 0h7M0 1.5h1m5 0h1m2 0h3m3 0h3m2 0h1m1 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h1m1 0h2m2 0h2m2 0h2m2 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m3 0h2m2 0h1m1 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m1 0h1m3 0h2m4 0h3m1 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m1 0h1m2 0h1m1 0h3m4 0h1m1 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h1M0 8.5h1m1 0h5m3 0h2m2 0h4m4 0h5M1 9.5h4m5 0h1m5 0h1m1 0h7m3 0h1M0 10.5h3m1 0h1m1 0h2m1 0h1m2 0h1m2 0h1m4 0h1m1 0h3M1 11.5h1m1 0h2m9 0h2m3 0h4m1 0h2m1 0h1M0 12.5h2m3 0h3m1 0h3m4 0h2m7 0h2M1 13.5h1m3 0h1m3 0h2m1 0h3m1 0h1m2 0h6m3 0h1M0 14.5h1m1 0h2m1 0h2m1 0h1m1 0h1m2 0h3m1 0h1m2 0h1m2 0h4M0 15.5h2m2 0h2m1 0h1m3 0h3m4 0h1m2 0h1m5 0h1M0 16.5h2m2 0h1m1 0h1m1 0h1m5 0h5m4 0h1m1 0h2M0 17.5h1m1 0h4m3 0h1m1 0h2m4 0h8m1 0h1m1 0h1M0 18.5h1m1 0h6m1 0h1m1 0h1m3 0h3m5 0h2m1 0h1M0 19.5h1m1 0h1m1 0h2m4 0h1m3 0h3m5 0h1m1 0h1m2 0h1M0 20.5h1m1 0h5m2 0h1m7 0h1m2 0h5m1 0h3M8 21.5h1m3 0h3m1 0h1m2 0h2m3 0h5M0 22.5h7m6 0h4m1 0h3m1 0h1m1 0h3M0 23.5h1m5 0h1m1 0h2m1 0h1m1 0h1m2 0h1m2 0h2m3 0h1M0 24.5h1m1 0h3m1 0h1m1 0h1m1 0h2m2 0h5m1 0h5m1 0h1M0 25.5h1m1 0h3m1 0h1m1 0h1m2 0h3m3 0h2m1 0h1m4 0h4M0 26.5h1m1 0h3m1 0h1m1 0h1m6 0h3m1 0h9M0 27.5h1m5 0h1m2 0h1m2 0h1m7 0h1m1 0h2m1 0h1m1 0h1M0 28.5h7m1 0h6m3 0h1m4 0h1m1 0h3"/></symbol><symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9Zm11 1h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1 1 1.5 1 2.5M11.5 3.5c0 1 1 1.5 1 2.5M4 21h14"/></symbol></svg>
+<div class="wrap">
+<h1>QR 포스터 디자인 시안 5종 + 언어 선택</h1>
+<p class="lead">사장님이 링크 · QR 화면에서 디자인과 문구 언어를 골라 내려받는 구성입니다. 여기서 3개(또는 원하시는 만큼)를 골라 주세요.</p>
+
+<h2>포스터 디자인</h2>
+<div class="row">
+ <div class="item"><h3>A. 기본형</h3><p class="d">지금 포스터. 상호명 · QR · 문구 · 민트 띠. 어디에나 무난함.</p>
+  <div class="paper"><div class="pA"><b>연남동 로스터리</b><svg class="qr"><use href="#qr"/></svg><p class="cap">QR을 찍어 익명으로 피드백 부탁드려요</p><p class="cap2">Scan to leave us anonymous feedback</p><div class="band">Say&amp;Go</div></div></div></div>
+ <div class="item"><h3>B. 큰 문구형</h3><p class="d">"솔직한 피드백 부탁드려요"가 멀리서도 보임. 벽 · 입구처럼 거리가 있는 곳에.</p>
+  <div class="paper"><div class="pB"><p class="big">솔직한<br><em>피드백</em><br>부탁드려요</p><p class="sub">익명이에요. 누가 썼는지 아무도 몰라요.</p><div class="bot"><svg class="qr"><use href="#qr"/></svg><p class="nm">연남동<br>로스터리</p></div><div class="band">Say&amp;Go</div></div></div></div>
+ <div class="item"><h3>C. 가게 색 테마형</h3><p class="d">사장님이 고른 가게 색 · 업종 아이콘이 들어감. 가게 분위기에 맞춰 튀지 않음.</p>
+  <div class="paper"><div class="pC"><div class="card"><span class="ic"><svg width="22" height="22"><use href="#cup"/></svg></span><b>연남동 로스터리</b><svg class="qr"><use href="#qr"/></svg><p class="cap">QR을 찍어 익명으로 피드백 부탁드려요</p><p class="brand">Say&amp;Go</p></div></div></div></div>
+ <div class="item"><h3>D. 테이블 텐트형</h3><p class="d">A4 한 장 출력 → 가운데 접어 세우면 앞뒤 양쪽에서 보임. 스탠드 없이 바로 테이블에.</p>
+  <div class="paper"><div class="pD"><div class="half top"><svg class="qr"><use href="#qr"/></svg><div><b>연남동 로스터리</b><p class="cap">QR을 찍어 익명으로<br>피드백 부탁드려요</p><span class="tag">Say&amp;Go</span></div></div><div class="half"><svg class="qr"><use href="#qr"/></svg><div><b>연남동 로스터리</b><p class="cap">QR을 찍어 익명으로<br>피드백 부탁드려요</p><span class="tag">Say&amp;Go</span></div></div><span class="fold">— 여기를 접으세요 —</span></div></div></div>
+ <div class="item"><h3>E. 정사각 스티커형</h3><p class="d">작은 정사각형. 카운터 · 계산대 · 문 · 메뉴판 귀퉁이에 붙이기 좋음.</p>
+  <div class="paper"><div class="pE"><div><div class="w"><svg class="qr"><use href="#qr"/></svg></div><p class="t">익명 피드백 <span>Say&amp;Go</span></p></div></div></div></div>
+</div>
+
+<h2>링크 · QR 화면에서 고르는 방법</h2>
+<div class="row">
+ <div class="phone"><div class="ph-bar">← 링크 · QR</div><div class="ph">
+  <h4>링크 · QR</h4>
+  <div class="stage"><div class="pA" style="transform:scale(.85);margin:-20px 0"><b>연남동 로스터리</b><svg class="qr"><use href="#qr"/></svg><p class="cap">QR을 찍어 익명으로 피드백 부탁드려요</p><p class="cap2">Scan to leave us anonymous feedback</p><div class="band">Say&amp;Go</div></div></div>
+  <p class="lbl">디자인</p>
+  <div class="thumbs"><span class="th on">A</span><span class="th">B</span><span class="th">C</span><span class="th">D</span><span class="th">E</span></div>
+  <p class="lbl">문구 언어</p>
+  <div class="seg"><span>한국어</span><span>English</span><span class="on">한국어+EN</span></div>
+  <div class="inp"><small>포스터 문구 (직접 고칠 수 있어요)</small>QR을 찍어 익명으로 피드백 부탁드려요</div>
+  <div class="btns"><span class="b k">이미지 저장</span><span class="b l">공유</span></div>
+ </div></div>
+ <div style="max-width:520px">
+  <table>
+   <tr><td>디자인</td><td>작은 미리보기 카드를 옆으로 넘기며 고르면 위 큰 미리보기가 바로 바뀜</td></tr>
+   <tr><td>문구 언어</td><td>한국어 / English / 한국어+English(두 줄). 기본값은 지금 화면 언어. 나중에 日本語 · 中文 추가</td></tr>
+   <tr><td>문구 직접 고치기</td><td>"피드백 부탁드려요" 대신 가게 말투로 바꿀 수 있게 (금칙어 검사, 30자 제한). 선택 사항</td></tr>
+   <tr><td>저장 · 공유</td><td>지금처럼 PNG 저장 · 공유. D(텐트형)는 A4 인쇄 크기로 저장</td></tr>
+   <tr><td>기억</td><td>고른 디자인 · 언어는 기기에 기억해 다음에 열어도 그대로 (서버 저장 없음, 비용 0)</td></tr>
+  </table>
+ </div>
+</div>
+</div></body></html>

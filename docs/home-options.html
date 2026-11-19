@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>홈 개편 시안 5개</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: #15201d; font-family: "Pretendard Variable", Pretendard, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; word-break: keep-all; }
+  .wrap { padding: 32px 24px 64px; }
+  .wrap > h1 { font-size: 24px; font-weight: 800; }
+  .wrap > p { color: #5b6b67; margin-top: 6px; }
+  .grid { display: grid; grid-auto-flow: column; grid-auto-columns: 390px; gap: 32px; overflow-x: auto; padding: 24px 0 12px; align-items: start; }
+  .opt h2 { font-size: 18px; font-weight: 800; }
+  .opt .desc { font-size: 14px; color: #5b6b67; margin: 4px 0 12px; min-height: 60px; }
+  .phone { width: 390px; border-radius: 36px; overflow: hidden; border: 1px solid #e3e7e5; position: relative; }
+  svg { display: block; }
+  :root { --mint: #3ccfae; --mint-ink: #0b6b58; --mint-soft: #e2f6ef; --ink: #15201d; --muted: #5f6b67; --paper: #f2f4f3; }
+
+  /* 공통 조각 */
+  .bar { height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+  .wm { display: flex; align-items: center; gap: 8px; font-weight: 800; }
+  .bar .r { font-size: 14px; color: var(--muted); display: flex; gap: 14px; }
+  .btn { display: grid; place-items: center; height: 54px; border-radius: 16px; font-weight: 700; font-size: 16px; }
+  .btn.mint { background: var(--mint); color: var(--ink); }
+  .btn.ink { background: var(--ink); color: #fff; }
+  .card { background: #fff; border-radius: 20px; padding: 16px; }
+  .quote { background: #f3f5f4; border-radius: 16px; padding: 10px 13px; font-size: 14px; }
+  .quote small { display: flex; gap: 6px; align-items: center; color: var(--muted); font-weight: 600; font-size: 12px; margin-bottom: 2px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .ans { margin-top: 8px; font-size: 15px; }
+  .faq { border-top: 1px solid #e6eae8; padding: 14px 0; font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; }
+  .faq:first-child { border-top: 0; }
+  .sec { padding: 28px 20px 0; }
+  .sec h3 { font-size: 18px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.01em; }
+
+  /* ===== 1. 말풍선 모티프 ===== */
+  .m1 { background: #fff; }
+  .m1 .hero { position: relative; height: 600px; overflow: hidden; }
+  .m1 .bubble { position: absolute; right: -90px; top: 30px; width: 420px; height: 260px; background: var(--mint); border-radius: 60px; }
+  .m1 .bubble::after { content: ''; position: absolute; left: 70px; bottom: -58px; border-left: 0 solid transparent; border-right: 70px solid transparent; border-top: 70px solid var(--mint); }
+  .m1 .chev { position: absolute; right: 70px; top: 120px; }
+  .m1 .copy { position: absolute; left: 20px; right: 20px; bottom: 30px; }
+  .m1 .copy h2 { font-size: 34px; line-height: 1.2; font-weight: 800; letter-spacing: -0.03em; }
+  .m1 .copy p { color: var(--muted); margin-top: 10px; font-size: 15px; }
+  .m1 .bbtn { margin-top: 18px; background: var(--ink); color: #fff; border-radius: 28px 28px 28px 6px; height: 56px; display: grid; place-items: center; font-weight: 700; }
+  .m1 .steps li { list-style: none; display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; }
+  .m1 .bul { width: 22px; height: 18px; background: var(--mint); border-radius: 8px 8px 8px 2px; flex: none; margin-top: 3px; }
+  .m1 .steps b { display: block; }
+  .m1 .steps span { color: var(--muted); font-size: 14px; }
+  .m1 .band { margin: 28px 0 0; background: var(--mint-soft); padding: 22px 20px; border-radius: 0 40px 0 0; }
+
+  /* ===== 2. 테이블 위 QR 스탠드 ===== */
+  .m2 { background: #efe9df; }
+  .m2 .table { padding: 28px 20px 40px; background: #e4dccf; }
+  .m2 .stand { background: #fff; border-radius: 18px 18px 6px 6px; padding: 22px 20px 0; text-align: center; box-shadow: 0 30px 0 -18px #c8bca9; }
+  .m2 .stand h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; }
+  .m2 .qr { width: 150px; height: 150px; margin: 18px auto; background:
+      conic-gradient(from 90deg at 2px 2px, #0000 90deg, #15201d 0) 0 0/16px 16px; border-radius: 6px; position: relative; }
+  .m2 .qr::before, .m2 .qr::after { content: ''; position: absolute; width: 40px; height: 40px; border: 8px solid #15201d; background: #fff; }
+  .m2 .qr::before { left: 0; top: 0; } .m2 .qr::after { right: 0; top: 0; }
+  .m2 .stand p { font-size: 14px; color: var(--muted); }
+  .m2 .foot { margin: 18px -20px 0; background: var(--mint); padding: 10px; font-weight: 800; border-radius: 0 0 6px 6px; }
+  .m2 .lead { padding: 26px 20px 0; }
+  .m2 .lead h3 { font-size: 22px; font-weight: 800; line-height: 1.35; letter-spacing: -0.02em; }
+  .m2 .lead p { margin-top: 8px; color: #5f594f; }
+  .m2 .note { background: #fff; border-radius: 4px; padding: 14px; transform: rotate(-1.5deg); box-shadow: 0 1px 0 #d9d0c1; font-size: 15px; }
+  .m2 .note + .note { transform: rotate(1.2deg); margin-top: 12px; }
+  .m2 .note small { color: #8a8273; font-size: 12px; display: block; margin-bottom: 4px; }
+  .m2 .note .re { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #d9d0c1; color: var(--mint-ink); font-weight: 600; font-size: 14px; }
+
+  /* ===== 3. 문장이 곧 화면 ===== */
+  .m3 { background: #fff; }
+  .m3 .poster { padding: 30px 20px 10px; font-size: 44px; font-weight: 800; line-height: 1.18; letter-spacing: -0.04em; }
+  .m3 .chip { display: inline-flex; vertical-align: middle; align-items: center; height: 46px; padding: 0 12px; margin: 0 4px; border-radius: 14px; font-size: 15px; font-weight: 700; letter-spacing: 0; }
+  .m3 .chip.q { background: #f3f5f4; color: var(--ink); }
+  .m3 .chip.a { background: var(--mint); color: var(--ink); }
+  .m3 .chip.lock { background: var(--ink); color: #fff; gap: 6px; }
+  .m3 .sub { padding: 6px 20px 0; color: var(--muted); }
+  .m3 .flow { padding: 24px 20px 0; display: grid; gap: 10px; }
+  .m3 .row { display: flex; gap: 10px; align-items: center; }
+  .m3 .row .k { width: 64px; font-size: 13px; color: var(--muted); font-weight: 700; flex: none; }
+
+  /* ===== 4. 이름이 기념비 ===== */
+  .m4 { background: var(--ink); color: #fff; }
+  .m4 .bar .r, .m4 .wm { color: #fff; }
+  .m4 .mega { font-size: 104px; font-weight: 900; letter-spacing: -0.06em; line-height: .9; padding: 18px 14px 0; color: var(--mint); }
+  .m4 .mega span { color: #fff; }
+  .m4 .tag { padding: 14px 20px 0; font-size: 22px; font-weight: 700; line-height: 1.35; }
+  .m4 .tag em { font-style: normal; color: var(--mint); }
+  .m4 .p { padding: 10px 20px 0; color: #a9b5b0; }
+  .m4 .panel { margin: 26px 12px 0; background: #fff; color: var(--ink); border-radius: 24px; padding: 18px; }
+  .m4 .panel h3 { font-size: 16px; font-weight: 800; margin-bottom: 10px; }
+  .m4 .lite { background: #1d2a26; border-radius: 18px; margin: 12px; padding: 16px; }
+  .m4 .lite .faq { border-color: #2c3a35; color: #e6ecea; }
+
+  /* ===== 5. 조용한 도구 ===== */
+  .m5 { background: #fbfbfa; }
+  .m5 .col { padding: 60px 28px 0; }
+  .m5 h2 { font-size: 22px; font-weight: 700; line-height: 1.45; letter-spacing: -0.01em; }
+  .m5 .p { margin-top: 12px; color: var(--muted); font-size: 15px; line-height: 1.7; }
+  .m5 .link { margin-top: 20px; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; border-bottom: 2px solid var(--mint); padding-bottom: 2px; }
+  .m5 .demo { margin-top: 56px; }
+  .m5 .demo small { font-size: 12px; color: #8a9490; display: block; margin-bottom: 10px; }
+  .m5 .line { border-left: 2px solid #e2e7e5; padding-left: 16px; margin-left: 4px; }
+  .m5 .line p { font-size: 15px; }
+  .m5 .line p + p { margin-top: 10px; }
+  .m5 .line .o { color: var(--mint-ink); font-weight: 600; }
+  .m5 .list { margin-top: 56px; display: grid; gap: 22px; }
+  .m5 .list b { display: block; font-size: 15px; }
+  .m5 .list span { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="mark" viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="#3ccfae"/><path d="M30 24h40a12 12 0 0 1 12 12v22a12 12 0 0 1-12 12H44l-14 12v-12a12 12 0 0 1-12-12V36a12 12 0 0 1 12-12Z" fill="#15201d"/><path d="M44 37l11 10-11 10" fill="none" stroke="#3ccfae" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></g></symbol>
+</svg>
+
+<div class="wrap">
+  <h1>홈 개편 시안 5개</h1>
+  <p>디자인 스킬이 뽑은 방향 5개를 Say&amp;Go 홈에 적용했습니다. 휴대폰 화면 기준, 내용은 같고 구성만 다릅니다. 옆으로 넘겨 보세요.</p>
+
+  <div class="grid">
+
+    <!-- 1 -->
+    <section class="opt">
+      <h2>1. 말풍선 모티프</h2>
+      <p class="desc">로고의 말풍선 하나가 전부. 첫 화면에 거대한 민트 말풍선, 버튼 · 목록 기호 · 구분 띠도 모두 말풍선 모양. 브랜드가 가장 강하게 남습니다.</p>
+      <div class="phone m1">
+        <div class="bar"><span class="wm"><svg width="26" height="26"><use href="#mark"/></svg>Say&amp;Go</span><span class="r">KR · 로그인</span></div>
+        <div class="hero">
+          <div class="bubble"></div>
+          <svg class="chev" width="80" height="80" viewBox="0 0 24 24"><path d="M8 4l8 8-8 8" fill="none" stroke="#15201d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="copy">
+            <h2>손님이 못 한 말,<br>여기서 들어요</h2>
+            <p>테이블에 QR 하나. 익명이라 솔직해지고, 사장님은 고치기만 하면 돼요.</p>
+            <div class="bbtn">우리 가게 QR 만들기</div>
+          </div>
+        </div>
+        <div class="sec">
+          <h3>이렇게 써요</h3>
+          <ul class="steps">
+            <li><span class="bul"></span><div><b>QR 붙이기</b><span>가입하면 바로 나와요</span></div></li>
+            <li><span class="bul"></span><div><b>익명으로 받기</b><span>로그인 없이, 누군지 몰라요</span></div></li>
+            <li><span class="bul"></span><div><b>고치고 답하기</b><span>답한 글만 공개돼요</span></div></li>
+          </ul>
+        </div>
+        <div class="band">
+          <div class="card"><div class="quote"><small><span class="dot" style="background:#e86a4a"></span>익명님의 아쉬운 점</small>음악 소리가 커서 대화하기 힘들었어요</div><p class="ans">말씀 감사해요. 오후엔 볼륨을 줄였어요.</p></div>
+        </div>
+        <div class="sec" style="padding-bottom:20px"><h3>자주 묻는 질문</h3><div class="faq">손님이 누군지 알 수 있나요?<span>+</span></div><div class="faq">욕이 올라오면요?<span>+</span></div></div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="opt">
+      <h2>2. 테이블 위 QR 스탠드</h2>
+      <p class="desc">홈 자체가 테이블에 세워 둔 QR 스탠드. 사장님은 "내 가게에 이게 놓이는구나"를 바로 그립니다. 아래는 손님이 남긴 쪽지처럼.</p>
+      <div class="phone m2">
+        <div class="bar"><span class="wm"><svg width="26" height="26"><use href="#mark"/></svg>Say&amp;Go</span><span class="r">KR · 로그인</span></div>
+        <div class="table">
+          <div class="stand">
+            <h2>사장님께<br>솔직하게 한마디</h2>
+            <div class="qr"></div>
+            <p>QR을 찍고 익명으로 남기고 가세요</p>
+            <div class="foot">Say&amp;Go</div>
+          </div>
+        </div>
+        <div class="lead">
+          <h3>이 스탠드 하나면,<br>손님 속마음이 들려요</h3>
+          <p>가입하면 우리 가게 이름이 들어간 QR이 바로 나와요.</p>
+          <div class="btn ink" style="margin-top:16px">우리 가게 QR 만들기</div>
+        </div>
+        <div class="sec">
+          <h3>이런 쪽지가 와요</h3>
+          <div class="note"><small>익명 · 아쉬워요</small>주말엔 자리가 너무 없어요<div class="re">사장님: 주말 오전엔 테이블 두 개 더 놓을게요</div></div>
+          <div class="note"><small>익명 · 제안해요</small>오트밀크 옵션이 있으면 좋겠어요<div class="re">사장님: 다음 달부터 준비할게요</div></div>
+        </div>
+        <div class="sec" style="padding-bottom:20px"><h3>자주 묻는 질문</h3><div class="faq">손님이 누군지 알 수 있나요?<span>+</span></div><div class="faq">욕이 올라오면요?<span>+</span></div></div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="opt">
+      <h2>3. 문장이 곧 화면</h2>
+      <p class="desc">큰 문장 한 줄 안에 실제 앱 조각(질문 · 답변 · 익명)이 단어처럼 들어감. 읽기만 해도 서비스가 이해됩니다. 가장 현대적.</p>
+      <div class="phone m3">
+        <div class="bar"><span class="wm"><svg width="26" height="26"><use href="#mark"/></svg>Say&amp;Go</span><span class="r">KR · 로그인</span></div>
+        <div class="poster">손님의<span class="chip q">음악이 커요</span>한마디가<span class="chip a">볼륨 줄였어요</span>가게를 바꿔요<span class="chip lock"><svg width="16" height="16"><use href="#lock"/></svg>익명</span></div>
+        <p class="sub">테이블 QR로 익명 피드백을 받고, 고친 걸 답으로 보여 주세요.</p>
+        <div style="padding:18px 20px 0"><div class="btn mint">우리 가게 QR 만들기</div></div>
+        <div class="flow">
+          <div class="row"><span class="k">손님</span><div class="quote" style="flex:1"><small><span class="dot" style="background:#e3b008"></span>익명님의 제안</small>테라스에 담요가 있으면 좋겠어요</div></div>
+          <div class="row"><span class="k">사장님</span><div class="card" style="flex:1;background:var(--mint-soft);padding:12px">좋은 생각이에요. 다음 주부터 놓아 둘게요.</div></div>
+          <div class="row"><span class="k">공개</span><div style="flex:1;font-size:14px;color:var(--muted)">답한 글만 가게 페이지에 올라가요</div></div>
+        </div>
+        <div class="sec" style="padding-bottom:20px"><h3>자주 묻는 질문</h3><div class="faq">손님이 누군지 알 수 있나요?<span>+</span></div><div class="faq">욕이 올라오면요?<span>+</span></div></div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="opt">
+      <h2>4. 이름이 기념비</h2>
+      <p class="desc">어두운 바탕에 "Say&amp;Go"를 화면 폭만큼. 이름 자체가 설명("말하고, 가세요"). 가장 대담하고 기억에 남지만 밝은 앱 화면과 대비가 큼.</p>
+      <div class="phone m4">
+        <div class="bar"><span class="wm"><svg width="26" height="26"><use href="#mark"/></svg>Say&amp;Go</span><span class="r">KR · 로그인</span></div>
+        <div class="mega">Say<span>&amp;</span><br>Go</div>
+        <p class="tag">말하고, 가세요.<br><em>사장님은 고치면 돼요.</em></p>
+        <p class="p">테이블 QR로 받는 익명 피드백. 누가 썼는지 아무도 몰라요.</p>
+        <div style="padding:20px 20px 0"><div class="btn mint">우리 가게 QR 만들기</div></div>
+        <div class="panel">
+          <h3>이렇게 보여요</h3>
+          <div class="quote"><small><span class="dot" style="background:#e86a4a"></span>익명님의 아쉬운 점</small>아메리카노가 조금 썼어요</div>
+          <p class="ans">블렌드를 바꿔 봤어요. 다시 드셔 보세요.</p>
+        </div>
+        <div class="lite"><div class="faq">손님이 누군지 알 수 있나요?<span>+</span></div><div class="faq">욕이 올라오면요?<span>+</span></div></div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="opt">
+      <h2>5. 조용한 도구</h2>
+      <p class="desc">모두가 소리칠 때 속삭이기. 좁은 한 칼럼, 작은 제목, 많은 여백, 실제 대화 한 줄. 토스보다 더 담백하고 고급스러운 쪽.</p>
+      <div class="phone m5">
+        <div class="bar"><span class="wm"><svg width="26" height="26"><use href="#mark"/></svg>Say&amp;Go</span><span class="r">KR · 로그인</span></div>
+        <div class="col">
+          <h2>손님은 대부분<br>불편해도 말없이 떠나요.</h2>
+          <p class="p">테이블에 QR을 두면, 그 말을 익명으로 들을 수 있어요. 고치고 답하면 손님이 다시 와요.</p>
+          <span class="link">우리 가게 QR 만들기 →</span>
+          <div class="demo">
+            <small>어느 카페의 하루</small>
+            <div class="line"><p>"주말엔 자리가 너무 없어요."</p><p class="o">→ 주말 오전엔 테이블 두 개 더 놓을게요.</p></div>
+          </div>
+          <div class="list">
+            <div><b>로그인 없이</b><span>손님은 QR만 찍으면 돼요</span></div>
+            <div><b>누군지 몰라요</b><span>이름 · 연락처 · IP가 남지 않아요</span></div>
+            <div><b>답한 것만 공개</b><span>나머지는 숨기거나 지우면 돼요</span></div>
+          </div>
+          <div style="height:40px"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+</body>
+</html>

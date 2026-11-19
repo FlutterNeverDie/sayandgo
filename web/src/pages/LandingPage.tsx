@@ -5,6 +5,9 @@ import { useAuth } from '../app/auth';
 import { SessionButton } from '../components/ui/SessionButton';
 import { HeroCarousel } from '../components/landing/HeroScenes';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
+import { ShareIcon } from '../components/ui/Icons';
+import { useToast } from '../components/ui/Overlay';
+import { currentLang } from '../i18n';
 import type { QuestionKind } from '../lib/types';
 
 type Ex = { name: string; kind: QuestionKind; q: string; a: string };
@@ -22,6 +25,18 @@ export function LandingPage() {
   const examples = t('landing.examples', { returnObjects: true }) as Ex[];
   const notes = examples.filter((e) => e.kind === 'complaint' || e.kind === 'suggestion').slice(0, 3);
   const faqs = [2, 3, 4];
+  const toast = useToast();
+
+  // 서비스 공유: 공유 창이 없는 브라우저(PC 등)는 복사로 대신
+  function shareService() {
+    const text = `${t('landing.shareText', { lng: currentLang() })}\n${location.origin}`;
+    if (typeof navigator.share === 'function') navigator.share({ text }).catch(() => undefined);
+    else
+      navigator.clipboard
+        .writeText(text)
+        .then(() => toast(t('common.copied')))
+        .catch(() => toast(t('errors.generic')));
+  }
 
   return (
     <>
@@ -69,6 +84,14 @@ export function LandingPage() {
               </details>
             ))}
           </div>
+        </section>
+
+        <section className="home-share" aria-labelledby="share-h">
+          <p id="share-h">{t('landing.shareTitle')}</p>
+          <button type="button" className="btn btn--line" onClick={shareService}>
+            <ShareIcon size={18} />
+            {t('landing.shareButton')}
+          </button>
         </section>
 
         <Footer />

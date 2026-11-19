@@ -172,7 +172,10 @@
       "starsVague": "\"It was okay\"",
       "starsWhy": "No idea what went wrong",
       "feedbackWhere": "Anonymous feedback"
-    }
+    },
+    "shareTitle": "Know a store owner who could use this?",
+    "shareButton": "Share Say&Go",
+    "shareText": "Hear what only your guests know. Get anonymous feedback with one QR code. Say&Go"
   },
   "signup": {
     "title": "Create your feedback box",

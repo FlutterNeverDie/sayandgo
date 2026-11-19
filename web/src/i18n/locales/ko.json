@@ -172,7 +172,10 @@
       "starsVague": "\"그냥 그랬어요\"",
       "starsWhy": "무엇이 문제였는지 알 수 없음",
       "feedbackWhere": "익명 피드백"
-    }
+    },
+    "shareTitle": "주변 사장님께도 알려 주세요",
+    "shareButton": "Say&Go 공유하기",
+    "shareText": "손님만 아는 우리 매장 문제, QR 하나로 익명 피드백을 받아 보세요. Say&Go"
   },
   "signup": {
     "title": "우리 가게 피드백함 만들기",

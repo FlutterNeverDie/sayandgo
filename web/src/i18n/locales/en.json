@@ -48,7 +48,7 @@
   },
   "nav": {
     "inbox": "Feedback",
-    "share": "Link · QR",
+    "share": "QR poster",
     "settings": "Settings"
   },
   "landing": {
@@ -265,7 +265,7 @@
     "end": "You've seen all the feedback",
     "moreText": "More",
     "less": "Less",
-    "qrShare": "QR · Share",
+    "qrShare": "QR poster",
     "pausedChip": "Feedback paused",
     "anonBadge": "Anonymous · no sign-in",
     "privateTitle": "Only the owner can see",
@@ -367,7 +367,7 @@
     "allDoneDesc": "New feedback will show up here right away."
   },
   "share": {
-    "title": "Link · QR",
+    "title": "QR poster",
     "desc": "Put it up once and keep using it. Your link and QR never change.",
     "link": "Your link",
     "nativeShare": "Share to another app",

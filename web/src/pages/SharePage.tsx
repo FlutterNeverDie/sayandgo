@@ -51,7 +51,7 @@ export function SharePage() {
   return <RequireOwner>{(store) => <Share store={store} />}</RequireOwner>;
 }
 
-/** 링크 · QR: 포스터 미리보기 → 디자인 · 언어 · 문구 → 저장 / 공유 → 링크 한 줄 */
+/** QR 포스터: 포스터 미리보기 → 디자인 · 언어 · 문구 → 저장 / 공유 → 링크 한 줄 */
 function Share({ store }: { store: Store }) {
   const { t } = useTranslation();
   const toast = useToast();

@@ -48,7 +48,7 @@
   },
   "nav": {
     "inbox": "받은 피드백",
-    "share": "링크 · QR",
+    "share": "QR 포스터",
     "settings": "설정"
   },
   "landing": {
@@ -265,7 +265,7 @@
     "end": "모든 피드백을 봤어요",
     "moreText": "더보기",
     "less": "접기",
-    "qrShare": "QR · 공유",
+    "qrShare": "QR 포스터",
     "pausedChip": "피드백 잠시 멈춤",
     "anonBadge": "익명 보장 · 로그인 없이 써요",
     "privateTitle": "사장님만 보기",
@@ -367,7 +367,7 @@
     "allDoneDesc": "새로 들어오면 여기에 바로 보여요."
   },
   "share": {
-    "title": "링크 · QR",
+    "title": "QR 포스터",
     "desc": "한 번 붙여 두면 계속 써요. 링크와 QR은 바뀌지 않아요.",
     "link": "내 가게 링크",
     "nativeShare": "다른 앱으로 공유",

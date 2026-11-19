@@ -559,3 +559,11 @@ body.white .topbar { background: #ffffff; }
 .post__select { width: 22px; height: 22px; accent-color: var(--text); margin: 9px 0 0 9px; }
 
 .no-delete { margin-top: 14px; font-size: 13px; font-weight: 600; color: #9c3418; text-align: center; }
+
+/* 안내 화면: 화면을 꽉 채우고 문구는 가운데, 푸터는 맨 아래 */
+.page--fill { min-height: calc(100dvh - 52px); display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom); }
+.page--fill .center-state { flex: 1; align-content: center; }
+.page--fill .footer { margin-top: 24px; padding-bottom: 24px; }
+.center-state--big h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+.center-state--big p { font-size: var(--fs-16); }
+.state-icon { width: 72px; height: 72px; border-radius: 24px; background: var(--raised); color: var(--faint); display: grid; place-items: center; margin-bottom: 4px; }

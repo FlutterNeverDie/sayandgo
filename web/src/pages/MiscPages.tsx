@@ -7,13 +7,14 @@ export function NotFoundPage() {
   return (
     <>
       <PublicTopbar />
-      <main className="page">
-        <div className="center-state">
+      <main className="page page--fill">
+        <div className="center-state center-state--big">
           <h1>{t('notFound.title')}</h1>
-          <Link to="/" className="btn">
+          <Link to="/" className="btn btn--line" style={{ marginTop: 8 }}>
             {t('notFound.home')}
           </Link>
         </div>
+        <Footer />
       </main>
     </>
   );

@@ -10,7 +10,8 @@ import { Sheet, useToast } from '../components/ui/Overlay';
 import { Switch } from '../components/ui/Fields';
 import { LockIcon } from '../components/ui/Icons';
 import { ErrorBox, Loading, TicketSkeleton } from '../components/ui/States';
-import { currentLang } from '../i18n';
+import i18n, { currentLang } from '../i18n';
+import { CategoryGlyph } from '../components/ui/StoreIcon';
 import {
   alreadyReported,
   fetchAnsweredCount,
@@ -57,10 +58,16 @@ function StoreState({ title, desc }: { title: string; desc: string }) {
   return (
     <>
       <PublicTopbar />
-      <main className="page">
-        <div className="center-state">
+      <main className="page page--fill">
+        <div className="center-state center-state--big">
+          <span className="state-icon" aria-hidden="true">
+            <CategoryGlyph category="other" size={32} />
+          </span>
           <h1>{title}</h1>
           <p>{desc}</p>
+          <Link to="/" className="btn btn--line" style={{ marginTop: 8 }}>
+            {i18n.t('notFound.home')}
+          </Link>
         </div>
         <Footer />
       </main>

@@ -457,7 +457,8 @@
     "policy": "Community policy",
     "rights": "Rights infringement",
     "about": "About",
-    "koreanOnly": "This document is provided in Korean, which is the governing version."
+    "koreanOnly": "This document is provided in Korean, which is the governing version.",
+    "contact": "Contact"
   },
   "notFound": {
     "title": "Page not found",
@@ -506,5 +507,18 @@
     "suggestion": "Anonymous suggestion",
     "complaint": "Anonymous concern",
     "praise": "Anonymous compliment"
+  },
+  "contact": {
+    "title": "Contact",
+    "lead": "Feedback about Say&Go or anything else, we welcome every message. We want to get better from your words too.",
+    "topics": [
+      "Things that felt inconvenient, or features you wish we had",
+      "Bug reports",
+      "Partnerships, collaboration or bulk sign-ups",
+      "Anything else"
+    ],
+    "mail": "Send an email",
+    "subject": "[Say&Go inquiry]",
+    "note": "We'll reply as soon as we can. To request removal of a specific post, please also see the rights infringement page."
   }
 }

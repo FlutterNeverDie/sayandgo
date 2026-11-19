@@ -17,6 +17,7 @@ export function Footer({ extra }: { extra?: ReactNode }) {
         </Link>
         <Link to="/policy">{t('legal.policy')}</Link>
         <Link to="/rights">{t('legal.rights')}</Link>
+        <Link to="/contact">{t('legal.contact')}</Link>
         {extra}
       </nav>
       <span>© {new Date().getFullYear()} {t('app.name')}</span>

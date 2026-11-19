@@ -24,6 +24,7 @@ const SharePage = lazy(() => import('./pages/SharePage').then((m) => ({ default:
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 const misc = () => import('./pages/MiscPages');
 const LegalPage = lazy(() => misc().then((m) => ({ default: m.LegalPage })));
+const ContactPage = lazy(() => misc().then((m) => ({ default: m.ContactPage })));
 const NotFoundPage = lazy(() => misc().then((m) => ({ default: m.NotFoundPage })));
 
 const queryClient = new QueryClient({
@@ -57,6 +58,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/privacy" element={<LegalPage kind="privacy" />} />
                 <Route path="/policy" element={<LegalPage kind="policy" />} />
                 <Route path="/rights" element={<LegalPage kind="rights" />} />
+                <Route path="/contact" element={<ContactPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>

@@ -121,9 +121,9 @@
         "category": "beauty",
         "tone": "#15201d",
         "intro": "By appointment",
-        "kind": "praise",
-        "q": "Love my new haircut, thank you",
-        "a": "Thank you! See you next time."
+        "kind": "complaint",
+        "q": "I waited over 30 minutes past my booking",
+        "a": "Sorry about that. We added 15 minutes between bookings."
       },
       {
         "name": "Neighbourhood Pilates",
@@ -139,9 +139,9 @@
         "category": "study",
         "tone": "#e8dcc8",
         "intro": "Closed on Mondays",
-        "kind": "question",
-        "q": "Do you buy second-hand books?",
-        "a": "Sorry, we only stock new books."
+        "kind": "suggestion",
+        "q": "A place to sit and read would be great",
+        "a": "We put two chairs by the window. Stay and read."
       }
     ]
   },

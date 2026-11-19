@@ -146,12 +146,13 @@
         "a": "We put two chairs by the window. Stay and read."
       }
     ],
-    "titleV2": "Just put it up,\nand guests speak first",
-    "leadV2": "Sign up and your QR is ready. Print it and put it on the table.",
+    "titleV2": "The problems only guests notice,\nstraight from them",
+    "leadV2": "Anonymous, so guests are honest. Put up the QR and they tell you what you've been missing.",
     "heroSampleQ": "There are never seats on weekends",
     "heroSampleA": "We'll add two more tables on weekend mornings.",
     "notesTitle": "Notes like these arrive",
-    "ownerSays": "Owner:"
+    "ownerSays": "Owner:",
+    "heroDots": "Intro pictures"
   },
   "signup": {
     "title": "Create your feedback box",
@@ -353,7 +354,7 @@
     "qrDesc": "A print-ready image with your shop name. Save it and print or display it.",
     "savePng": "Save image",
     "sharePng": "Save to photos · Share",
-    "qrCaption": "Scan, say it anonymously, and go",
+    "qrCaption": "Scan to leave us anonymous feedback",
     "devNotice": "This is a development address and won't open on other devices. Save again after deploying.",
     "tip": "Put it on tables, the counter or the door"
   },

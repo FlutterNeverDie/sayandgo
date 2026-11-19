@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'qrcode';
 
@@ -66,6 +66,66 @@ export function HeroSceneB({ name }: { name: string }) {
         </div>
       </div>
       <div className="hp-b__thumb" />
+    </div>
+  );
+}
+
+/** A → B 자동 슬라이드 (4초). 손가락으로 넘기면 잠깐 멈추고, 움직임 줄이기 설정이면 넘기지 않는다 */
+export function HeroCarousel({ name }: { name: string }) {
+  const { t } = useTranslation();
+  const ref = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+  const pausedUntil = useRef(0);
+  const slides = 2;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onScroll = () => setIndex(Math.round(el.scrollLeft / el.clientWidth));
+    const pause = () => (pausedUntil.current = Date.now() + 8000);
+    el.addEventListener('scroll', onScroll, { passive: true });
+    el.addEventListener('pointerdown', pause);
+    el.addEventListener('touchstart', pause, { passive: true });
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const timer = reduce
+      ? undefined
+      : setInterval(() => {
+          if (Date.now() < pausedUntil.current || document.hidden) return;
+          const next = (Math.round(el.scrollLeft / el.clientWidth) + 1) % slides;
+          el.scrollTo({ left: next * el.clientWidth, behavior: 'smooth' });
+        }, 4000);
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      el.removeEventListener('pointerdown', pause);
+      el.removeEventListener('touchstart', pause);
+      if (timer) clearInterval(timer);
+    };
+  }, []);
+
+  return (
+    <div className="hero-carousel">
+      <div className="hero-carousel__track" ref={ref}>
+        <div className="hero-carousel__slide">
+          <HeroSceneA name={name} />
+        </div>
+        <div className="hero-carousel__slide">
+          <HeroSceneB name={name} />
+        </div>
+      </div>
+      <div className="hero-carousel__dots" role="tablist" aria-label={t('landing.heroDots')}>
+        {Array.from({ length: slides }, (_, i) => (
+          <button
+            key={i}
+            role="tab"
+            aria-selected={index === i}
+            aria-label={`${i + 1} / ${slides}`}
+            onClick={() => {
+              pausedUntil.current = Date.now() + 8000;
+              ref.current?.scrollTo({ left: i * (ref.current?.clientWidth ?? 0), behavior: 'smooth' });
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }

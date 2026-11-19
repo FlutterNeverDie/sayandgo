@@ -660,7 +660,7 @@ body.white .topbar { background: #ffffff; }
 .hp-poster p { font-size: 10.5px; font-weight: 600; }
 .hp-poster__band { margin: 12px -14px 0; background: var(--mint); font-size: 12px; font-weight: 800; padding: 7px 0; }
 
-.hp-a { position: relative; height: 390px; margin: 0 calc(var(--gutter) * -1); background: #e9dfd0; overflow: hidden; }
+.hp-a { position: relative; height: 390px; background: #e9dfd0; overflow: hidden; }
 .hp-a__table { position: absolute; left: 0; right: 0; bottom: 0; height: 110px; background: #c9a77f; }
 .hp-a__edge { position: absolute; left: 0; right: 0; bottom: 110px; height: 10px; background: #b48f66; }
 .hp-a__stand { position: absolute; left: 50%; bottom: 88px; width: 190px; margin-left: -120px; transform: rotate(-3deg); }
@@ -670,7 +670,7 @@ body.white .topbar { background: #ffffff; }
 .hp-a__cup::after { content: ''; position: absolute; right: -16px; top: 10px; width: 18px; height: 22px; border: 6px solid #fff; border-left: 0; border-radius: 0 12px 12px 0; }
 .hp-a__saucer { position: absolute; right: 18px; bottom: 96px; width: 96px; height: 14px; background: #f3efe8; border-radius: 50%; }
 
-.hp-b { position: relative; height: 400px; margin: 0 calc(var(--gutter) * -1); background: #ddd2c2; overflow: hidden; }
+.hp-b { position: relative; height: 390px; background: #ddd2c2; overflow: hidden; }
 .hp-b__back { position: absolute; left: 22px; top: 26px; width: 150px; filter: blur(2.5px); transform: rotate(-4deg); }
 .hp-b__phone { position: absolute; right: 26px; top: 40px; width: 200px; height: 400px; background: #15201d; border-radius: 30px; padding: 9px; transform: rotate(4deg); }
 .hp-b__screen { background: #fff; height: 100%; border-radius: 22px; padding: 16px 12px; overflow: hidden; }
@@ -694,3 +694,12 @@ body.warm .topbar { background: #f3f2ef; }
 .note small { display: block; color: #665e50; font-size: 12px; margin-bottom: 4px; }
 .note__re { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #d9d0c1; color: var(--mint-ink); font-weight: 600; font-size: 14px; }
 .faq-list { background: #fff; border-radius: 18px; overflow: hidden; }
+
+/* 홈 맨 위 자동 슬라이드 */
+.hero-carousel { margin: 0 calc(var(--gutter) * -1); position: relative; }
+.hero-carousel__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.hero-carousel__track::-webkit-scrollbar { display: none; }
+.hero-carousel__slide { flex: 0 0 100%; scroll-snap-align: start; }
+.hero-carousel__dots { position: absolute; left: 0; right: 0; bottom: 12px; display: flex; justify-content: center; gap: 6px; }
+.hero-carousel__dots button { width: 8px; height: 8px; border-radius: 4px; border: 0; padding: 0; background: rgba(21, 32, 29, 0.25); cursor: pointer; transition: width 200ms var(--ease), background-color 200ms var(--ease); }
+.hero-carousel__dots button[aria-selected='true'] { width: 22px; background: var(--text); }

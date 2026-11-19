@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../app/auth';
-import { HeroSceneA, HeroSceneB } from '../components/landing/HeroScenes';
+import { HeroCarousel } from '../components/landing/HeroScenes';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
 import type { QuestionKind } from '../lib/types';
 
@@ -20,8 +20,6 @@ export function LandingPage() {
 
   if (ready && user?.emailVerified) return <Navigate to="/inbox" replace />;
 
-  // 미리보기 비교용: ?hero=a (테이블 위 QR) | ?hero=b (손님 휴대폰)
-  const hero = new URLSearchParams(location.search).get('hero') === 'b' ? 'b' : 'a';
   const examples = t('landing.examples', { returnObjects: true }) as Ex[];
   const notes = examples.filter((e) => e.kind === 'complaint' || e.kind === 'suggestion').slice(0, 3);
   const faqs = [2, 3, 4];
@@ -30,7 +28,7 @@ export function LandingPage() {
     <>
       <PublicTopbar end={<Link to="/login" className="btn btn--text btn--sm">{t('landing.login')}</Link>} />
       <main className="page">
-        {hero === 'a' ? <HeroSceneA name={examples[0].name} /> : <HeroSceneB name={examples[0].name} />}
+        <HeroCarousel name={examples[0].name} />
 
         <section className="home-lead">
           <h1 className="landing__title">{t('landing.titleV2')}</h1>

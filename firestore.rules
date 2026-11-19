@@ -1,0 +1,146 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    // ---------- 공통 ----------
+    function signedIn() { return request.auth != null; }                  // 익명 손님 포함
+    function isAnon()   { return signedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous'; }
+    function verified() { return signedIn() && request.auth.token.email_verified == true; }
+    function isAdmin()  { return signedIn() && request.auth.token.admin == true; }
+    function d()        { return request.resource.data; }
+    function changes(keys) { return d().diff(resource.data).affectedKeys().hasOnly(keys); }
+    function str(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
+    function store(c)   { return get(/databases/$(db)/documents/stores/$(c)).data; }
+    function isOwner(c) {
+      return verified() && store(c).ownerUid == request.auth.uid && store(c).status != 'suspended';
+    }
+
+    // ---------- 사장님 계정 ----------
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn() && !isAnon() && request.auth.uid == uid
+        && d().keys().hasOnly(['storeCode', 'uiLang', 'agreed', 'createdAt'])
+        && str(d().uiLang, 2, 10)
+        && d().agreed.age14 == true && d().agreed.terms is string && d().agreed.privacy is string
+        && d().createdAt == request.time
+        && getAfter(/databases/$(db)/documents/stores/$(d().storeCode)).data.ownerUid == uid;
+      allow update: if signedIn() && request.auth.uid == uid && changes(['uiLang', 'agreed']);
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // ---------- 가게 ----------
+    match /stores/{code} {
+      function validSettings() {
+        return str(d().storeName, 1, 30) && str(d().intro, 0, 60) && str(d().lang, 2, 10)
+          && d().acceptingQuestions is bool && d().showUnanswered is bool
+          && d().blockedWords is list && d().blockedWords.size() <= 30;
+      }
+
+      allow read: if true;
+
+      allow create: if signedIn() && !isAnon()
+        && code.matches('^[23456789abcdefghjkmnpqrstuvwxyz]{8}$')
+        && d().keys().hasOnly(['storeName', 'intro', 'ownerUid', 'lang', 'status',
+                               'acceptingQuestions', 'showUnanswered', 'blockedWords', 'createdAt'])
+        && d().ownerUid == request.auth.uid && d().status == 'pending'
+        && d().createdAt == request.time && validSettings()
+        && !exists(/databases/$(db)/documents/users/$(request.auth.uid))            // 계정당 가게 1개
+        && getAfter(/databases/$(db)/documents/users/$(request.auth.uid)).data.storeCode == code;
+
+      allow update: if
+        (isOwner(code) && resource.data.status in ['pending', 'active']
+          && changes(['storeName', 'intro', 'lang', 'acceptingQuestions', 'showUnanswered', 'blockedWords', 'status'])
+          && validSettings()
+          && (d().status == resource.data.status
+              || (resource.data.status == 'pending' && d().status == 'active')
+              || (resource.data.status == 'active' && d().status == 'deleted')))
+        || (isAdmin() && changes(['status']) && d().status in ['active', 'suspended']);
+
+      allow delete: if false;                                                       // 코드 재사용 금지
+
+      // ---------- 질문 ----------
+      match /questions/{qid} {
+        function authorPath()   { return /databases/$(db)/documents/stores/$(code)/authors/$(qid); }
+        function throttlePath() { return /databases/$(db)/documents/throttle/$(request.auth.uid); }
+        function reportPath()   { return /databases/$(db)/documents/reports/$(qid + '_' + request.auth.uid); }
+
+        allow read: if resource.data.hidden == false || isOwner(code) || isAdmin();
+
+        allow create: if signedIn()
+          && store(code).status == 'active' && store(code).acceptingQuestions == true
+          && !exists(/databases/$(db)/documents/stores/$(code)/blocked/$(request.auth.uid))
+          && d().keys().hasOnly(['body', 'lang', 'status', 'answer', 'hidden', 'hiddenBy',
+                                 'reportCount', 'pinned', 'createdAt'])
+          && str(d().body, 2, 500) && str(d().lang, 2, 10)
+          && d().status == 'open' && d().answer == null
+          && d().hidden == false && d().hiddenBy == null
+          && d().reportCount == 0 && d().pinned == false
+          && d().createdAt == request.time
+          && getAfter(authorPath()).data.uid == request.auth.uid                     // 작성자 기록 같이
+          && getAfter(throttlePath()).data.lastPostAt == request.time                // 쓰기 간격 기록 같이
+          && (!exists(throttlePath())
+              || get(throttlePath()).data.lastPostAt < request.time - duration.value(30, 's'));
+
+        allow update: if
+          // 사장님: 답변 · 숨기기 · 고정 (운영자가 가린 건 못 풂)
+          (isOwner(code) && resource.data.hiddenBy != 'admin'
+            && changes(['answer', 'status', 'hidden', 'hiddenBy', 'pinned'])
+            && (d().answer == null
+                  ? d().status == 'open'
+                  : (str(d().answer.body, 1, 1000) && d().status == 'answered'))
+            && d().hidden is bool && d().pinned is bool
+            && (d().hidden == false ? d().hiddenBy == null : d().hiddenBy in ['owner', 'report']))
+          // 손님 신고: 한 사람당 한 번, 3건부터 자동 가림
+          || (signedIn() && changes(['reportCount', 'hidden', 'hiddenBy'])
+            && !exists(reportPath()) && existsAfter(reportPath())
+            && d().reportCount == resource.data.reportCount + 1
+            && (d().reportCount >= 3
+                  ? (d().hidden == true && d().hiddenBy == 'report')
+                  : (d().hidden == resource.data.hidden && d().hiddenBy == resource.data.hiddenBy)))
+          // 운영자
+          || (isAdmin() && changes(['hidden', 'hiddenBy']));
+
+        allow delete: if isOwner(code) || isAdmin()
+          || (signedIn() && get(authorPath()).data.uid == request.auth.uid);        // 내가 쓴 질문
+      }
+
+      // ---------- 작성자 기록 (차단 · 본인 삭제용) ----------
+      match /authors/{qid} {
+        allow create: if signedIn()
+          && d().keys().hasOnly(['uid']) && d().uid == request.auth.uid
+          && !exists(/databases/$(db)/documents/stores/$(code)/questions/$(qid))
+          && existsAfter(/databases/$(db)/documents/stores/$(code)/questions/$(qid));
+        allow read:   if isOwner(code) || (signedIn() && resource.data.uid == request.auth.uid);
+        allow delete: if isOwner(code) || isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      }
+
+      // ---------- 차단 목록 ----------
+      match /blocked/{uid} {
+        allow read, write: if isOwner(code);
+      }
+    }
+
+    // ---------- 쓰기 간격 ----------
+    match /throttle/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && d().keys().hasOnly(['lastPostAt']) && d().lastPostAt == request.time;
+    }
+
+    // ---------- 신고 ----------
+    match /reports/{rid} {
+      allow create: if signedIn()
+        && d().keys().hasOnly(['targetType', 'storeCode', 'targetId', 'reason', 'detail',
+                               'reporterUid', 'status', 'createdAt'])
+        && d().targetType in ['question', 'store']
+        && rid == d().targetId + '_' + request.auth.uid                              // 한 사람당 한 번
+        && d().reporterUid == request.auth.uid
+        && d().reason in ['abuse', 'privacy', 'spam', 'sexual', 'defamation', 'other']
+        && str(d().detail, 0, 300)
+        && d().status == 'open' && d().createdAt == request.time;
+      allow read, update: if isAdmin();
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}

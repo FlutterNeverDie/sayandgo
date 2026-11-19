@@ -31,9 +31,10 @@ service cloud.firestore {
     // ---------- 가게 ----------
     match /stores/{code} {
       function validSettings() {
-        return str(d().storeName, 1, 30) && str(d().intro, 0, 60) && str(d().lang, 2, 10)
-          && d().category in ['cafe', 'restaurant', 'bar', 'bakery', 'pc', 'beauty', 'shop', 'other']
-          && d().tone in ['mint', 'lemon', 'coral', 'sky', 'sand', 'ink']
+        return str(d().storeName, 1, 20) && str(d().intro, 0, 30) && str(d().lang, 2, 10)
+          && d().category in ['cafe', 'restaurant', 'bar', 'bakery', 'pc', 'beauty', 'shop', 'person',
+                              'other', 'flower', 'fitness', 'study', 'karaoke', 'pet', 'stay', 'car']
+          && d().tone is string && d().tone.matches('^#[0-9a-fA-F]{6}$')
           && d().acceptingQuestions is bool && d().showUnanswered is bool
           && d().blockedWords is list && d().blockedWords.size() <= 30;
       }

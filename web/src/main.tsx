@@ -46,6 +46,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/inbox" element={<InboxPage />} />
                 <Route path="/share" element={<SharePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/settings/:section" element={<SettingsPage />} />
                 <Route path="/terms" element={<LegalPage kind="terms" />} />
                 <Route path="/privacy" element={<LegalPage kind="privacy" />} />
                 <Route path="/policy" element={<LegalPage kind="policy" />} />

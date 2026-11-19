@@ -271,6 +271,30 @@ a { color: var(--mint-ink); text-underline-offset: 3px; }
 .swatches { display: flex; gap: 10px; flex-wrap: wrap; }
 .swatches button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(21, 32, 29, 0.12); cursor: pointer; }
 .swatches button[aria-checked='true'] { outline: 2px solid var(--text); outline-offset: 3px; }
+.swatch-custom {
+  position: relative; width: 40px; height: 40px; border-radius: 50%; border: 1px dashed var(--control);
+  display: grid; place-items: center; color: var(--muted); font-size: 20px; cursor: pointer; overflow: hidden;
+}
+.swatch-custom input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; border: 0; padding: 0; }
+.swatch-custom--on { border: 1px solid rgba(21, 32, 29, 0.12); outline: 2px solid var(--text); outline-offset: 3px; }
+.swatch-custom:focus-within { outline: 2px solid var(--mint-ink); outline-offset: 3px; }
+
+/* 설정 메뉴 */
+.menu-group { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.menu-group + .menu-group { margin-top: 16px; }
+.menu-row {
+  display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 16px; width: 100%;
+  background: none; border: 0; border-top: 1px solid var(--rule); text-decoration: none; color: var(--text);
+  font-size: var(--fs-16); text-align: left; cursor: pointer;
+}
+.menu-group > :first-child { border-top: 0; }
+.menu-row:hover { background: var(--raised); }
+.menu-row__value { margin-left: auto; color: var(--muted); font-size: var(--fs-14); max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-row svg.chev { color: var(--faint); flex: none; transform: rotate(-90deg); }
+.menu-group .switch-row { padding: 12px 16px; border-top: 1px solid var(--rule); }
+.menu-group .switch-row:first-child { border-top: 0; }
+.subpage-head { display: flex; align-items: center; gap: 4px; padding: 16px 0 12px; margin-left: -10px; }
+.subpage-head h1 { font-size: var(--fs-20); font-weight: 700; }
 
 /* ---------- 질문 피드 ---------- */
 .feed { margin: 0 calc(var(--gutter) * -1); }

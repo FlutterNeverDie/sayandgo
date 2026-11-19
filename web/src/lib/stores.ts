@@ -7,6 +7,7 @@ import {
 import { doc, getDoc, serverTimestamp, updateDoc, writeBatch, type DocumentSnapshot } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import { generateStoreCode } from './storeCode';
+import { LEGACY_TONES, PRESET_TONES } from '../components/ui/StoreIcon';
 import { TERMS_VERSION, type Store, type StoreCategory } from './types';
 
 const toDate = (v: unknown): Date | null =>
@@ -20,7 +21,7 @@ export function toStore(snap: DocumentSnapshot): Store | null {
     storeName: d.storeName,
     intro: d.intro ?? '',
     category: d.category ?? 'other',
-    tone: d.tone ?? 'mint',
+    tone: LEGACY_TONES[d.tone] ?? d.tone ?? PRESET_TONES[0],
     ownerUid: d.ownerUid,
     lang: d.lang,
     status: d.status,
@@ -73,12 +74,12 @@ async function createStore(user: User, code: string, storeName: string, lang: st
     storeName,
     intro: '',
     category,
-    tone: 'mint',
+    tone: PRESET_TONES[0],
     ownerUid: user.uid,
     lang,
     status: 'pending',
     acceptingQuestions: true,
-    showUnanswered: true,
+    showUnanswered: false, // 기본은 답변한 질문만 공개
     blockedWords: [],
     createdAt: serverTimestamp(),
   });

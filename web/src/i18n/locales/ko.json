@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "큐플레이스"
+    "name": "Q 플레이스"
   },
   "common": {
     "loading": "불러오는 중",
@@ -152,7 +152,7 @@
     "deletedDesc": "이 링크로는 더 이상 질문을 받지 않아요.",
     "suspendedTitle": "이용이 제한된 가게예요",
     "suspendedDesc": "운영정책 위반으로 지금은 이 가게 페이지를 이용할 수 없어요.",
-    "powered": "큐플레이스로 내 가게 질문함 만들기",
+    "powered": "Q 플레이스로 내 가게 질문함 만들기",
     "sentHidden": "보냈어요. 사장님이 답변하면 이 페이지에 보여요.",
     "anonymousQ": "익명님의 질문",
     "waiting": "아직 답변 전이에요",
@@ -232,7 +232,7 @@
     },
     "pinned": "고정됨",
     "blockTitle": "이 작성자를 차단할까요?",
-    "blockDesc": "이 질문을 보낸 기기에서는 앞으로 질문을 보낼 수 없어요. 누가 보냈는지는 큐플레이스도 사장님도 알 수 없어요.",
+    "blockDesc": "이 질문을 보낸 기기에서는 앞으로 질문을 보낼 수 없어요. 누가 보냈는지는 Q 플레이스도 사장님도 알 수 없어요.",
     "blockOnly": "차단만 하기",
     "blockAndDelete": "차단하고 질문 삭제",
     "blocked": "차단했어요",
@@ -287,7 +287,14 @@
     "deleting": "지우는 중",
     "look": "가게 아이콘",
     "lookDesc": "사진 대신 업종 아이콘과 색으로 가게를 보여 줘요.",
-    "tone": "색"
+    "tone": "색",
+    "iconsMore": "아이콘 더보기",
+    "iconsLess": "접기",
+    "customColor": "직접 고르기",
+    "questions": "질문 받기 설정",
+    "wordsCount": "{{n}}개",
+    "storeInfo": "가게 정보",
+    "storeInfoDesc": "상호명 · 소개 · 아이콘"
   },
   "legal": {
     "terms": "이용약관",
@@ -309,7 +316,15 @@
     "pc": "PC방",
     "beauty": "미용",
     "shop": "상점",
-    "other": "기타"
+    "other": "가게",
+    "person": "사람",
+    "flower": "꽃집",
+    "fitness": "운동",
+    "study": "스터디",
+    "karaoke": "노래방",
+    "pet": "반려동물",
+    "stay": "숙소",
+    "car": "자동차"
   },
   "tone": {
     "mint": "민트",

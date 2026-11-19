@@ -287,7 +287,14 @@
     "deleting": "Deleting",
     "look": "Shop icon",
     "lookDesc": "Your shop is shown with a type icon and colour instead of a photo.",
-    "tone": "Colour"
+    "tone": "Colour",
+    "iconsMore": "More icons",
+    "iconsLess": "Fewer icons",
+    "customColor": "Pick a colour",
+    "questions": "Questions",
+    "wordsCount": "{{n}}",
+    "storeInfo": "Shop info",
+    "storeInfoDesc": "Name · intro · icon"
   },
   "legal": {
     "terms": "Terms",
@@ -309,7 +316,15 @@
     "pc": "PC café",
     "beauty": "Salon",
     "shop": "Shop",
-    "other": "Other"
+    "other": "Store",
+    "person": "Person",
+    "flower": "Florist",
+    "fitness": "Fitness",
+    "study": "Study",
+    "karaoke": "Karaoke",
+    "pet": "Pets",
+    "stay": "Stay",
+    "car": "Car"
   },
   "tone": {
     "mint": "Mint",

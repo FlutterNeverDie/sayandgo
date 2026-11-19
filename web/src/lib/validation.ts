@@ -2,8 +2,8 @@ import { hasBannedWord } from './bannedWords';
 
 /** 보안 규칙(firestore.rules)과 같은 숫자를 쓴다. */
 export const LIMITS = {
-  storeName: 30,
-  intro: 60,
+  storeName: 20,
+  intro: 30,
   questionMin: 2,
   questionMax: 500,
   answer: 1000,

@@ -1,16 +1,16 @@
 import { signOut } from 'firebase/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { RequireOwner, useAuth } from '../app/auth';
 import { LanguageSelect, PasswordField, Switch, TextField } from '../components/ui/Fields';
-import { CloseIcon } from '../components/ui/Icons';
-import { StoreIcon } from '../components/ui/StoreIcon';
-import { CategoryPicker, TonePicker } from '../components/ui/StorePickers';
-import { OwnerShell } from '../components/ui/Layout';
+import { BackIcon, ChevronIcon, CloseIcon } from '../components/ui/Icons';
+import { Footer, OwnerShell } from '../components/ui/Layout';
 import { useToast } from '../components/ui/Overlay';
 import { ErrorBox } from '../components/ui/States';
+import { StoreIcon } from '../components/ui/StoreIcon';
+import { CategoryPicker, TonePicker } from '../components/ui/StorePickers';
 import { changePassword, deleteAccount } from '../lib/account';
 import { auth } from '../lib/firebase';
 import { errorKey, relativeTime } from '../lib/format';
@@ -19,26 +19,72 @@ import { updateStore, type StoreSettings } from '../lib/stores';
 import type { Store } from '../lib/types';
 import { checkIntro, checkPassword, checkStoreName, LIMITS } from '../lib/validation';
 
+type Section = 'store' | 'words' | 'blocked' | 'account';
+const SECTIONS: Section[] = ['store', 'words', 'blocked', 'account'];
+
 export function SettingsPage() {
   return <RequireOwner>{(store) => <Settings store={store} />}</RequireOwner>;
 }
 
+/** 설정: 첫 화면은 자주 쓰는 스위치 + 메뉴, 각 항목은 자기 화면으로 */
 function Settings({ store }: { store: Store }) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
+  const { section } = useParams();
 
-  async function save(patch: Partial<StoreSettings>) {
+  async function save(patch: Partial<StoreSettings>, quiet = false) {
     const prev = store;
     qc.setQueryData<Store>(['store', store.code], { ...store, ...patch });
     try {
       await updateStore(store.code, patch);
-      toast(t('common.saved'));
+      if (!quiet) toast(t('common.saved'));
     } catch {
       qc.setQueryData<Store>(['store', store.code], prev);
       toast(t('errors.generic'));
     }
   }
+
+  if (section && !SECTIONS.includes(section as Section)) return <Navigate to="/settings" replace />;
+
+  const titles: Record<Section, string> = {
+    store: t('settings.storeInfo'),
+    words: t('settings.words'),
+    blocked: t('settings.blocked'),
+    account: t('settings.account'),
+  };
+
+  if (section) {
+    const s = section as Section;
+    return (
+      <OwnerShell storeName={store.storeName}>
+        <main className="page">
+          <div className="subpage-head">
+            <Link to="/settings" className="icon-btn" aria-label={t('settings.title')}>
+              <BackIcon />
+            </Link>
+            <h1>{titles[s]}</h1>
+          </div>
+          {s === 'store' && <StoreInfo store={store} onSave={save} />}
+          {s === 'words' && <BlockedWords store={store} onSave={save} />}
+          {s === 'blocked' && <BlockedList code={store.code} />}
+          {s === 'account' && <Account store={store} />}
+        </main>
+      </OwnerShell>
+    );
+  }
+
+  const Row = ({ to, label, value }: { to: string; label: string; value?: ReactNode }) => (
+    <Link to={to} className="menu-row">
+      <span>{label}</span>
+      {value != null && <span className="menu-row__value">{value}</span>}
+      <span style={value == null ? { marginLeft: 'auto' } : undefined}>
+        <svg className="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </span>
+    </Link>
+  );
 
   return (
     <OwnerShell storeName={store.storeName}>
@@ -46,78 +92,112 @@ function Settings({ store }: { store: Store }) {
         <div className="title-row">
           <h1 className="title">{t('settings.title')}</h1>
         </div>
-        <StoreInfo store={store} onSave={save} />
-        <section className="section" aria-labelledby="look-h">
-          <h2 id="look-h" className="section__title">
-            {t('settings.look')}
-          </h2>
-          <div className="panel" style={{ display: 'grid', gap: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <StoreIcon category={store.category} tone={store.tone} size={56} />
-              <p className="subtitle">{t('settings.lookDesc')}</p>
+
+        <div className="menu-group">
+          <div className="switch-row">
+            <div className="switch-row__text">
+              <p className="switch-row__title">{t('inbox.pauseTitle')}</p>
+              <p className="switch-row__desc">{store.acceptingQuestions ? t('inbox.pauseOn') : t('inbox.pauseOff')}</p>
             </div>
-            <CategoryPicker value={store.category} onChange={(c) => save({ category: c ?? 'other' })} label={t('signup.category')} />
-            <div>
-              <p className="field__label" style={{ marginBottom: 8 }}>
-                {t('settings.tone')}
-              </p>
-              <TonePicker value={store.tone} onChange={(v) => save({ tone: v })} label={t('settings.tone')} />
-            </div>
+            <Switch checked={store.acceptingQuestions} onChange={(v) => save({ acceptingQuestions: v }, true)} label={t('inbox.pauseTitle')} />
           </div>
-        </section>
-        <section className="section">
-          <div className="panel divided" style={{ padding: '0 16px' }}>
-            <div className="switch-row">
-              <div className="switch-row__text">
-                <p className="switch-row__title">{t('inbox.pauseTitle')}</p>
-                <p className="switch-row__desc">{store.acceptingQuestions ? t('inbox.pauseOn') : t('inbox.pauseOff')}</p>
-              </div>
-              <Switch checked={store.acceptingQuestions} onChange={(v) => save({ acceptingQuestions: v })} label={t('inbox.pauseTitle')} />
+          <div className="switch-row">
+            <div className="switch-row__text">
+              <p className="switch-row__title">{t('settings.showUnanswered')}</p>
+              <p className="switch-row__desc">{store.showUnanswered ? t('settings.showUnansweredOn') : t('settings.showUnansweredOff')}</p>
             </div>
-            <div className="switch-row">
-              <div className="switch-row__text">
-                <p className="switch-row__title">{t('settings.showUnanswered')}</p>
-                <p className="switch-row__desc">{store.showUnanswered ? t('settings.showUnansweredOn') : t('settings.showUnansweredOff')}</p>
-              </div>
-              <Switch checked={store.showUnanswered} onChange={(v) => save({ showUnanswered: v })} label={t('settings.showUnanswered')} />
-            </div>
+            <Switch checked={store.showUnanswered} onChange={(v) => save({ showUnanswered: v }, true)} label={t('settings.showUnanswered')} />
           </div>
-        </section>
-        <BlockedWords store={store} onSave={save} />
-        <BlockedList code={store.code} />
-        <Account store={store} />
+        </div>
+
+        <div className="menu-group">
+          <Link to="/settings/store" className="menu-row">
+            <StoreIcon category={store.category} tone={store.tone} size={36} />
+            <span style={{ minWidth: 0 }}>
+              <span style={{ display: 'block', fontWeight: 600 }}>{store.storeName}</span>
+              <span className="subtitle">{t('settings.storeInfoDesc')}</span>
+            </span>
+            <span style={{ marginLeft: 'auto' }}>
+              <ChevronRight />
+            </span>
+          </Link>
+          <Row to="/settings/words" label={t('settings.words')} value={t('settings.wordsCount', { n: store.blockedWords.length })} />
+          <Row to="/settings/blocked" label={t('settings.blocked')} />
+        </div>
+
+        <div className="menu-group">
+          <Row to="/settings/account" label={t('settings.account')} value={auth.currentUser?.email} />
+        </div>
+
+        <Footer />
       </main>
     </OwnerShell>
   );
 }
 
+function ChevronRight() {
+  return (
+    <span style={{ display: 'inline-flex', transform: 'rotate(-90deg)', color: 'var(--faint)' }}>
+      <ChevronIcon />
+    </span>
+  );
+}
+
+/** 가게 정보: 미리보기 + 상호명 · 소개 · 아이콘 · 색, 저장 버튼 하나 */
 function StoreInfo({ store, onSave }: { store: Store; onSave: (p: Partial<StoreSettings>) => Promise<void> }) {
   const { t } = useTranslation();
   const [name, setName] = useState(store.storeName);
   const [intro, setIntro] = useState(store.intro);
+  const [category, setCategory] = useState(store.category);
+  const [tone, setTone] = useState(store.tone);
   const errs = { name: checkStoreName(name), intro: checkIntro(intro) };
-  const dirty = name.trim() !== store.storeName || intro.trim() !== store.intro;
+  const dirty = name.trim() !== store.storeName || intro.trim() !== store.intro || category !== store.category || tone !== store.tone;
+
   return (
-    <section aria-labelledby="store-h">
-      <h2 id="store-h" className="section__title">
-        {t('settings.store')}
-      </h2>
-      <form
-        className="panel"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!errs.name && !errs.intro) onSave({ storeName: name.trim(), intro: intro.trim() });
-        }}
-      >
-        <TextField label={t('settings.storeName')} value={name} maxLength={LIMITS.storeName} onChange={(e) => setName(e.target.value)} error={errs.name} />
-        <TextField label={t('settings.intro')} value={intro} maxLength={LIMITS.intro} onChange={(e) => setIntro(e.target.value)} error={errs.intro} hint={t('settings.introHint')} />
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button className="btn btn--primary btn--sm" disabled={!dirty || !!errs.name || !!errs.intro}>
-            {t('common.save')}
-          </button>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!errs.name && !errs.intro) onSave({ storeName: name.trim(), intro: intro.trim(), category, tone });
+      }}
+    >
+      <div className="panel" style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+        <StoreIcon category={category} tone={tone} size={56} />
+        <div style={{ minWidth: 0 }}>
+          <p style={{ fontWeight: 700, fontSize: 18 }}>{name.trim() || ' '}</p>
+          <p className="subtitle">{intro.trim() || t('settings.introHint')}</p>
         </div>
-      </form>
-    </section>
+      </div>
+
+      <TextField
+        label={t('settings.storeName')}
+        value={name}
+        maxLength={LIMITS.storeName}
+        onChange={(e) => setName(e.target.value)}
+        error={errs.name}
+        hint={`${name.trim().length} / ${LIMITS.storeName}`}
+      />
+      <TextField
+        label={t('settings.intro')}
+        value={intro}
+        maxLength={LIMITS.intro}
+        onChange={(e) => setIntro(e.target.value)}
+        error={errs.intro}
+        hint={`${intro.trim().length} / ${LIMITS.intro}`}
+      />
+
+      <div className="field">
+        <span className="field__label">{t('signup.category')}</span>
+        <CategoryPicker value={category} onChange={(c) => setCategory(c ?? 'other')} label={t('signup.category')} />
+      </div>
+      <div className="field">
+        <span className="field__label">{t('settings.tone')}</span>
+        <TonePicker value={tone} onChange={setTone} label={t('settings.tone')} />
+      </div>
+
+      <button className="btn btn--primary btn--block" disabled={!dirty || !!errs.name || !!errs.intro}>
+        {t('common.save')}
+      </button>
+    </form>
   );
 }
 
@@ -134,37 +214,32 @@ function BlockedWords({ store, onSave }: { store: Store; onSave: (p: Partial<Sto
     setWord('');
   }
   return (
-    <section className="section" aria-labelledby="words-h">
-      <h2 id="words-h" className="section__title">
-        {t('settings.words')}
-      </h2>
-      <div className="panel">
-        <p className="subtitle" style={{ marginBottom: 12 }}>
-          {t('settings.wordsDesc')}
-        </p>
-        <form className="input-group" onSubmit={add}>
-          <input className="input" value={word} maxLength={LIMITS.blockedWordLength} placeholder={t('settings.wordsPlaceholder')} aria-label={t('settings.wordsPlaceholder')} onChange={(e) => setWord(e.target.value)} disabled={full} />
-          <button className="btn" disabled={full || !word.trim()}>
-            {t('settings.wordsAdd')}
-          </button>
-        </form>
-        <p className="field__hint num" style={{ marginTop: 8 }}>
-          {t('settings.wordsLimit', { n: words.length })}
-        </p>
-        {words.length > 0 && (
-          <ul style={{ listStyle: 'none', margin: '12px 0 0', padding: 0, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {words.map((w) => (
-              <li key={w} className="pill pill--hidden" style={{ height: 32, paddingRight: 2, fontSize: 14 }}>
-                {w}
-                <button className="icon-btn" style={{ width: 28, height: 28 }} aria-label={t('settings.wordsRemove', { w })} onClick={() => onSave({ blockedWords: words.filter((x) => x !== w) })}>
-                  <CloseIcon />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </section>
+    <>
+      <p className="subtitle" style={{ marginBottom: 16 }}>
+        {t('settings.wordsDesc')}
+      </p>
+      <form className="input-group" onSubmit={add}>
+        <input className="input" value={word} maxLength={LIMITS.blockedWordLength} placeholder={t('settings.wordsPlaceholder')} aria-label={t('settings.wordsPlaceholder')} onChange={(e) => setWord(e.target.value)} disabled={full} />
+        <button className="btn" disabled={full || !word.trim()}>
+          {t('settings.wordsAdd')}
+        </button>
+      </form>
+      <p className="field__hint num" style={{ marginTop: 8 }}>
+        {t('settings.wordsLimit', { n: words.length })}
+      </p>
+      {words.length > 0 && (
+        <ul style={{ listStyle: 'none', margin: '12px 0 0', padding: 0, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {words.map((w) => (
+            <li key={w} className="chip" style={{ paddingRight: 2, color: 'var(--text)' }}>
+              {w}
+              <button className="icon-btn" style={{ width: 28, height: 28 }} aria-label={t('settings.wordsRemove', { w })} onClick={() => onSave({ blockedWords: words.filter((x) => x !== w) })}>
+                <CloseIcon />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
   );
 }
 
@@ -173,17 +248,14 @@ function BlockedList({ code }: { code: string }) {
   const toast = useToast();
   const q = useQuery({ queryKey: ['blocked', code], queryFn: () => listBlocked(code), staleTime: 5 * 60_000 });
   return (
-    <section className="section" aria-labelledby="blocked-h">
-      <h2 id="blocked-h" className="section__title">
-        {t('settings.blocked')}
-      </h2>
+    <>
       {q.isError && <ErrorBox onRetry={() => q.refetch()} />}
       {q.isLoading && <div className="skeleton" style={{ height: 56 }} />}
       {q.data?.length === 0 && <div className="empty">{t('settings.blockedEmpty')}</div>}
       {!!q.data?.length && (
-        <ul className="panel divided" style={{ listStyle: 'none', margin: 0, padding: '0 16px' }}>
+        <ul className="menu-group" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {q.data.map((b) => (
-            <li key={b.uid} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0' }}>
+            <li key={b.uid} className="menu-row" style={{ cursor: 'default' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>“{b.snippet}”</p>
                 <p className="field__hint">{relativeTime(b.at)}</p>
@@ -201,7 +273,7 @@ function BlockedList({ code }: { code: string }) {
           ))}
         </ul>
       )}
-    </section>
+    </>
   );
 }
 
@@ -249,50 +321,50 @@ function Account({ store }: { store: Store }) {
 
   return (
     <>
-      <section className="section" aria-labelledby="account-h">
-        <h2 id="account-h" className="section__title">
-          {t('settings.account')}
-        </h2>
-        <div className="panel divided" style={{ padding: '0 16px' }}>
-          <div style={{ padding: '14px 0' }}>
-            <p className="field__hint">{t('settings.email')}</p>
-            <p>{user?.email}</p>
-          </div>
-          <div style={{ padding: '10px 0', display: 'flex', alignItems: 'center' }}>
-            <span style={{ flex: 1 }}>{t('lang.label')}</span>
-            <LanguageSelect />
-          </div>
-          <details style={{ padding: '14px 0' }}>
-            <summary style={{ cursor: 'pointer', fontWeight: 600 }}>{t('settings.changePassword')}</summary>
-            <form onSubmit={onChangePassword} style={{ marginTop: 16 }} noValidate>
-              <PasswordField label={t('settings.currentPassword')} autoComplete="current-password" value={cur} onChange={(e) => setCur(e.target.value)} />
-              <PasswordField label={t('settings.newPassword')} autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} hint={t('signup.passwordHint')} error={pwError} showStrength />
-              <button className="btn btn--ink btn--sm" disabled={busy || !cur || !next}>
-                {t('settings.changePassword')}
-              </button>
-            </form>
-          </details>
-          <div style={{ padding: '10px 0' }}>
-            <button className="btn btn--text" style={{ paddingLeft: 0 }} onClick={() => signOut(auth).then(() => navigate('/'))}>
-              {t('settings.logout')}
-            </button>
-          </div>
+      <div className="menu-group">
+        <div className="menu-row" style={{ cursor: 'default' }}>
+          <span>{t('settings.email')}</span>
+          <span className="menu-row__value">{user?.email}</span>
         </div>
+        <div className="menu-row" style={{ cursor: 'default' }}>
+          <span>{t('lang.label')}</span>
+          <span style={{ marginLeft: 'auto' }}>
+            <LanguageSelect />
+          </span>
+        </div>
+        <button className="menu-row" onClick={() => signOut(auth).then(() => navigate('/'))}>
+          {t('settings.logout')}
+        </button>
+      </div>
+
+      <section className="section" aria-labelledby="pw-h">
+        <h2 id="pw-h" className="section__title">
+          {t('settings.changePassword')}
+        </h2>
+        <form className="panel" onSubmit={onChangePassword} noValidate>
+          <PasswordField label={t('settings.currentPassword')} autoComplete="current-password" value={cur} onChange={(e) => setCur(e.target.value)} />
+          <PasswordField label={t('settings.newPassword')} autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} hint={t('signup.passwordHint')} error={pwError} showStrength />
+          <button className="btn btn--ink btn--sm" disabled={busy || !cur || !next}>
+            {t('settings.changePassword')}
+          </button>
+        </form>
       </section>
 
       <section className="section" aria-labelledby="delete-h">
-        <h2 id="delete-h" className="section__title" style={{ color: 'var(--negative)' }}>
-          {t('settings.deleteTitle')}
-        </h2>
-        <form className="panel" onSubmit={onDelete} noValidate>
-          <p className="subtitle" style={{ marginBottom: 16 }}>
-            {t('settings.deleteDesc')}
-          </p>
-          <PasswordField label={t('settings.deleteConfirm')} autoComplete="current-password" value={delPw} onChange={(e) => setDelPw(e.target.value)} error={delError} />
-          <button className="btn btn--danger btn--sm" disabled={busy || !delPw}>
-            {busy ? t('settings.deleting') : t('settings.deleteButton')}
-          </button>
-        </form>
+        <details>
+          <summary className="section__title" id="delete-h" style={{ color: 'var(--negative)', cursor: 'pointer' }}>
+            {t('settings.deleteTitle')}
+          </summary>
+          <form className="panel" onSubmit={onDelete} noValidate style={{ marginTop: 8 }}>
+            <p className="subtitle" style={{ marginBottom: 16 }}>
+              {t('settings.deleteDesc')}
+            </p>
+            <PasswordField label={t('settings.deleteConfirm')} autoComplete="current-password" value={delPw} onChange={(e) => setDelPw(e.target.value)} error={delError} />
+            <button className="btn btn--danger btn--sm" disabled={busy || !delPw}>
+              {busy ? t('settings.deleting') : t('settings.deleteButton')}
+            </button>
+          </form>
+        </details>
       </section>
     </>
   );

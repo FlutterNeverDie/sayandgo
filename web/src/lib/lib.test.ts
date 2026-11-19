@@ -41,7 +41,8 @@ describe('입력 검증', () => {
   });
   it('상호명', () => {
     expect(checkStoreName('  ')).toBe('errors.required');
-    expect(checkStoreName('가'.repeat(31))).toBe('errors.tooLong');
+    expect(checkStoreName('가'.repeat(21))).toBe('errors.tooLong');
+    expect(checkStoreName('가'.repeat(20))).toBeNull();
     expect(checkStoreName('연남동 로스터리')).toBeNull();
   });
   it('질문 2~500자', () => {

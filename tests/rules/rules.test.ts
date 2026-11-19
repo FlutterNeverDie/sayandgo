@@ -42,7 +42,7 @@ const storeData = (ownerUid: string, status = 'active') => ({
   storeName: '연남동 로스터리',
   intro: '',
   category: 'cafe',
-  tone: 'mint',
+  tone: '#3ccfae',
   ownerUid,
   lang: 'ko',
   status,
@@ -167,14 +167,18 @@ describe('가게 설정', () => {
     await seed(async (db) => setDoc(doc(db, 'stores/pend2345'), storeData(OWNER, 'pending')));
     await assertSucceeds(updateDoc(doc(owner(), 'stores/pend2345'), { status: 'active' }));
   });
+  it('상호명 21자 · 소개 31자는 거부', async () => {
+    await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { storeName: '가'.repeat(21) }));
+    await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { intro: '가'.repeat(31) }));
+  });
   it('주인은 상호명 · 소개 변경 가능, 남은 불가', async () => {
     await assertSucceeds(updateDoc(doc(owner(), `stores/${CODE}`), { storeName: '새 이름', intro: '주말 10시 오픈' }));
     await assertFails(updateDoc(doc(anon(), `stores/${CODE}`), { storeName: '해킹' }));
   });
   it('업종 · 색은 정해진 값만', async () => {
-    await assertSucceeds(updateDoc(doc(owner(), `stores/${CODE}`), { category: 'bar', tone: 'ink' }));
+    await assertSucceeds(updateDoc(doc(owner(), `stores/${CODE}`), { category: 'person', tone: '#ab12ef' }));
     await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { category: 'casino' }));
-    await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { tone: 'purple' }));
+    await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { tone: 'mint' }));
   });
   it('주인이 ownerUid는 못 바꾼다', async () => {
     await assertFails(updateDoc(doc(owner(), `stores/${CODE}`), { ownerUid: 'other' }));

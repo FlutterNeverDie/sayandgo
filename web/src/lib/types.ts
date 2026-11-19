@@ -1,6 +1,9 @@
 export type StoreStatus = 'pending' | 'active' | 'deleted' | 'suspended';
-export type StoreCategory = 'cafe' | 'restaurant' | 'bar' | 'bakery' | 'pc' | 'beauty' | 'shop' | 'other';
-export type StoreTone = 'mint' | 'lemon' | 'coral' | 'sky' | 'sand' | 'ink';
+export type StoreCategory =
+  | 'cafe' | 'restaurant' | 'bar' | 'bakery' | 'pc' | 'beauty' | 'shop' | 'person'
+  | 'other' | 'flower' | 'fitness' | 'study' | 'karaoke' | 'pet' | 'stay' | 'car';
+/** 색 코드 #rrggbb */
+export type StoreTone = string;
 
 export interface Store {
   code: string;

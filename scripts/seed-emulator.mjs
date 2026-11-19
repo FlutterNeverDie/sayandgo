@@ -50,7 +50,7 @@ await put(`stores/${CODE}`, {
   storeName: '연남동 로스터리',
   intro: '평일 8시, 주말 10시에 열어요',
   category: 'cafe',
-  tone: 'mint',
+  tone: '#3ccfae',
   ownerUid: uid,
   lang: 'ko',
   status: 'active',

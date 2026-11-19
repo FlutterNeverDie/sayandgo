@@ -9,16 +9,19 @@ export function Footer({ extra }: { extra?: ReactNode }) {
   const { t } = useTranslation();
   return (
     <footer className="footer">
-      <nav aria-label="footer">
+      {/* 자주 누르는 것(소개 · 문의)과 약관 · 정책을 나눠서, 휴대폰에서도 줄이 아무 데서나 끊기지 않게 */}
+      <nav aria-label="footer" className="footer__main">
         <Link to="/">{t('legal.about')}</Link>
+        <Link to="/contact">{t('legal.contact')}</Link>
+        {extra}
+      </nav>
+      <nav aria-label="legal" className="footer__legal">
         <Link to="/terms">{t('legal.terms')}</Link>
         <Link to="/privacy">
           <strong>{t('legal.privacy')}</strong>
         </Link>
         <Link to="/policy">{t('legal.policy')}</Link>
         <Link to="/rights">{t('legal.rights')}</Link>
-        <Link to="/contact">{t('legal.contact')}</Link>
-        {extra}
       </nav>
       <span>© {new Date().getFullYear()} {t('app.name')}</span>
     </footer>

@@ -15,7 +15,6 @@ export interface Store {
   lang: string;
   status: StoreStatus;
   acceptingQuestions: boolean;
-  showUnanswered: boolean;
   blockedWords: string[];
   createdAt: Date | null;
 }
@@ -27,11 +26,17 @@ export interface Answer {
 }
 
 export type HiddenBy = null | 'owner' | 'report' | 'admin';
+export type QuestionKind = 'question' | 'suggestion' | 'complaint' | 'praise';
+export const QUESTION_KINDS: QuestionKind[] = ['question', 'suggestion', 'complaint', 'praise'];
+/** public: 모두에게 공개(답변 후) · owner: 사장님만 */
+export type Visibility = 'public' | 'owner';
 
 export interface Question {
   id: string;
   body: string;
   lang: string;
+  kind: QuestionKind;
+  visibility: Visibility;
   status: 'open' | 'answered';
   answer: Answer | null;
   hidden: boolean;

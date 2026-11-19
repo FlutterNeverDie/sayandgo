@@ -414,3 +414,22 @@ a { color: var(--mint-ink); text-underline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
 }
+
+/* 글 종류 색 점 */
+.qitem__bubble-label--complaint { color: #9a3b1f; }
+.qitem__bubble-label--praise { color: var(--mint-ink); }
+
+/* 익명 보장 */
+.anon-line { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: var(--fs-14); color: var(--mint-ink); font-weight: 600; }
+.anon-box { background: var(--mint-soft); border-radius: 14px; padding: 14px 16px; margin-top: 16px; }
+.anon-box__title { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--mint-ink); font-size: var(--fs-14); }
+.anon-box ul { margin: 8px 0 0; padding-left: 0; list-style: none; display: grid; gap: 4px; font-size: var(--fs-14); color: var(--text); }
+.anon-box li::before { content: '·'; margin-right: 6px; color: var(--mint-ink); font-weight: 700; }
+
+/* 종류 고르기 */
+.kind-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.kind-chips button {
+  height: 38px; padding: 0 14px; border-radius: 19px; border: 1px solid var(--border); background: var(--surface);
+  font-size: var(--fs-14); color: var(--muted); cursor: pointer;
+}
+.kind-chips button[aria-checked='true'] { background: var(--text); border-color: var(--text); color: #fff; font-weight: 700; }

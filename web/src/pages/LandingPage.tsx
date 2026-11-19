@@ -14,6 +14,8 @@ export function LandingPage() {
     id: 'sample',
     body: t('landing.sampleQ'),
     lang: 'ko',
+    kind: 'question',
+    visibility: 'public',
     status: 'answered',
     answer: { body: t('landing.sampleA'), at: new Date(Date.now() - 20 * 60_000), editedAt: null },
     hidden: false,
@@ -50,7 +52,7 @@ export function LandingPage() {
           </h2>
           <div className="feed" style={{ borderTop: '1px solid var(--rule)' }}>
             <QuestionItem q={sample} store={sampleStore} />
-            <QuestionItem q={{ ...sample, id: 'sample2', body: t('landing.sampleQ2'), status: 'open', answer: null, createdAt: new Date() }} store={sampleStore} />
+            <QuestionItem q={{ ...sample, id: 'sample2', kind: 'suggestion', body: t('landing.sampleQ2'), answer: { body: t('landing.sampleA2'), at: new Date(), editedAt: null }, createdAt: new Date(Date.now() - 40 * 60_000) }} store={sampleStore} />
           </div>
         </section>
 

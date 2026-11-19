@@ -101,13 +101,6 @@ function Settings({ store }: { store: Store }) {
             </div>
             <Switch checked={store.acceptingQuestions} onChange={(v) => save({ acceptingQuestions: v }, true)} label={t('inbox.pauseTitle')} />
           </div>
-          <div className="switch-row">
-            <div className="switch-row__text">
-              <p className="switch-row__title">{t('settings.showUnanswered')}</p>
-              <p className="switch-row__desc">{store.showUnanswered ? t('settings.showUnansweredOn') : t('settings.showUnansweredOff')}</p>
-            </div>
-            <Switch checked={store.showUnanswered} onChange={(v) => save({ showUnanswered: v }, true)} label={t('settings.showUnanswered')} />
-          </div>
         </div>
 
         <div className="menu-group">

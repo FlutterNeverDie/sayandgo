@@ -24,7 +24,7 @@ import {
   type QueryDocumentSnapshot,
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
-import type { Question, ReportReason } from './types';
+import type { Question, QuestionKind, ReportReason, Visibility } from './types';
 
 export const PAGE_SIZE = 10;
 
@@ -40,6 +40,8 @@ export function toQuestion(snap: DocumentSnapshot): Question {
     id: snap.id,
     body: d.body,
     lang: d.lang,
+    kind: d.kind ?? 'question',
+    visibility: d.visibility ?? 'public',
     status: d.status,
     answer: d.answer ? { body: d.answer.body, at: toDate(d.answer.at), editedAt: toDate(d.answer.editedAt) } : null,
     hidden: d.hidden,
@@ -68,21 +70,17 @@ async function fetchPage(code: string, constraints: QueryConstraint[], cursor: Q
 
 // ---------- 손님 ----------
 
-/** 손님 목록: 가려진 글 제외, 10개씩. 실시간 구독 안 함(읽기 절감). */
-export function fetchPublicPage(code: string, answeredOnly: boolean, cursor: QueryDocumentSnapshot | null) {
-  const c: QueryConstraint[] = [where('hidden', '==', false)];
-  if (answeredOnly) c.push(where('status', '==', 'answered'));
-  return fetchPage(code, c, cursor);
+/** 손님에게 보이는 글 = 사장님이 답변한 공개 글 (보안 규칙과 같은 조건) */
+const publicOnly = () => [where('hidden', '==', false), where('visibility', '==', 'public'), where('status', '==', 'answered')];
+
+/** 손님 목록: 10개씩. 실시간 구독 안 함(읽기 절감). */
+export function fetchPublicPage(code: string, cursor: QueryDocumentSnapshot | null) {
+  return fetchPage(code, publicOnly(), cursor);
 }
 
-/** 가게 머리의 "질문 N · 답변 M". count()는 1,000건당 읽기 1회. */
-export async function fetchCounts(code: string): Promise<{ total: number; answered: number }> {
-  const visible = where('hidden', '==', false);
-  const [all, answered] = await Promise.all([
-    getCountFromServer(query(qcol(code), visible)),
-    getCountFromServer(query(qcol(code), visible, where('status', '==', 'answered'))),
-  ]);
-  return { total: all.data().count, answered: answered.data().count };
+/** 가게 머리의 "답변 N". count()는 1,000건당 읽기 1회. */
+export async function fetchAnsweredCount(code: string): Promise<number> {
+  return (await getCountFromServer(query(qcol(code), ...publicOnly()))).data().count;
 }
 
 async function ensureSignedIn(): Promise<User> {
@@ -112,13 +110,15 @@ function rememberMine(code: string, id: string, add = true) {
 }
 
 /** 질문 + 작성자 기록 + 쓰기 간격을 한 배치로 (규칙이 셋 다 요구) */
-export async function postQuestion(code: string, body: string, lang: string): Promise<Question> {
+export async function postQuestion(code: string, body: string, lang: string, kind: QuestionKind, visibility: Visibility): Promise<Question> {
   const user = await ensureSignedIn();
   const ref = doc(qcol(code));
   const b = writeBatch(db);
   b.set(ref, {
     body,
     lang,
+    kind,
+    visibility,
     status: 'open',
     answer: null,
     hidden: false,
@@ -131,7 +131,7 @@ export async function postQuestion(code: string, body: string, lang: string): Pr
   b.set(doc(db, 'throttle', user.uid), { lastPostAt: serverTimestamp() });
   await b.commit();
   rememberMine(code, ref.id);
-  return { id: ref.id, body, lang, status: 'open', answer: null, hidden: false, hiddenBy: null, reportCount: 0, pinned: false, createdAt: new Date() };
+  return { id: ref.id, body, lang, kind, visibility, status: 'open', answer: null, hidden: false, hiddenBy: null, reportCount: 0, pinned: false, createdAt: new Date() };
 }
 
 export async function deleteMyQuestion(code: string, id: string) {

@@ -7,12 +7,14 @@ import { StoreHeader, useScrolledPast } from '../components/question/StoreHeader
 import { ReportSheet } from '../components/question/ReportSheet';
 import { Footer, PublicTopbar } from '../components/ui/Layout';
 import { Sheet, useToast } from '../components/ui/Overlay';
+import { Switch } from '../components/ui/Fields';
+import { LockIcon } from '../components/ui/Icons';
 import { ErrorBox, Loading, TicketSkeleton } from '../components/ui/States';
 import { currentLang } from '../i18n';
 import {
   alreadyReported,
   deleteMyQuestion,
-  fetchCounts,
+  fetchAnsweredCount,
   fetchPublicPage,
   myQuestionIds,
   postQuestion,
@@ -22,7 +24,7 @@ import {
 } from '../lib/questions';
 import { CODE_RE, storeUrl } from '../lib/storeCode';
 import { getStore } from '../lib/stores';
-import type { Question, Store } from '../lib/types';
+import { QUESTION_KINDS, type Question, type QuestionKind, type Store } from '../lib/types';
 import { checkQuestion, LIMITS, tidyText } from '../lib/validation';
 
 const LAST_POST_KEY = 'qplace:lastPost';
@@ -64,17 +66,12 @@ function StoreState({ title, desc }: { title: string; desc: string }) {
   );
 }
 
-type Tab = 'all' | 'answered';
-
 function ActiveStore({ store }: { store: Store }) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<Tab>(store.showUnanswered ? 'all' : 'answered');
-  const answeredOnly = tab === 'answered';
-  const listKey = ['public', store.code, answeredOnly];
+  const listKey = ['public', store.code];
   const [mine, setMine] = useState(() => myQuestionIds(store.code));
-  const [freshId, setFreshId] = useState<string | null>(null);
   const [composing, setComposing] = useState(false);
   const [menuFor, setMenuFor] = useState<Question | null>(null);
   const [reporting, setReporting] = useState<Question | 'store' | null>(null);
@@ -85,12 +82,12 @@ function ActiveStore({ store }: { store: Store }) {
   }, [store.storeName, t]);
 
   const [headerRef, past] = useScrolledPast<HTMLElement>();
-  const counts = useQuery({ queryKey: ['counts', store.code], queryFn: () => fetchCounts(store.code), staleTime: 10 * 60_000 });
+  const answered = useQuery({ queryKey: ['answered', store.code], queryFn: () => fetchAnsweredCount(store.code), staleTime: 10 * 60_000 });
 
-  // 10개씩, 60초 캐시, 실시간 구독 없음 (읽기 절감)
+  // 사장님이 답변한 공개 글만, 10개씩, 60초 캐시, 실시간 구독 없음 (읽기 절감)
   const list = useInfiniteQuery({
     queryKey: listKey,
-    queryFn: ({ pageParam }) => fetchPublicPage(store.code, answeredOnly, pageParam),
+    queryFn: ({ pageParam }) => fetchPublicPage(store.code, pageParam),
     initialPageParam: null as Page['cursor'],
     getNextPageParam: (last) => last.cursor ?? undefined,
     staleTime: 60_000,
@@ -108,33 +105,20 @@ function ActiveStore({ store }: { store: Store }) {
     return () => io.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const setItems = (fn: (pages: Page[]) => Page[]) =>
-    qc.setQueryData<InfiniteData<Page>>(['public', store.code, false], (old) => (old ? { ...old, pages: fn(old.pages) } : old));
-
   function onPosted(q: Question) {
     setComposing(false);
     setMine(myQuestionIds(store.code));
-    qc.setQueryData<{ total: number; answered: number }>(['counts', store.code], (c) => (c ? { ...c, total: c.total + 1 } : c));
-    if (!store.showUnanswered) {
-      toast(t('store.sentHidden'));
-      return;
-    }
-    // 다시 불러오지 않고 맨 위에 끼워 넣는다 (읽기 0)
-    setItems((pages) => [{ ...pages[0], items: [q, ...(pages[0]?.items ?? [])] }, ...pages.slice(1)]);
-    setTab('all');
-    setFreshId(q.id);
-    toast(t('store.sent'));
+    // 답변 전 글은 공개되지 않으므로 목록은 그대로 (읽기 0)
+    toast(q.visibility === 'owner' ? t('store.sentPrivate') : t('store.sentHidden'), { ms: 3600 });
   }
 
   async function onDeleteMine(q: Question) {
     setConfirmDelete(null);
     try {
       await deleteMyQuestion(store.code, q.id);
-      for (const only of [false, true]) {
-        qc.setQueryData<InfiniteData<Page>>(['public', store.code, only], (old) =>
-          old ? { ...old, pages: old.pages.map((p) => ({ ...p, items: p.items.filter((i) => i.id !== q.id) })) } : old,
-        );
-      }
+      qc.setQueryData<InfiniteData<Page>>(listKey, (old) =>
+        old ? { ...old, pages: old.pages.map((p) => ({ ...p, items: p.items.filter((i) => i.id !== q.id) })) } : old,
+      );
       setMine(myQuestionIds(store.code));
       toast(t('store.deletedMine'));
     } catch {
@@ -166,15 +150,14 @@ function ActiveStore({ store }: { store: Store }) {
           intro={store.intro}
           chips={
             <>
-              {counts.data && (
-                <>
-                  <span className="chip num">
-                    {t('store.statsQ')} <b>{counts.data.total}</b>
-                  </span>
-                  <span className="chip num">
-                    {t('store.statsA')} <b>{counts.data.answered}</b>
-                  </span>
-                </>
+              <span className="anon-line" style={{ marginTop: 0, marginRight: 4 }}>
+                <LockIcon />
+                {t('store.anonBadge')}
+              </span>
+              {answered.data != null && answered.data > 0 && (
+                <span className="chip num">
+                  {t('store.statsA')} <b>{answered.data}</b>
+                </span>
               )}
               {!store.acceptingQuestions && <span className="chip chip--paused">{t('store.pausedChip')}</span>}
             </>
@@ -195,17 +178,7 @@ function ActiveStore({ store }: { store: Store }) {
           }
         />
 
-        {store.showUnanswered && (
-          <div className="segmented" role="tablist">
-            {(['all', 'answered'] as Tab[]).map((k) => (
-              <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>
-                {k === 'all' ? t('store.tabAll') : t('store.tabAnswered')}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <section className="feed" aria-label={t('store.listTitle')}>
+        <section className="feed" aria-label={t('store.listTitle')} style={{ borderTop: '1px solid var(--rule)' }}>
           {list.isLoading && (
             <>
               <TicketSkeleton />
@@ -221,18 +194,11 @@ function ActiveStore({ store }: { store: Store }) {
           {list.isSuccess && items.length === 0 && (
             <div className="center-state" style={{ padding: '48px 16px' }}>
               <h2 style={{ fontSize: 16 }}>{t('store.emptyTitle')}</h2>
-              <p>{answeredOnly ? t('store.emptyAnsweredDesc') : t('store.emptyDesc')}</p>
+              <p>{t('store.emptyDesc')}</p>
             </div>
           )}
           {items.map((q) => (
-            <QuestionItem
-              key={q.id}
-              q={q}
-              store={store}
-              mine={mine.has(q.id)}
-              fresh={q.id === freshId}
-              onMenu={() => setMenuFor(q)}
-            />
+            <QuestionItem key={q.id} q={q} store={store} mine={mine.has(q.id)} onMenu={() => setMenuFor(q)} />
           ))}
           <div ref={sentinel} />
           {list.isFetchingNextPage && <TicketSkeleton />}
@@ -318,11 +284,14 @@ function readLastPost(): number {
   }
 }
 
-/** 질문하기: 버튼을 눌렀을 때만 열리는 시트 (손님이 직접 연 것이라 바로 입력창에 포커스) */
+/** 남기기: 종류 고르기 + 사장님만 보기 + 익명 안내. 버튼을 눌렀을 때만 열린다. */
 function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () => void; onPosted: (q: Question) => void }) {
   const { t } = useTranslation();
   const draftKey = `qplace:draft:${store.code}`;
   const [text, setText] = useState(() => sessionStorage.getItem(draftKey) ?? '');
+  const [kind, setKind] = useState<QuestionKind>('question');
+  const [ownerOnly, setOwnerOnly] = useState(false);
+  const [touchedPrivate, setTouchedPrivate] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(Date.now());
@@ -343,6 +312,12 @@ function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () 
     sessionStorage.setItem(draftKey, text);
   }, [draftKey, text]);
 
+  function pickKind(k: QuestionKind) {
+    setKind(k);
+    // 아쉬운 점은 기본으로 사장님만 (직접 바꿨으면 그대로 둔다)
+    if (!touchedPrivate) setOwnerOnly(k === 'complaint');
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const body = tidyText(text);
@@ -351,7 +326,7 @@ function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () 
     if (err || wait > 0) return;
     setBusy(true);
     try {
-      const q = await postQuestion(store.code, body, currentLang());
+      const q = await postQuestion(store.code, body, currentLang(), kind, ownerOnly ? 'owner' : 'public');
       try {
         localStorage.setItem(LAST_POST_KEY, String(Date.now()));
       } catch {
@@ -368,8 +343,15 @@ function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () 
 
   const length = text.trim().length;
   return (
-    <Sheet title={t('store.askTitle')} desc={t('store.anonymous')} onClose={onClose}>
+    <Sheet title={t('store.askTitle')} onClose={onClose}>
       <form onSubmit={onSubmit} noValidate>
+        <div className="kind-chips" role="radiogroup" aria-label={t('store.label')}>
+          {QUESTION_KINDS.map((k) => (
+            <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => pickKind(k)}>
+              {t(`kind.${k}`)}
+            </button>
+          ))}
+        </div>
         <label htmlFor="q-body" className="sr-only">
           {t('store.label')}
         </label>
@@ -379,7 +361,7 @@ function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () 
           className="textarea"
           rows={5}
           maxLength={LIMITS.questionMax + 50}
-          placeholder={t('store.placeholder')}
+          placeholder={t(`kindPlaceholder.${kind}`)}
           value={text}
           onChange={(e) => {
             setText(e.target.value);
@@ -394,14 +376,40 @@ function ComposeSheet({ store, onClose, onPosted }: { store: Store; onClose: () 
             {t(error)}
           </p>
         )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}>
-          <span className="num" style={{ fontSize: 12, color: length > LIMITS.questionMax ? 'var(--negative)' : 'var(--muted)' }}>
-            {length} / {LIMITS.questionMax}
-          </span>
-          <button className="btn btn--primary" style={{ marginLeft: 'auto', minWidth: 120 }} disabled={busy || wait > 0 || length === 0}>
-            {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
-          </button>
+        <p className="num" style={{ fontSize: 12, color: length > LIMITS.questionMax ? 'var(--negative)' : 'var(--muted)', textAlign: 'right', marginTop: 6 }}>
+          {length} / {LIMITS.questionMax}
+        </p>
+
+        <div className="switch-row" style={{ paddingTop: 4 }}>
+          <div className="switch-row__text">
+            <p className="switch-row__title">{t('store.privateTitle')}</p>
+            <p className="switch-row__desc">{t('store.privateDesc')}</p>
+          </div>
+          <Switch
+            checked={ownerOnly}
+            onChange={(v) => {
+              setOwnerOnly(v);
+              setTouchedPrivate(true);
+            }}
+            label={t('store.privateTitle')}
+          />
         </div>
+
+        <div className="anon-box">
+          <p className="anon-box__title">
+            <LockIcon />
+            {t('store.anonTitle')}
+          </p>
+          <ul>
+            <li>{t('store.anon1')}</li>
+            <li>{t('store.anon2')}</li>
+            <li>{t('store.anon3')}</li>
+          </ul>
+        </div>
+
+        <button className="btn btn--primary btn--block" style={{ marginTop: 16 }} disabled={busy || wait > 0 || length === 0}>
+          {busy ? t('store.sending') : wait > 0 ? t('store.wait', { s: wait }) : t('store.send')}
+        </button>
         <p className="field__hint" id="q-hint" style={{ marginTop: 12 }}>
           <Trans i18nKey="store.consent" components={{ 1: <Link to="/policy" /> }} />
         </p>

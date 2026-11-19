@@ -37,6 +37,7 @@ export function QuestionItem({ q, store, mine, owner, fresh, selected, onMenu, l
           <span className="who">{store.storeName}</span>
           <time dateTime={when?.toISOString()}>· {relativeTime(when)}</time>
           {mine && <span className="pill pill--mine">{t('store.mine')}</span>}
+        {owner && q.visibility === 'owner' && <span className="pill pill--hidden">{t('store.ownerOnly')}</span>}
           {owner && q.hidden && (
             <span className={`pill ${q.hiddenBy === 'owner' ? 'pill--hidden' : 'pill--danger'}`}>{t(`inbox.hiddenBy.${q.hiddenBy ?? 'owner'}`)}</span>
           )}
@@ -49,9 +50,9 @@ export function QuestionItem({ q, store, mine, owner, fresh, selected, onMenu, l
         </div>
 
         <div className="qitem__bubble">
-          <p className="qitem__bubble-label">
+          <p className={`qitem__bubble-label qitem__bubble-label--${q.kind}`}>
             <span className="qitem__anon" aria-hidden="true" />
-            {t('store.anonymousQ')}
+            {t('store.kindLabel', { kind: t(`kind.${q.kind}`) })}
             {q.answer && <span className="qitem__bubble-time">{relativeTime(q.createdAt)}</span>}
           </p>
           <p className="qitem__bubble-text">{q.body}</p>

@@ -35,7 +35,7 @@ service cloud.firestore {
           && d().category in ['cafe', 'restaurant', 'bar', 'bakery', 'pc', 'beauty', 'shop', 'person',
                               'other', 'flower', 'fitness', 'study', 'karaoke', 'pet', 'stay', 'car']
           && d().tone is string && d().tone.matches('^#[0-9a-fA-F]{6}$')
-          && d().acceptingQuestions is bool && d().showUnanswered is bool
+          && d().acceptingQuestions is bool
           && d().blockedWords is list && d().blockedWords.size() <= 30;
       }
 
@@ -44,7 +44,7 @@ service cloud.firestore {
       allow create: if signedIn() && !isAnon()
         && code.matches('^[23456789abcdefghjkmnpqrstuvwxyz]{8}$')
         && d().keys().hasOnly(['storeName', 'intro', 'category', 'tone', 'ownerUid', 'lang', 'status',
-                               'acceptingQuestions', 'showUnanswered', 'blockedWords', 'createdAt'])
+                               'acceptingQuestions', 'blockedWords', 'createdAt'])
         && d().ownerUid == request.auth.uid && d().status == 'pending'
         && d().createdAt == request.time && validSettings()
         && !exists(/databases/$(db)/documents/users/$(request.auth.uid))            // 계정당 가게 1개
@@ -52,7 +52,7 @@ service cloud.firestore {
 
       allow update: if
         (isOwner(code) && resource.data.status in ['pending', 'active']
-          && changes(['storeName', 'intro', 'category', 'tone', 'lang', 'acceptingQuestions', 'showUnanswered', 'blockedWords', 'status'])
+          && changes(['storeName', 'intro', 'category', 'tone', 'lang', 'acceptingQuestions', 'blockedWords', 'status'])
           && validSettings()
           && (d().status == resource.data.status
               || (resource.data.status == 'pending' && d().status == 'active')
@@ -67,14 +67,18 @@ service cloud.firestore {
         function throttlePath() { return /databases/$(db)/documents/throttle/$(request.auth.uid); }
         function reportPath()   { return /databases/$(db)/documents/reports/$(qid + '_' + request.auth.uid); }
 
-        allow read: if resource.data.hidden == false || isOwner(code) || isAdmin();
+        // 손님에게는 사장님이 답변한 공개 글만. 답변 전 · 가려진 글 · 사장님만 보기 글은 주인 · 운영자만
+        allow read: if (resource.data.hidden == false && resource.data.visibility == 'public' && resource.data.status == 'answered')
+                    || isOwner(code) || isAdmin();
 
         allow create: if signedIn()
           && store(code).status == 'active' && store(code).acceptingQuestions == true
           && !exists(/databases/$(db)/documents/stores/$(code)/blocked/$(request.auth.uid))
-          && d().keys().hasOnly(['body', 'lang', 'status', 'answer', 'hidden', 'hiddenBy',
+          && d().keys().hasOnly(['body', 'lang', 'kind', 'visibility', 'status', 'answer', 'hidden', 'hiddenBy',
                                  'reportCount', 'pinned', 'createdAt'])
           && str(d().body, 2, 500) && str(d().lang, 2, 10)
+          && d().kind in ['question', 'suggestion', 'complaint', 'praise']
+          && d().visibility in ['public', 'owner']
           && d().status == 'open' && d().answer == null
           && d().hidden == false && d().hiddenBy == null
           && d().reportCount == 0 && d().pinned == false

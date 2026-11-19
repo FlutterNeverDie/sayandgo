@@ -26,7 +26,6 @@ export function toStore(snap: DocumentSnapshot): Store | null {
     lang: d.lang,
     status: d.status,
     acceptingQuestions: d.acceptingQuestions,
-    showUnanswered: d.showUnanswered,
     blockedWords: d.blockedWords ?? [],
     createdAt: toDate(d.createdAt),
   };
@@ -79,7 +78,6 @@ async function createStore(user: User, code: string, storeName: string, lang: st
     lang,
     status: 'pending',
     acceptingQuestions: true,
-    showUnanswered: false, // 기본은 답변한 질문만 공개
     blockedWords: [],
     createdAt: serverTimestamp(),
   });
@@ -98,7 +96,7 @@ export async function activateStore(user: User, code: string) {
   await updateDoc(doc(db, 'stores', code), { status: 'active' });
 }
 
-export type StoreSettings = Pick<Store, 'storeName' | 'intro' | 'category' | 'tone' | 'acceptingQuestions' | 'showUnanswered' | 'blockedWords'>;
+export type StoreSettings = Pick<Store, 'storeName' | 'intro' | 'category' | 'tone' | 'acceptingQuestions' | 'blockedWords'>;
 
 export async function updateStore(code: string, patch: Partial<StoreSettings>) {
   await updateDoc(doc(db, 'stores', code), patch);

@@ -70,8 +70,9 @@
     "faq4q": "상호명을 바꾸면 QR도 새로 뽑아야 하나요?",
     "faq4a": "아니요. 링크와 QR은 가입할 때 정해진 뒤 바뀌지 않아요.",
     "closing": "오늘 가입하고, 내일 아침 테이블에 붙여 보세요.",
-    "sampleQ2": "주차는 어디에 하면 되나요?",
-    "sampleStore": "연남동 로스터리"
+    "sampleQ2": "테라스에 담요가 있으면 좋겠어요",
+    "sampleStore": "연남동 로스터리",
+    "sampleA2": "좋은 생각이에요. 다음 주부터 준비해 둘게요."
   },
   "signup": {
     "title": "가입하기",
@@ -125,15 +126,15 @@
     "anonymous": "익명으로 남겨져요. 사장님도 누가 썼는지 몰라요.",
     "placeholder": "궁금한 점이나 하고 싶은 말을 남겨 주세요",
     "label": "질문 쓰기",
-    "send": "보내기",
+    "send": "익명으로 보내기",
     "sending": "보내는 중",
     "wait": "{{s}}초 후에 보낼 수 있어요",
     "sent": "질문을 보냈어요",
     "consent": "보내기를 누르면 <1>운영정책</1>에 동의한 것으로 봐요. 욕설이나 다른 사람의 개인정보는 등록되지 않거나 가려질 수 있어요.",
     "paused": "지금은 질문을 받지 않아요. 아래에서 지난 질문과 답변을 볼 수 있어요.",
     "listTitle": "질문과 답변",
-    "emptyTitle": "아직 질문이 없어요",
-    "emptyDesc": "첫 질문을 남겨 보세요.",
+    "emptyTitle": "아직 답변이 올라오지 않았어요",
+    "emptyDesc": "궁금한 점이나 하고 싶은 말을 익명으로 남겨 보세요.",
     "emptyAnsweredDesc": "아직 답변한 질문이 없어요.",
     "open": "답변 전",
     "answer": "사장님 답변",
@@ -153,11 +154,11 @@
     "suspendedTitle": "이용이 제한된 가게예요",
     "suspendedDesc": "운영정책 위반으로 지금은 이 가게 페이지를 이용할 수 없어요.",
     "powered": "Q 플레이스로 내 가게 질문함 만들기",
-    "sentHidden": "보냈어요. 사장님이 답변하면 이 페이지에 보여요.",
+    "sentHidden": "보냈어요. 사장님이 답변하면 이 페이지에 공개돼요.",
     "anonymousQ": "익명님의 질문",
     "waiting": "아직 답변 전이에요",
-    "ask": "질문하기",
-    "askTitle": "익명으로 질문하기",
+    "ask": "익명으로 남기기",
+    "askTitle": "익명으로 남기기",
     "statsQ": "질문",
     "statsA": "답변",
     "tabAll": "전체",
@@ -168,7 +169,17 @@
     "less": "접기",
     "editInfo": "정보 편집",
     "qrShare": "QR · 공유",
-    "pausedChip": "질문 잠시 멈춤"
+    "pausedChip": "질문 잠시 멈춤",
+    "anonBadge": "익명 보장 · 로그인 없이 써요",
+    "privateTitle": "사장님만 보기",
+    "privateDesc": "다른 손님에게 보이지 않아요. 답변도 공개되지 않아요.",
+    "sentPrivate": "사장님께만 전달했어요",
+    "anonTitle": "누가 보냈는지 아무도 몰라요",
+    "anon1": "로그인 · 이름 · 연락처를 받지 않아요",
+    "anon2": "사장님께 기기 정보나 IP가 보이지 않아요",
+    "anon3": "보낸 글은 이 기기에서 언제든 지울 수 있어요",
+    "ownerOnly": "사장님만",
+    "kindLabel": "익명 · {{kind}}"
   },
   "report": {
     "title": "신고하기",
@@ -240,7 +251,8 @@
     "pinLimit": "고정은 3개까지 할 수 있어요.",
     "answerTitle": "답변 쓰기",
     "pausedNotice": "질문 받기를 멈췄어요. 손님 화면에 안내가 보여요.",
-    "resume": "다시 받기"
+    "resume": "다시 받기",
+    "privateNote": "사장님만 볼 수 있는 의견이에요. 답변도 손님들에게 공개되지 않아요."
   },
   "share": {
     "title": "링크 · QR",
@@ -333,5 +345,17 @@
     "sky": "하늘",
     "sand": "모래",
     "ink": "잉크"
+  },
+  "kind": {
+    "question": "궁금해요",
+    "suggestion": "제안해요",
+    "complaint": "아쉬워요",
+    "praise": "칭찬해요"
+  },
+  "kindPlaceholder": {
+    "question": "궁금한 점을 적어 주세요",
+    "suggestion": "이런 게 있으면 좋겠어요",
+    "complaint": "아쉬웠던 점을 솔직하게 적어 주세요. 사장님께 꼭 필요한 이야기예요.",
+    "praise": "좋았던 점을 알려 주세요"
   }
 }

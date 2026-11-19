@@ -70,8 +70,9 @@
     "faq4q": "If I rename my shop, do I need a new QR?",
     "faq4a": "No. Your link and QR code never change.",
     "closing": "Sign up today, put it on the tables tomorrow.",
-    "sampleQ2": "Where can I park?",
-    "sampleStore": "Harbour Street Roasters"
+    "sampleQ2": "Blankets on the terrace would be nice",
+    "sampleStore": "Harbour Street Roasters",
+    "sampleA2": "Great idea. We will have them from next week."
   },
   "signup": {
     "title": "Sign up",
@@ -125,15 +126,15 @@
     "anonymous": "Posted anonymously. The owner can't see who wrote it.",
     "placeholder": "Ask a question or leave a note",
     "label": "Your question",
-    "send": "Send",
+    "send": "Send anonymously",
     "sending": "Sending",
     "wait": "You can send again in {{s}}s",
     "sent": "Question sent",
     "consent": "By sending you agree to the <1>community policy</1>. Abuse or other people's personal details may be blocked or hidden.",
     "paused": "Not taking questions right now. Past questions and answers are below.",
     "listTitle": "Questions and answers",
-    "emptyTitle": "No questions yet",
-    "emptyDesc": "Be the first to ask.",
+    "emptyTitle": "No replies yet",
+    "emptyDesc": "Leave a question or a note, anonymously.",
     "emptyAnsweredDesc": "No answered questions yet.",
     "open": "Awaiting reply",
     "answer": "Owner's reply",
@@ -156,8 +157,8 @@
     "sentHidden": "Sent. It will appear here once the owner replies.",
     "anonymousQ": "Anonymous asked",
     "waiting": "Not answered yet",
-    "ask": "Ask a question",
-    "askTitle": "Ask anonymously",
+    "ask": "Leave a note anonymously",
+    "askTitle": "Leave a note anonymously",
     "statsQ": "questions",
     "statsA": "replies",
     "tabAll": "All",
@@ -168,7 +169,17 @@
     "less": "Less",
     "editInfo": "Edit info",
     "qrShare": "QR · Share",
-    "pausedChip": "Questions paused"
+    "pausedChip": "Questions paused",
+    "anonBadge": "Anonymous · no sign-in",
+    "privateTitle": "Only the owner can see",
+    "privateDesc": "Other guests won't see it, and the reply stays private.",
+    "sentPrivate": "Sent privately to the owner",
+    "anonTitle": "Nobody can tell who sent it",
+    "anon1": "No sign-in, name or contact details",
+    "anon2": "The owner never sees your device or IP",
+    "anon3": "You can delete it from this device any time",
+    "ownerOnly": "Owner only",
+    "kindLabel": "Anonymous · {{kind}}"
   },
   "report": {
     "title": "Report",
@@ -240,7 +251,8 @@
     "pinLimit": "You can pin up to 3.",
     "answerTitle": "Write a reply",
     "pausedNotice": "Questions are paused. Guests see a notice.",
-    "resume": "Resume"
+    "resume": "Resume",
+    "privateNote": "Only you can see this note. Your reply stays private too."
   },
   "share": {
     "title": "Link · QR",
@@ -333,5 +345,17 @@
     "sky": "Sky",
     "sand": "Sand",
     "ink": "Ink"
+  },
+  "kind": {
+    "question": "Question",
+    "suggestion": "Suggestion",
+    "complaint": "Could be better",
+    "praise": "Compliment"
+  },
+  "kindPlaceholder": {
+    "question": "What would you like to know?",
+    "suggestion": "It would be great if…",
+    "complaint": "Tell the owner honestly what wasn't right. It really helps.",
+    "praise": "What did you like?"
   }
 }

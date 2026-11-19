@@ -47,7 +47,6 @@ const storeData = (ownerUid: string, status = 'active') => ({
   lang: 'ko',
   status,
   acceptingQuestions: true,
-  showUnanswered: true,
   blockedWords: [],
   createdAt: Timestamp.now(),
 });
@@ -55,6 +54,8 @@ const storeData = (ownerUid: string, status = 'active') => ({
 const questionData = (over: Record<string, unknown> = {}) => ({
   body: '디카페인 원두도 파시나요?',
   lang: 'ko',
+  kind: 'question',
+  visibility: 'public',
   status: 'open',
   answer: null,
   hidden: false,
@@ -229,6 +230,16 @@ describe('손님 질문', () => {
     b.set(doc(db, 'throttle/anon1'), { lastPostAt: serverTimestamp() });
     await assertFails(b.commit());
   });
+  it('없는 종류 · 공개 범위는 거부', async () => {
+    for (const bad of [{ kind: 'rant' }, { visibility: 'friends' }]) {
+      const db = anon();
+      const b = writeBatch(db);
+      b.set(doc(db, `stores/${CODE}/questions/qx`), { ...questionData(bad), createdAt: serverTimestamp() });
+      b.set(doc(db, `stores/${CODE}/authors/qx`), { uid: 'anon1' });
+      b.set(doc(db, 'throttle/anon1'), { lastPostAt: serverTimestamp() });
+      await assertFails(b.commit());
+    }
+  });
   it('1자 질문은 거부', async () => {
     const db = anon();
     const b = writeBatch(db);
@@ -247,8 +258,19 @@ describe('읽기', () => {
       await setDoc(doc(db, `stores/${CODE}/authors/open1`), { uid: 'anon1' });
     });
   });
-  it('손님은 hidden == false 쿼리로 목록을 읽는다', async () => {
-    await assertSucceeds(getDocs(query(collection(guest(), `stores/${CODE}/questions`), where('hidden', '==', false))));
+  it('손님은 답변된 공개 글 쿼리로 목록을 읽는다', async () => {
+    await assertSucceeds(getDocs(query(collection(guest(), `stores/${CODE}/questions`), where('hidden', '==', false), where('visibility', '==', 'public'), where('status', '==', 'answered'))));
+  });
+  it('답변 조건이 빠진 손님 쿼리는 거부', async () => {
+    await assertFails(getDocs(query(collection(guest(), `stores/${CODE}/questions`), where('hidden', '==', false), where('visibility', '==', 'public'))));
+  });
+  it('답변 전 질문은 링크로 직접 읽어도 거부', async () => {
+    await assertFails(getDoc(doc(guest(), `stores/${CODE}/questions/open1`)));
+  });
+  it('사장님만 보기 글은 남이 못 읽고 주인은 읽는다', async () => {
+    await seed(async (db) => setDoc(doc(db, `stores/${CODE}/questions/priv1`), questionData({ visibility: 'owner', kind: 'complaint' })));
+    await assertFails(getDoc(doc(guest(), `stores/${CODE}/questions/priv1`)));
+    await assertSucceeds(getDoc(doc(owner(), `stores/${CODE}/questions/priv1`)));
   });
   it('필터 없는 손님 목록 쿼리는 거부', async () => {
     await assertFails(getDocs(collection(guest(), `stores/${CODE}/questions`)));

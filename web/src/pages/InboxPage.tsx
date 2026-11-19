@@ -503,6 +503,11 @@ function AnswerSheet({ q, onSave, onClose, onRemove }: { q: Question; onSave: (b
 
   return (
     <Sheet title={q.answer ? t('inbox.editAnswer') : t('inbox.answerTitle')} onClose={onClose}>
+      {q.visibility === 'owner' && (
+        <p className="notice" style={{ marginBottom: 12 }}>
+          {t('inbox.privateNote')}
+        </p>
+      )}
       <p className="qitem__quote">{q.body}</p>
       <form
         onSubmit={(e) => {

@@ -180,16 +180,7 @@ function Share({ store }: { store: Store }) {
           </div>
           <p className="share-hint">{t(`share.typeHints.${pref.type}`)}</p>
 
-          <p className="share-label">{t('share.captionLang')}</p>
-          <div className="segmented" role="radiogroup" aria-label={t('share.captionLang')}>
-            {(['ko', 'en', 'both'] as PosterLang[]).map((l) => (
-              <button key={l} type="button" role="radio" aria-selected={pref.lang === l} onClick={() => setPref((p) => ({ ...p, lang: l }))}>
-                {t(`share.langs.${l}`)}
-              </button>
-            ))}
-          </div>
-
-          <div className="field" style={{ marginTop: 16 }}>
+          <div className="field" style={{ marginTop: 20 }}>
             <label className="field__label" htmlFor="poster-caption">
               {t('share.customCaption')}
             </label>
@@ -212,6 +203,15 @@ function Share({ store }: { store: Store }) {
             {captionError ? <p className="field__error">{captionError}</p> : <p className="field__hint">{t('share.customHint', { n: draft.trim().length, max: CAPTION_MAX })}</p>}
           </div>
 
+
+          <p className="share-label">{t('share.captionLang')}</p>
+          <div className="segmented" role="radiogroup" aria-label={t('share.captionLang')}>
+            {(['ko', 'en', 'both'] as PosterLang[]).map((l) => (
+              <button key={l} type="button" role="radio" aria-selected={pref.lang === l} onClick={() => setPref((p) => ({ ...p, lang: l }))}>
+                {t(`share.langs.${l}`)}
+              </button>
+            ))}
+          </div>
           <button type="button" className="btn btn--black btn--lg" style={{ width: '100%', marginTop: 20 }} onClick={() => setCustomizing(false)}>
             {t('share.apply')}
           </button>

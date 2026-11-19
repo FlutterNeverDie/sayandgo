@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<title>Threads 카드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --ink: #15201d; --mint: #3ccfae; --mint-ink: #0b6b58; --mint-soft: #dff5ee; --warm: #f3f2ef; --muted: #5f6b67; }
+  body { background: #888; font-family: "Pretendard Variable", Pretendard, -apple-system, sans-serif; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+  .card { width: 1080px; height: 1350px; position: relative; overflow: hidden; padding: 84px 84px 0; color: var(--ink); margin-bottom: 20px; }
+  .brand { display: flex; align-items: center; gap: 14px; font-size: 34px; font-weight: 800; letter-spacing: -0.01em; }
+  .brand img { width: 52px; height: 52px; }
+  .url { position: absolute; left: 84px; bottom: 64px; font-size: 30px; font-weight: 700; opacity: 0.75; }
+  h1 { font-size: 96px; line-height: 1.16; font-weight: 900; letter-spacing: -0.035em; margin-top: 64px; white-space: pre-line; }
+  h1 em { font-style: normal; color: var(--mint-ink); }
+  .sub { font-size: 38px; line-height: 1.5; font-weight: 600; margin-top: 30px; color: var(--muted); white-space: pre-line; }
+  .phone { position: absolute; width: 440px; border: 14px solid var(--ink); border-radius: 60px; overflow: hidden; background: #fff; box-shadow: 0 30px 60px rgba(0,0,0,0.18); }
+  .phone img { display: block; width: 100%; }
+  .label { position: absolute; font-size: 24px; font-weight: 700; background: rgba(21,32,29,0.82); color: #fff; padding: 8px 16px; border-radius: 999px; }
+  .bubble { display: inline-block; background: #fff; border-radius: 34px 34px 34px 10px; padding: 26px 34px; font-size: 42px; font-weight: 700; box-shadow: 0 6px 0 rgba(0,0,0,0.05); }
+  .bubble small { display: block; font-size: 26px; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+
+  /* 1 */
+  .c1 { background: var(--warm); }
+  .c1 .paper { position: absolute; left: 84px; bottom: 170px; width: 340px; height: 330px; background: #d9d3c7; border-radius: 18px; }
+  .c1 .paper::before { content: ''; position: absolute; left: 70px; right: 70px; top: 48px; height: 16px; background: #8f8778; border-radius: 8px; }
+  .c1 .paper b { position: absolute; left: 0; right: 0; top: 120px; text-align: center; font-size: 40px; color: #6d6558; }
+  .c1 .paper span { position: absolute; left: 0; right: 0; top: 184px; text-align: center; font-size: 26px; font-weight: 600; color: #8f8778; }
+  .c1 .arrow { position: absolute; left: 450px; bottom: 300px; font-size: 80px; font-weight: 900; color: var(--mint-ink); }
+  .c1 .phone { right: 84px; bottom: -330px; transform: rotate(-4deg); }
+  .c1 .label { right: 96px; top: 690px; }
+
+  /* 2 */
+  .c2 { background: var(--ink); color: #fff; }
+  .c2 .sub { color: rgba(255,255,255,0.72); }
+  .c2 h1 em { color: var(--mint); }
+  .c2 .phone { right: 84px; bottom: -40px; border-color: #2c3a36; height: 700px; }
+  .c2 .phone img { position: absolute; bottom: 0; left: 0; }
+  .c2 .label { right: 96px; top: 618px; background: rgba(255,255,255,0.18); }
+  .c2 .url { color: #fff; }
+
+  /* 3 */
+  .c3 { background: var(--mint); }
+  .c3 .sub { color: rgba(21,32,29,0.75); }
+  .c3 .brand img { border-radius: 13px; box-shadow: 0 0 0 4px var(--ink); }
+  .c3 .posters { position: absolute; left: 0; right: 0; bottom: 140px; height: 560px; }
+  .c3 .posters img { position: absolute; bottom: 0; border-radius: 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.18); }
+  .c3 .pA { width: 340px; left: 110px; transform: rotate(-6deg); }
+  .c3 .pB { width: 360px; left: 360px; bottom: 30px !important; z-index: 2; }
+  .c3 .pE { width: 300px; right: 110px; transform: rotate(6deg); border-radius: 40px !important; }
+
+  /* 4 */
+  .c4 { background: var(--warm); }
+  .c4 .talk { margin-top: 56px; display: grid; gap: 22px; width: 540px; }
+  .c4 .talk .bubble:nth-child(2) { justify-self: end; border-radius: 34px 34px 10px 34px; background: #e6e3dc; }
+  .c4 .talk .bubble.anon { background: var(--ink); color: #fff; }
+  .c4 .talk .bubble.anon small { color: var(--mint); }
+  .c4 .phone { right: 70px; bottom: -260px; transform: rotate(4deg); }
+  .c4 .label { right: 70px; top: 640px; }
+
+  /* 5 */
+  .c5 { background: #e8eef0; }
+  .c5 .eg { margin-top: 56px; font-size: 30px; font-weight: 700; color: var(--muted); }
+  .c5 .list { display: grid; gap: 22px; margin-top: 18px; }
+  .c5 .list .bubble:nth-child(2) { margin-left: 120px; }
+  .c5 .list .bubble:nth-child(3) { margin-left: 40px; }
+  .c5 .foot { position: absolute; left: 84px; right: 84px; bottom: 140px; background: var(--ink); color: #fff; border-radius: 28px; padding: 34px 40px; font-size: 40px; font-weight: 800; line-height: 1.4; }
+  .c5 .foot span { color: var(--mint); }
+
+  /* 6 */
+  .c6 { background: var(--ink); color: #fff; display: flex; flex-direction: column; }
+  .c6 h1 { font-size: 84px; margin-top: 120px; }
+  .c6 h1 em { color: var(--mint); }
+  .c6 .sub { color: rgba(255,255,255,0.72); }
+  .c6 .reply { margin-top: 70px; display: flex; gap: 20px; align-items: center; font-size: 36px; font-weight: 700; color: rgba(255,255,255,0.85); }
+  .c6 .reply i { width: 64px; height: 64px; border-radius: 50%; background: var(--mint); display: inline-block; flex: none; }
+  .c6 .reply span { background: rgba(255,255,255,0.1); border-radius: 28px; padding: 22px 30px; }
+  .c6 .url { color: #fff; }
+
+  /* 7 */
+  .c7 { background: var(--warm); }
+  .c7 .row { position: absolute; left: 60px; right: 60px; bottom: 160px; display: flex; align-items: flex-end; justify-content: center; gap: 22px; }
+  .c7 .row figure { display: grid; justify-items: center; gap: 14px; }
+  .c7 .row img { border-radius: 10px; box-shadow: 0 14px 28px rgba(0,0,0,0.14); background: #fff; }
+  .c7 .row figcaption { font-size: 26px; font-weight: 700; color: var(--muted); }
+  .c7 .wide { position: absolute; left: 160px; right: 160px; bottom: 450px; }
+  .c7 .wide img { width: 100%; border-radius: 10px; box-shadow: 0 14px 28px rgba(0,0,0,0.14); }
+  .c7 .wide figcaption { font-size: 26px; font-weight: 700; color: var(--muted); margin-top: 12px; text-align: center; }
+</style>
+</head>
+<body>
+
+<section class="card c1" id="card1">
+  <div class="brand"><img src="../../web/public/favicon.svg" alt="">Say&amp;Go</div>
+  <h1>망하는 것보단
+<em>쓴소리</em> 듣는 게
+낫다</h1>
+  <p class="sub">휴대폰으로 쓰는 '고객의 소리'함</p>
+  <div class="paper"><b>고객의 소리</b><span>펜 · 종이 필요</span></div>
+  <div class="arrow">→</div>
+  <div class="phone"><img src="src/store.png" alt=""></div>
+  <span class="label">예시 화면</span>
+  <p class="url">sayandgo.pages.dev</p>
+</section>
+
+<section class="card c2" id="card2">
+  <div class="brand"><img src="../../web/public/favicon.svg" alt="">Say&amp;Go</div>
+  <h1>답변한 글만
+<em>공개</em>돼요</h1>
+  <p class="sub">답하지 않은 글은 사장님만 봐요.
+욕설은 자동으로 막히고,
+금지어 · 차단도 돼요.</p>
+  <div class="phone"><img src="src/answer.png" alt=""></div>
+  <span class="label">예시 화면</span>
+  <p class="url">sayandgo.pages.dev</p>
+</section>
+
+<section class="card c3" id="card3">
+  <div class="brand"><img src="../../web/public/favicon.svg" alt="">Say&amp;Go</div>
+  <h1>첫 매장 10곳을
+찾고 있어요</h1>
+  <p class="sub">쓰는 데 돈은 들지 않아요.
+가입하면 QR 포스터가 바로 저장돼요.</p>
+  <div class="posters">
+    <img class="pA" src="src/poster-A.png" alt="">
+    <img class="pB" src="src/poster-B.png" alt="">
+    <img class="pE" src="src/poster-E.png" alt="">
+  </div>
+  <p class="url">sayandgo.pages.dev</p>
+</section>
+
+<section class="card c4" id="card4">
+  <div class="brand"><img src="../../web/public/favicon.svg" alt="">Say&amp;Go</div>
+  <h1>"네" 뒤에
+<em>숨은 말</em></h1>
+  <div class="talk">
+    <span class="bubble"><small>직원</small>맛있게 드셨어요?</span>
+    <span class="bubble"><small>손님</small>네~</span>
+    <span class="bubble anon"><small>익명으로는</small>아메리카노가 조금 탄 맛이 났어요</span>
+  </div>
+  <div class="phone"><img src="src/compose.png" alt=""></div>
+  <span class="label">예시 화면</span>
+  <p class="url">sayandgo.pages.dev</p>
+</section>
+
+<section class="card c5" id="card5">
+  <div class="brand"><img src="../../web/public/favicon.svg" alt="">Say&amp;Go</div>
+  <h1>헬스장 사장님,
+회원이 <em>말 못 한</em>
+불편함</h1>
+  <p class="eg">예를 들면 이런 말</p>
+  <div class="list">
+    <span class="bubble">샤워실 수압이 약해요</span>
+    <span class="bubble">고장 난 기구가 몇 주째 그대로예요</span>
+    <span class="bubble">음악이 너무 커요</span>
+  </div>
+  <div class="foot">카운터의 '고객의 소리'함을
+<span>QR 하나</span>로 바꿔 보세요</div>
+  <p class="url">sayandgo.pages.dev</p>
+</section>
+
+<section class="card c6" id="card6">
+  <div class="brand"><img src="../../web/public/favicon.svg" alt="">Say&amp;Go</div>
+  <h1>사장님,
+손님한테 들은 쓴소리 중에
+<em>고쳐서 도움 된 것</em>
+있으세요?</h1>
+  <p class="sub">반대로 듣고 힘만 빠졌던 말도 궁금해요.</p>
+  <div class="reply"><i></i><span>댓글로 알려 주세요. 하나하나 다 읽을게요</span></div>
+  <p class="url">sayandgo.pages.dev</p>
+</section>
+
+<section class="card c7" id="card7">
+  <div class="brand"><img src="../../web/public/favicon.svg" alt="">Say&amp;Go</div>
+  <h1>한 번 붙인 QR은
+<em>다시 뽑을 일</em> 없어요</h1>
+  <p class="sub">매장 이름을 바꿔도 QR과 링크는 그대로.
+포스터 모양은 다섯 가지예요.</p>
+  <figure class="wide"><img src="src/poster-C.png" alt=""><figcaption>가로 띠</figcaption></figure>
+  <div class="row">
+    <figure><img src="src/poster-A.png" style="width:170px" alt=""><figcaption>기본</figcaption></figure>
+    <figure><img src="src/poster-B.png" style="width:170px" alt=""><figcaption>큰 문구</figcaption></figure>
+    <figure><img src="src/poster-D.png" style="width:160px" alt=""><figcaption>테이블 텐트</figcaption></figure>
+    <figure><img src="src/poster-E.png" style="width:180px;border-radius:22px" alt=""><figcaption>스티커</figcaption></figure>
+  </div>
+  <p class="url">sayandgo.pages.dev</p>
+</section>
+
+</body>
+</html>

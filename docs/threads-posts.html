@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Threads 첫 글</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; color: #15201d; font-family: "Pretendard Variable", Pretendard, -apple-system, sans-serif; line-height: 1.65; word-break: keep-all; }
+  main { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  h2 { font-size: 19px; margin: 36px 0 10px; padding-top: 18px; border-top: 1px solid #e6ebe9; }
+  .lead { color: #4b5853; margin: 0 0 8px; }
+  ul { padding-left: 20px; margin: 6px 0; } li { margin: 4px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 8px 0; }
+  th, td { border: 1px solid #e1e7e5; padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f4f7f6; }
+  .post { border: 1px solid #dfe5e3; border-radius: 14px; padding: 16px 18px; margin: 14px 0; }
+  .post__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .post__head b { font-size: 16px; }
+  .chip { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #e2f6ef; color: #0b6b58; }
+  .chip--when { background: #eef1f0; color: #4b5853; }
+  .body { white-space: pre-wrap; font-size: 15.5px; background: #f7f9f8; border-radius: 10px; padding: 12px 14px; margin: 0; }
+  .reply { white-space: pre-wrap; font-size: 14.5px; border-left: 3px solid #3ccfae; padding: 6px 12px; margin: 10px 0 0; color: #33403b; }
+  .meta { display: flex; gap: 10px; align-items: center; margin-top: 10px; font-size: 13px; color: #5f6b67; flex-wrap: wrap; }
+  .meta button { border: 1px solid #cfd8d5; background: #fff; border-radius: 8px; padding: 5px 10px; font: inherit; color: #15201d; cursor: pointer; }
+  .check { background: #fff3d6; color: #7a5600; border-radius: 6px; padding: 1px 6px; font-weight: 600; }
+  .note { font-size: 13.5px; color: #4b5853; margin-top: 8px; }
+  .shot { display: block; width: 300px; max-width: 100%; margin-top: 12px; border-radius: 10px; border: 1px solid #e1e7e5; }
+  .file { font-size: 12.5px; color: #5f6b67; margin-top: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Threads 운영자 계정 첫 글 7개</h1>
+  <p class="lead">2주 동안 올릴 첫 글 묶음입니다. 아직 실제 매장 사례가 없어서 지어낸 사례 · 숫자 · 후기는 넣지 않았습니다. <span class="check">노란 표시</span>는 운영자 본인 경험과 맞는지 확인하고 고칠 곳입니다.</p>
+
+  <h2>올리기 전에</h2>
+  <ul>
+    <li><b>프로필 소개:</b> 매장용 '고객의 소리'함 Say&amp;Go를 만들고 있어요. 망하는 것보단 쓴소리 듣는 게 낫다고 생각해요. / 링크 칸: sayandgo.pages.dev</li>
+    <li><b>링크는 본문 말고 내 답글에:</b> 본문에 외부 링크가 있으면 덜 퍼지는 경우가 많아서, 글을 올린 뒤 바로 내 글에 답글로 링크를 다는 식으로 썼습니다.</li>
+    <li><b>주제 태그는 글마다 1개:</b> 자영업, 소상공인, 헬스장 중 글에 맞는 것 하나.</li>
+    <li><b>이미지 같이 올리기:</b> 글마다 맞는 1080×1350 이미지(Threads에서 크게 보이는 4:5 세로)를 만들어 뒀습니다. 파일은 docs/threads/card1~7.png. 앱 화면은 테스트용 샘플이라 '예시 화면'이라고 적었습니다.</li>
+    <li><b>댓글은 그날 바로 답하기:</b> 처음 한두 시간 안의 댓글 대화가 노출에 가장 중요합니다. 사장님 댓글은 기준 문서의 실제 고객 말로 모아 둡니다.</li>
+  </ul>
+
+  <h2>올리는 순서</h2>
+  <table>
+    <thead><tr><th>순서</th><th>글</th><th>목적</th></tr></thead>
+    <tbody>
+      <tr><td>1주 월</td><td>1. 왜 만들었나</td><td>소개, 핵심 문장</td></tr>
+      <tr><td>1주 수</td><td>2. 악플 걱정</td><td>가장 큰 반론 먼저 풀기</td></tr>
+      <tr><td>1주 금</td><td>3. 첫 매장 10곳 모집</td><td>가입 · 연락 받기 (목표 50곳의 시작)</td></tr>
+      <tr><td>2주 월</td><td>4. "네" 뒤에 숨은 말</td><td>손님이 말 안 하는 이유 공감</td></tr>
+      <tr><td>2주 수</td><td>5. 헬스장 사장님께</td><td>첫 공략 업종</td></tr>
+      <tr><td>2주 금</td><td>6. 사장님께 질문</td><td>댓글 · 실제 사장님 말 모으기</td></tr>
+      <tr><td>3주 월</td><td>7. QR은 안 바뀌어요</td><td>만드는 이야기, 포스터 소개</td></tr>
+    </tbody>
+  </table>
+
+  <h2>글</h2>
+
+  <div class="post">
+    <div class="post__head"><b>1. 왜 만들었나</b><span class="chip">태그: 자영업</span><span class="chip chip--when">1주 월</span></div>
+    <p class="body">헬스장이나 병원 카운터 옆에 '고객의 소리' 함 하나씩 있잖아요. 그런데 거기에 종이 넣는 손님은 거의 못 봤어요. 펜이랑 종이를 찾아야 하고, 글씨나 넣은 시간 때문에 누가 썼는지 들킬 것 같으니까요.
+
+그래서 휴대폰으로 쓰는 고객의 소리함을 만들었어요. 매장에 붙인 QR을 찍으면 가입 없이 익명으로 한마디 남길 수 있고, 그 글은 사장님 휴대폰으로 바로 와요.
+
+망하는 것보단 쓴소리 듣는 게 낫다고 생각해서 만들었어요. 이름은 Say&amp;Go예요.</p>
+    <p class="reply">(내 답글) 매장 등록은 여기서 할 수 있어요. sayandgo.pages.dev</p>
+    <img class="shot" src="threads/card1.png" alt="1번 글 이미지"><p class="file">이미지 파일: docs/threads/card1.png</p>
+    <div class="meta"><button type="button">본문 복사</button><span class="count"></span></div>
+    <p class="note"><span class="check">확인</span> "거의 못 봤어요"는 운영자 본인 경험일 때만 쓰세요. 아니면 "넣는 손님이 생각보다 적어요"로 바꾸세요.</p>
+  </div>
+
+  <div class="post">
+    <div class="post__head"><b>2. 악플 걱정</b><span class="chip">태그: 소상공인</span><span class="chip chip--when">1주 수</span></div>
+    <p class="body">익명으로 손님 의견을 받자고 하면 제일 먼저 드는 걱정이 악플이죠. 욕만 잔뜩 달리면 오히려 손해니까요.
+
+Say&amp;Go는 사장님이 답변을 단 글만 손님들에게 보여요. 답하지 않은 글은 사장님 혼자 보고 넘기면 돼요. 욕설은 쓰는 단계에서 막히고, 매장마다 금지어를 따로 정할 수도 있어요. 같은 사람이 계속 이상한 글을 남기면 차단하면 되고요.
+
+쓴소리는 듣되, 그게 매장 앞에 그대로 걸리지 않게 만들었어요.</p>
+    <p class="reply">(내 답글) 어떻게 보이는지는 여기서 볼 수 있어요. sayandgo.pages.dev</p>
+    <img class="shot" src="threads/card2.png" alt="2번 글 이미지"><p class="file">이미지 파일: docs/threads/card2.png</p>
+    <div class="meta"><button type="button">본문 복사</button><span class="count"></span></div>
+      </div>
+
+  <div class="post">
+    <div class="post__head"><b>3. 첫 매장 10곳 모집</b><span class="chip">태그: 자영업</span><span class="chip chip--when">1주 금</span></div>
+    <p class="body">Say&amp;Go를 같이 써 볼 첫 매장 10곳을 찾고 있어요.
+
+헬스장, 카페, 식당, 미용실처럼 손님이 좀 머물다 가는 매장이면 좋아요. 쓰는 데 돈은 들지 않아요. 나중에 광고를 붙여서 운영할 생각이에요.
+
+가입하면 QR 포스터가 바로 이미지로 저장돼서 출력해 붙이기만 하면 돼요. <span class="check">[동네 이름]</span> 근처 매장이면 제가 직접 가서 붙이는 것까지 도와드릴게요.
+
+대신 2주쯤 써 보고 불편했던 점을 솔직하게 말해 주세요. 저도 쓴소리가 필요하거든요. 관심 있으시면 댓글이나 DM 주세요.</p>
+    <p class="reply">(내 답글) 가입은 여기서 바로 돼요. sayandgo.pages.dev</p>
+    <img class="shot" src="threads/card3.png" alt="3번 글 이미지"><p class="file">이미지 파일: docs/threads/card3.png</p>
+    <div class="meta"><button type="button">본문 복사</button><span class="count"></span></div>
+    <p class="note"><span class="check">확인</span> 직접 가서 도와줄 수 있는 동네 이름을 넣거나, 어렵다면 그 문장을 빼세요.</p>
+  </div>
+
+  <div class="post">
+    <div class="post__head"><b>4. "네" 뒤에 숨은 말</b><span class="chip">태그: 자영업</span><span class="chip chip--when">2주 월</span></div>
+    <p class="body">커피가 좀 탄 맛이 났어도, 계산할 때 "맛있게 드셨어요?" 하면 다들 "네" 하고 나가요. 그리고 그 손님은 조용히 다른 카페로 가요.
+
+사장님은 이유도 모른 채 손님 한 명을 잃는 거고요. 얼굴 보고 "좀 탄 맛이 났어요"라고 말하기는 손님도 미안하고 어색하니까요.
+
+이름도 연락처도 남지 않는 곳이 있으면 그 "네" 뒤에 있던 말을 들을 수 있어요. 손님은 편하게 쓰고, 사장님은 고칠 기회를 얻고요.</p>
+    <p class="reply">(내 답글) 손님이 쓰는 화면은 이렇게 생겼어요. sayandgo.pages.dev</p>
+    <img class="shot" src="threads/card4.png" alt="4번 글 이미지"><p class="file">이미지 파일: docs/threads/card4.png</p>
+    <div class="meta"><button type="button">본문 복사</button><span class="count"></span></div>
+      </div>
+
+  <div class="post">
+    <div class="post__head"><b>5. 헬스장 사장님께</b><span class="chip">태그: 헬스장</span><span class="chip chip--when">2주 수</span></div>
+    <p class="body">헬스장 사장님이라면 회원한테 직접 듣기 어려운 말들이 있어요. 샤워실 수압이 약하다든지, 고장 난 기구가 몇 주째 그대로라든지, 음악이 너무 크다든지요.
+
+회원이 재등록을 안 하고 조용히 그만두는 이유가 이런 데 있을 수도 있어요. 카운터의 고객의 소리함을 QR 하나로 바꿔 보세요. 운동 끝나고 휴대폰으로 가입 없이 바로 남길 수 있어요.
+
+답을 달면 다른 회원들도 그 답을 볼 수 있어서, 고쳤다는 걸 자연스럽게 알릴 수도 있어요.</p>
+    <p class="reply">(내 답글) 헬스장도 업종 아이콘이 따로 있어요. sayandgo.pages.dev</p>
+    <img class="shot" src="threads/card5.png" alt="5번 글 이미지"><p class="file">이미지 파일: docs/threads/card5.png</p>
+    <div class="meta"><button type="button">본문 복사</button><span class="count"></span></div>
+    <p class="note">예시는 "이런 말이 있을 수 있다"는 뜻으로만 썼고, 실제로 받았다고 쓰지 않았습니다.</p>
+  </div>
+
+  <div class="post">
+    <div class="post__head"><b>6. 사장님께 질문</b><span class="chip">태그: 소상공인</span><span class="chip chip--when">2주 금</span></div>
+    <p class="body">사장님들께 하나 여쭤보고 싶어요.
+
+손님한테 들은 쓴소리 중에, 듣고 고쳤더니 실제로 장사에 도움이 됐던 게 있으세요? 반대로 듣고 나서 오히려 힘만 빠졌던 말도 궁금해요.
+
+Say&amp;Go를 만들면서 어떤 말이 정말 도움이 되는지 알고 싶어서요. 댓글 남겨 주시면 하나하나 다 읽을게요.</p>
+    <p class="reply">(링크 답글 없이 올리기. 질문 글은 댓글 대화가 목적이라 링크를 빼는 게 좋아요)</p>
+    <img class="shot" src="threads/card6.png" alt="6번 글 이미지"><p class="file">이미지 파일: docs/threads/card6.png</p>
+    <div class="meta"><button type="button">본문 복사</button><span class="count"></span></div>
+    <p class="note">달린 댓글은 그대로 모아 기준 문서의 "고객이 쓰는 말"에 넣습니다. 다음 글 소재도 됩니다.</p>
+  </div>
+
+  <div class="post">
+    <div class="post__head"><b>7. QR은 안 바뀌어요</b><span class="chip">태그: 자영업</span><span class="chip chip--when">3주 월</span></div>
+    <p class="body">Say&amp;Go를 만들면서 꼭 지키고 싶었던 게 하나 있어요. 한 번 붙인 QR은 다시 뽑을 일이 없게 하자는 거예요.
+
+매장 이름을 바꾸거나 소개 문구를 고쳐도 QR과 링크는 처음 그대로예요. 포스터는 다섯 가지 모양으로 만들 수 있어요. 벽에 붙이는 큰 글씨형, 테이블에 세우는 텐트형, 계산대 가장자리에 붙이는 가로 띠형 같은 거요. 들어가는 문구도 매장 말투로 바꿀 수 있고요.</p>
+    <p class="reply">(내 답글) 포스터는 가입하면 바로 받을 수 있어요. sayandgo.pages.dev</p>
+    <img class="shot" src="threads/card7.png" alt="7번 글 이미지"><p class="file">이미지 파일: docs/threads/card7.png</p>
+    <div class="meta"><button type="button">본문 복사</button><span class="count"></span></div>
+      </div>
+
+  <h2>다음에 할 것</h2>
+  <ul>
+        <li>첫 매장에서 실제 피드백이 오면, 사장님 동의를 받아 "실제로 받은 쓴소리와 고친 것" 글로 이어 갑니다. 그때부터가 진짜 사례입니다.</li>
+    <li>2주 뒤 Threads 통계(조회 · 댓글 · 프로필 방문)와 방문 분석(가입 화면 방문)을 같이 보고 잘된 글 방향으로 다음 글을 씁니다.</li>
+  </ul>
+</main>
+<script>
+  // 본문 글자 수(Threads는 500자 제한)와 복사 버튼
+  document.querySelectorAll('.post').forEach((post) => {
+    const body = post.querySelector('.body');
+    const text = () => body.innerText.trim();
+    const n = text().length;
+    post.querySelector('.count').textContent = `${n}자 / 500자`;
+    post.querySelector('.meta button').addEventListener('click', (e) => {
+      navigator.clipboard.writeText(text()).then(() => {
+        e.target.textContent = '복사했어요';
+        setTimeout(() => (e.target.textContent = '본문 복사'), 1500);
+      });
+    });
+  });
+</script>
+</body>
+</html>

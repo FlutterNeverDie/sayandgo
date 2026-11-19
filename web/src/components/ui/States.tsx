@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { AppMark } from './AppMark';
 
 export function Loading({ error, onRetry }: { error?: boolean; onRetry?: () => void }) {
   const { t } = useTranslation();
@@ -17,14 +18,9 @@ export function Loading({ error, onRetry }: { error?: boolean; onRetry?: () => v
     );
   }
   return (
-    <div className="page" aria-busy="true">
-      <span className="sr-only">{t('common.loading')}</span>
-      <div style={{ padding: '24px 0' }}>
-        <div className="skeleton" style={{ height: 28, width: '50%' }} />
-        <div className="skeleton" style={{ height: 14, width: '70%', marginTop: 12 }} />
-      </div>
-      <TicketSkeleton />
-      <TicketSkeleton />
+    <div className="page-loading" aria-busy="true">
+      <AppMark size={48} />
+      <span className="page-loading__text">{t('common.loading')}</span>
     </div>
   );
 }

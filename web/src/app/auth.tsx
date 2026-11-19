@@ -46,6 +46,8 @@ export function useMyStore() {
     code,
     store: storeQuery.data ?? null,
     isLoading: codeQuery.isLoading || storeQuery.isLoading,
+    /** 로그인은 됐는데 가게 정보가 없는 계정 */
+    missing: !!user && codeQuery.isSuccess && (!code || (storeQuery.isSuccess && !storeQuery.data)),
     isError: codeQuery.isError || storeQuery.isError,
     refetch: () => {
       codeQuery.refetch();
@@ -58,7 +60,7 @@ export function useMyStore() {
 export function RequireOwner({ children }: { children: (store: Store) => ReactNode }) {
   const { user, ready } = useAuth();
   const location = useLocation();
-  const { store, code, isLoading, isError, refetch } = useMyStore();
+  const { store, code, isLoading, isError, missing, refetch } = useMyStore();
   const qc = useQueryClient();
   const [activating, setActivating] = useState(false);
 
@@ -75,6 +77,7 @@ export function RequireOwner({ children }: { children: (store: Store) => ReactNo
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   if (!user.emailVerified) return <Navigate to="/verify" replace />;
   if (isError) return <Loading error onRetry={refetch} />;
+  if (missing) return <Loading error onRetry={refetch} />;
   if (isLoading || !store || needsActivation) return <Loading />;
   return <>{children(store)}</>;
 }

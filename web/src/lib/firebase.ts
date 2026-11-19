@@ -1,11 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { connectAuthEmulator, getAuth } from 'firebase/auth';
-import {
-  connectFirestoreEmulator,
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
-} from 'firebase/firestore';
+import { connectFirestoreEmulator, initializeFirestore, memoryLocalCache } from 'firebase/firestore';
 
 const env = import.meta.env;
 
@@ -36,10 +31,9 @@ if (!usingEmulator && env.VITE_RECAPTCHA_SITE_KEY) {
 
 export const auth = getAuth(app);
 
-// 기기 캐시: 다시 열면 저장된 내용을 먼저 보여 준다 (읽기 절감)
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
-});
+// 메모리 캐시: 기기 저장소(IndexedDB)는 일부 휴대폰 · 앱 내 브라우저에서 열리는 데 오래 걸리거나 멈춰
+// 첫 화면이 늦게 뜬다. 같은 방문 안의 캐시는 TanStack Query가 맡는다.
+export const db = initializeFirestore(app, { localCache: memoryLocalCache() });
 
 if (usingEmulator) {
   // 같은 와이파이의 휴대폰에서도 접속할 수 있게 현재 호스트를 쓴다

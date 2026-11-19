@@ -31,8 +31,13 @@ export function toStore(snap: DocumentSnapshot): Store | null {
   };
 }
 
+/** 응답이 끝내 안 오면 무한 로딩 대신 오류로 (화면에서 다시 시도) */
+export function withTimeout<T>(p: Promise<T>, ms = 15_000): Promise<T> {
+  return Promise.race([p, new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))]);
+}
+
 export async function getStore(code: string): Promise<Store | null> {
-  return toStore(await getDoc(doc(db, 'stores', code)));
+  return toStore(await withTimeout(getDoc(doc(db, 'stores', code))));
 }
 
 export async function getMyStoreCode(uid: string): Promise<string | null> {

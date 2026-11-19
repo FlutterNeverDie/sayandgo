@@ -14,6 +14,19 @@
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin />
     <!-- 필요한 글자만 받는 동적 서브셋 (전송량 절감) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+    <script>
+      // 앱 파일을 못 불러오면(배포 직후 옛 화면 등) 1분에 한 번만 새로고침
+      window.addEventListener('error', function (e) {
+        var t = e.target;
+        if (!t || (t.tagName !== 'SCRIPT' && t.tagName !== 'LINK')) return;
+        try {
+          var last = Number(sessionStorage.getItem('sayandgo:bootReload') || 0);
+          if (Date.now() - last < 60000) return;
+          sessionStorage.setItem('sayandgo:bootReload', String(Date.now()));
+        } catch (_) {}
+        location.reload();
+      }, true);
+    </script>
     <title>Say&amp;Go</title>
   </head>
   <body>

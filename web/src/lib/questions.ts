@@ -24,6 +24,7 @@ import {
   type QueryDocumentSnapshot,
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
+import { withTimeout } from './stores';
 import type { Question, QuestionKind, ReportReason, Visibility } from './types';
 
 export const PAGE_SIZE = 10;
@@ -62,7 +63,7 @@ async function fetchPage(code: string, constraints: QueryConstraint[], cursor: Q
   const parts = [...constraints, ...(byHelpful ? [orderBy('helpful', 'desc')] : []), orderBy('createdAt', 'desc')];
   if (cursor) parts.push(startAfter(cursor));
   parts.push(limit(PAGE_SIZE));
-  const snap = await getDocs(query(qcol(code), ...parts));
+  const snap = await withTimeout(getDocs(query(qcol(code), ...parts)));
   return {
     items: snap.docs.map(toQuestion),
     cursor: snap.docs.length === PAGE_SIZE ? snap.docs[snap.docs.length - 1] : null,

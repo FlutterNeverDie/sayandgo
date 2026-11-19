@@ -31,6 +31,11 @@ svg.qr{display:block}
 .pC .ic{width:40px;height:40px;border-radius:12px;background:#8cc8ff;display:grid;place-items:center;color:#15201d}
 .pC b{font-size:15px;font-weight:800;margin-top:6px} .pC svg.qr{width:120px;height:120px;margin:10px 0 8px}
 .pC .cap{font-size:10px;font-weight:600} .pC .brand{margin-top:auto;font-size:10px;font-weight:800;color:#0b6b58}
+/* C 가로 띠형 */
+.pC2{width:330px;height:110px;background:#fff;display:flex;align-items:center;gap:14px;padding:10px 16px 10px 10px;border-left:10px solid var(--mint)}
+.pC2 svg.qr{width:90px;height:90px;flex:none}
+.pC2 b{font-size:14px;font-weight:800;display:block} .pC2 p{font-size:10.5px;font-weight:600;margin-top:4px;line-height:1.4}
+.pC2 .tag{display:inline-block;margin-top:6px;background:var(--mint);font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px}
 /* D 텐트: A4 가로를 반으로 접음 */
 .pD{width:260px;height:368px;background:#fff;position:relative;display:grid;grid-template-rows:1fr 1fr}
 .pD .half{display:flex;align-items:center;gap:12px;padding:14px 16px}
@@ -73,8 +78,8 @@ table{border-collapse:collapse;margin-top:10px;font-size:14px;max-width:900px} t
   <div class="paper"><div class="pA"><b>연남동 로스터리</b><svg class="qr"><use href="#qr"/></svg><p class="cap">QR을 찍어 익명으로 피드백 부탁드려요</p><p class="cap2">Scan to leave us anonymous feedback</p><div class="band">Say&amp;Go</div></div></div></div>
  <div class="item"><h3>B. 큰 문구형</h3><p class="d">"솔직한 피드백 부탁드려요"가 멀리서도 보임. 벽 · 입구처럼 거리가 있는 곳에.</p>
   <div class="paper"><div class="pB"><p class="big">솔직한<br><em>피드백</em><br>부탁드려요</p><p class="sub">익명이에요. 누가 썼는지 아무도 몰라요.</p><div class="bot"><svg class="qr"><use href="#qr"/></svg><p class="nm">연남동<br>로스터리</p></div><div class="band">Say&amp;Go</div></div></div></div>
- <div class="item"><h3>C. 가게 색 테마형</h3><p class="d">사장님이 고른 가게 색 · 업종 아이콘이 들어감. 가게 분위기에 맞춰 튀지 않음.</p>
-  <div class="paper"><div class="pC"><div class="card"><span class="ic"><svg width="22" height="22"><use href="#cup"/></svg></span><b>연남동 로스터리</b><svg class="qr"><use href="#qr"/></svg><p class="cap">QR을 찍어 익명으로 피드백 부탁드려요</p><p class="brand">Say&amp;Go</p></div></div></div></div>
+ <div class="item"><h3>C. 가로 띠형 (새로 만듦)</h3><p class="d">3:1 가로로 긴 띠. 메뉴판 아래 · 계산대 가장자리 · 테이블 모서리에 길게 붙이기 좋음. 공간을 거의 차지하지 않음.</p>
+  <div class="paper"><div class="pC2"><svg class="qr"><use href="#qr"/></svg><div class="txt"><b>연남동 로스터리</b><p>QR을 찍어 익명으로<br>피드백 부탁드려요</p><span class="tag">Say&amp;Go</span></div></div></div></div>
  <div class="item"><h3>D. 테이블 텐트형</h3><p class="d">A4 한 장 출력 → 가운데 접어 세우면 앞뒤 양쪽에서 보임. 스탠드 없이 바로 테이블에.</p>
   <div class="paper"><div class="pD"><div class="half top"><svg class="qr"><use href="#qr"/></svg><div><b>연남동 로스터리</b><p class="cap">QR을 찍어 익명으로<br>피드백 부탁드려요</p><span class="tag">Say&amp;Go</span></div></div><div class="half"><svg class="qr"><use href="#qr"/></svg><div><b>연남동 로스터리</b><p class="cap">QR을 찍어 익명으로<br>피드백 부탁드려요</p><span class="tag">Say&amp;Go</span></div></div><span class="fold">— 여기를 접으세요 —</span></div></div></div>
  <div class="item"><h3>E. 정사각 스티커형</h3><p class="d">작은 정사각형. 카운터 · 계산대 · 문 · 메뉴판 귀퉁이에 붙이기 좋음.</p>

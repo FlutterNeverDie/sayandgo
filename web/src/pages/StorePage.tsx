@@ -39,6 +39,18 @@ export function StorePage() {
     staleTime: 10 * 60_000, // 상호명은 거의 안 바뀐다
   });
 
+  // 목록도 동시에 요청 (가게 정보를 기다렸다가 요청하면 한 번 더 왕복)
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (!valid) return;
+    qc.prefetchInfiniteQuery({
+      queryKey: ['public', code, 'latest'],
+      queryFn: ({ pageParam }) => fetchPublicPage(code, 'latest', pageParam as Page['cursor']),
+      initialPageParam: null as Page['cursor'],
+      staleTime: 60_000,
+    });
+  }, [qc, code, valid]);
+
   if (valid && storeQuery.isLoading) return <><PublicTopbar /><Loading /></>;
   if (storeQuery.isError) return <><PublicTopbar /><Loading error onRetry={() => storeQuery.refetch()} /></>;
   const store = storeQuery.data;

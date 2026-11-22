@@ -443,3 +443,67 @@ describe('도움됐어요', () => {
     await assertFails(getDoc(doc(anon('v2'), `stores/${CODE}/questions/qa/helpful/v1`)));
   });
 });
+
+describe('운영자 현장 세팅 · 연결 코드', () => {
+  const OPEN = 'kkkk2345';
+  const CLAIM = 'ab23cd45';
+  const opMail = () => env.authenticatedContext('op1', { email: 'oasa741@gmail.com', email_verified: true, firebase: { sign_in_provider: 'password' } }).firestore();
+  const opMailUnverified = () => env.authenticatedContext('op2', { email: 'oasa741@gmail.com', email_verified: false, firebase: { sign_in_provider: 'password' } }).firestore();
+  const newUser = (uid: string) => env.authenticatedContext(uid, unverifiedToken).firestore();
+  const createOpen = (db: Firestore, claim: string | null = CLAIM) => {
+    const b = writeBatch(db);
+    b.set(doc(db, `stores/${OPEN}`), { ...storeData(null as unknown as string, 'active'), ownerUid: null, createdAt: serverTimestamp() });
+    if (claim) b.set(doc(db, `stores/${OPEN}/private/claim`), { code: claim });
+    b.set(doc(db, `adminStores/${OPEN}`), { storeName: '현장 가게', mode: 'claim', claimCode: claim, createdAt: serverTimestamp() });
+    return b.commit();
+  };
+  const claim = (db: Firestore, uid: string, proof: string) => {
+    const b = writeBatch(db);
+    b.update(doc(db, `stores/${OPEN}`), { ownerUid: uid, claimProof: proof });
+    b.set(doc(db, `users/${uid}`), {
+      storeCode: OPEN, uiLang: 'ko', agreed: { terms: '2026-11-19', privacy: '2026-11-19', age14: true }, createdAt: serverTimestamp(),
+    });
+    return b.commit();
+  };
+
+  it('인증된 운영자 메일 계정은 주인 없는 가게를 바로 열 수 있다', async () => {
+    await assertSucceeds(createOpen(opMail()));
+  });
+  it('메일 인증 전인 운영자 메일 계정은 못 연다', async () => {
+    await assertFails(createOpen(opMailUnverified()));
+  });
+  it('일반 사장님은 주인 없는 가게를 못 연다', async () => {
+    await assertFails(createOpen(owner()));
+  });
+  it('연결 코드 없이 주인 없는 가게는 못 연다', async () => {
+    await assertFails(createOpen(opMail(), null));
+  });
+  it('연결 코드와 세팅 목록은 운영자만 읽는다', async () => {
+    await createOpen(opMail());
+    await assertSucceeds(getDoc(doc(opMail(), `stores/${OPEN}/private/claim`)));
+    await assertFails(getDoc(doc(owner(), `stores/${OPEN}/private/claim`)));
+    await assertFails(getDoc(doc(anon(), `stores/${OPEN}/private/claim`)));
+    await assertFails(getDoc(doc(owner(), `adminStores/${OPEN}`)));
+  });
+  it('맞는 연결 코드로 새 계정이 가게를 넘겨받는다', async () => {
+    await createOpen(opMail());
+    await assertSucceeds(claim(newUser('new9'), 'new9', CLAIM));
+  });
+  it('틀린 연결 코드는 거부', async () => {
+    await createOpen(opMail());
+    await assertFails(claim(newUser('new9'), 'new9', 'zz99zz99'));
+  });
+  it('이미 주인이 생긴 가게는 다시 못 넘겨받는다', async () => {
+    await createOpen(opMail());
+    await claim(newUser('new9'), 'new9', CLAIM);
+    await assertFails(claim(newUser('new8'), 'new8', CLAIM));
+  });
+  it('이미 가게가 있는 계정은 못 넘겨받는다', async () => {
+    await createOpen(opMail());
+    await assertFails(claim(owner(), OWNER, CLAIM));
+  });
+  it('운영자는 사장님 계정으로 만든 가게를 바로 열 수 있다', async () => {
+    await seed(async (db) => setDoc(doc(db, 'stores/pppp2345'), storeData('newowner', 'pending')));
+    await assertSucceeds(updateDoc(doc(opMail(), 'stores/pppp2345'), { status: 'active' }));
+  });
+});

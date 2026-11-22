@@ -12,7 +12,7 @@ export interface Store {
   intro: string;
   category: StoreCategory;
   tone: StoreTone;
-  ownerUid: string;
+  ownerUid: string | null; // 운영자가 현장에서 연 가게는 사장님이 넘겨받기 전까지 null
   lang: string;
   status: StoreStatus;
   acceptingQuestions: boolean;

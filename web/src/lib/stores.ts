@@ -61,12 +61,23 @@ export async function withContinueFallback(send: (withUrl: boolean) => Promise<v
 }
 
 /** 가입: Auth 계정 → 가게 + users 한 배치 → 인증 메일. 가게 생성이 끝내 실패하면 계정을 지운다. */
-export async function signUp(input: { email: string; password: string; storeName: string; lang: string; category: StoreCategory }) {
+export async function signUp(input: {
+  email: string;
+  password: string;
+  storeName: string;
+  lang: string;
+  category: StoreCategory;
+  /** 운영자가 현장에서 만든 가게를 연결 코드로 넘겨받을 때 */
+  claim?: { code: string; claim: string };
+}) {
   auth.languageCode = input.lang;
   const { user } = await createUserWithEmailAndPassword(auth, input.email.trim(), input.password);
   let code = '';
   try {
-    for (let attempt = 0; ; attempt++) {
+    if (input.claim) {
+      await claimStore(user, input.claim.code, input.claim.claim, input.lang);
+      code = input.claim.code;
+    } else for (let attempt = 0; ; attempt++) {
       code = generateStoreCode();
       try {
         await createStore(user, code, input.storeName.trim(), input.lang, input.category);
@@ -117,4 +128,17 @@ export type StoreSettings = Pick<Store, 'storeName' | 'intro' | 'category' | 'to
 
 export async function updateStore(code: string, patch: Partial<StoreSettings>) {
   await updateDoc(doc(db, 'stores', code), patch);
+}
+
+/** 가입하면서 연결 코드로 가게 넘겨받기 (users 문서와 한 배치). 코드가 틀리면 규칙이 거부한다 */
+export async function claimStore(user: User, code: string, claim: string, lang: string) {
+  const b = writeBatch(db);
+  b.update(doc(db, 'stores', code), { ownerUid: user.uid, claimProof: claim });
+  b.set(doc(db, 'users', user.uid), {
+    storeCode: code,
+    uiLang: lang,
+    agreed: { terms: TERMS_VERSION, privacy: TERMS_VERSION, age14: true },
+    createdAt: serverTimestamp(),
+  });
+  await b.commit();
 }

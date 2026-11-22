@@ -127,3 +127,23 @@ await put('stores/empty234', {
 });
 
 console.log(`완료\n  사장님 로그인: ${EMAIL} / ${PASSWORD}\n  손님 화면: http://127.0.0.1:5173/q/${CODE}\n  빈 가게: http://127.0.0.1:5173/q/empty234`);
+
+// 운영자 계정 (현장 세팅 /admin 시험용): oasa741@gmail.com / admin1234a, 자기 가게 "Say&Go 운영팀"
+{
+  const { localId: adminUid } = await call(`${AUTH}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'oasa741@gmail.com', password: 'admin1234a', returnSecureToken: true }),
+  });
+  await call(`${AUTH}/identitytoolkit.googleapis.com/v1/projects/${PROJECT}/accounts:update`, {
+    method: 'POST',
+    headers: ADMIN,
+    body: JSON.stringify({ localId: adminUid, emailVerified: true }),
+  });
+  await put('stores/sayg2345', {
+    storeName: 'Say&Go 운영팀', intro: 'Say&Go에 대한 쓴소리 환영해요', category: 'person', tone: '#15201d',
+    ownerUid: adminUid, lang: 'ko', status: 'active', acceptingQuestions: true, blockedWords: [], createdAt: ago(60),
+  });
+  await put(`users/${adminUid}`, { storeCode: 'sayg2345', uiLang: 'ko', agreed: { terms: '2026-11-19', privacy: '2026-11-19', age14: true }, createdAt: ago(60) });
+  console.log('운영자: oasa741@gmail.com / admin1234a (http://127.0.0.1:5173/admin?devLogin=admin)');
+}

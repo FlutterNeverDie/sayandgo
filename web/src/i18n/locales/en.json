@@ -41,7 +41,8 @@
     "cantPost": "You can't send feedback to this place right now.",
     "agreeRequired": "Please accept the required items.",
     "wrongPassword": "Current password is incorrect.",
-    "bannedStore": "This contains a word this place doesn't allow. Please rephrase."
+    "bannedStore": "This contains a word this place doesn't allow. Please rephrase.",
+    "claimInvalid": "This code is already used or not valid. Please check with the Say&Go team."
   },
   "lang": {
     "label": "Language"
@@ -200,7 +201,13 @@
     "haveAccount": "Already signed up?",
     "category": "Type of place (optional)",
     "categoryHint": "Used as your shop icon. You can change it later.",
-    "subtitle": "Your link and QR code are ready in a minute."
+    "subtitle": "Your link and QR code are ready in a minute.",
+    "claimToggle": "I have a setup code",
+    "claimLabel": "Setup code",
+    "claimHint": "Enter the code from the Say&Go team to link the store that was set up for you.",
+    "claimFormat": "Check the code format. (e.g. kjb9f5ep-ab23cd45)",
+    "claimStore": "\"{{name}}\" will be linked to your account.",
+    "claimCancel": "Create a new store instead"
   },
   "login": {
     "title": "Owner log in",

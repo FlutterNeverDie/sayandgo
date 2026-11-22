@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RequireOwner } from '../app/auth';
 import { currentLang } from '../i18n';
@@ -52,7 +52,8 @@ export function SharePage() {
 }
 
 /** QR 포스터: 포스터 미리보기 → 디자인 · 언어 · 문구 → 저장 / 공유 → 링크 한 줄 */
-function Share({ store }: { store: Store }) {
+/** 운영자 현장 세팅 화면에서도 쓴다 (back · top만 다름) */
+export function Share({ store, back = '/inbox', top }: { store: Store; back?: string; top?: ReactNode }) {
   const { t } = useTranslation();
   const toast = useToast();
   const url = storeUrl(store.code);
@@ -149,8 +150,9 @@ function Share({ store }: { store: Store }) {
   const [w, h] = POSTER_SIZE[pref.type];
 
   return (
-    <OwnerShell storeName={store.storeName} back="/inbox">
+    <OwnerShell storeName={store.storeName} back={back}>
       <main className="page">
+        {top}
         <div className="title-row" style={{ display: 'block' }}>
           <h1 className="title">{t('share.title')}</h1>
           <p className="subtitle" style={{ marginTop: 4 }}>

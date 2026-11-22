@@ -2,7 +2,9 @@ import { applyActionCode, confirmPasswordReset, sendEmailVerification, sendPassw
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../app/auth';
+import { parseClaimToken } from '../lib/admin';
 import { AppMark } from '../components/ui/AppMark';
 import { PasswordField, TextField } from '../components/ui/Fields';
 import { CategoryPicker } from '../components/ui/StorePickers';
@@ -12,7 +14,7 @@ import { Loading } from '../components/ui/States';
 import { currentLang } from '../i18n';
 import { auth } from '../lib/firebase';
 import { errorKey } from '../lib/format';
-import { signUp, verifyActionSettings, withContinueFallback } from '../lib/stores';
+import { getStore, signUp, verifyActionSettings, withContinueFallback } from '../lib/stores';
 import { checkEmail, checkPassword, checkStoreName, LIMITS } from '../lib/validation';
 import { useLock } from '../lib/useLock';
 
@@ -45,8 +47,33 @@ export function SignupPage() {
   const [submitted, setSubmitted] = useState(false);
   const { busy, run } = useLock();
   const [formError, setFormError] = useState<string | null>(null);
+  // 운영자가 현장에서 만든 가게를 연결 코드로 넘겨받기 (/signup?claim=가게코드-연결코드)
+  const initialClaim = new URLSearchParams(window.location.search).get('claim') ?? '';
+  const [claimMode, setClaimMode] = useState(!!initialClaim);
+  const [claimInput, setClaimInput] = useState(initialClaim);
+  const parsedClaim = claimMode ? parseClaimToken(claimInput) : null;
+  const claimTarget = useQuery({
+    queryKey: ['store', parsedClaim?.code],
+    queryFn: () => getStore(parsedClaim!.code),
+    enabled: !!parsedClaim,
+    staleTime: 30_000,
+  });
+  const claimStoreOk = !!parsedClaim && !!claimTarget.data && !claimTarget.data.ownerUid;
+  const claimHint = !claimInput.trim()
+    ? t('signup.claimHint')
+    : !parsedClaim
+      ? t('signup.claimFormat')
+      : claimTarget.isLoading
+        ? t('common.loading')
+        : claimStoreOk
+          ? t('signup.claimStore', { name: claimTarget.data!.storeName })
+          : t('errors.claimInvalid');
 
-  const errs = { email: checkEmail(email), password: checkPassword(password), storeName: checkStoreName(storeName) };
+  const errs = {
+    email: checkEmail(email),
+    password: checkPassword(password),
+    storeName: claimMode ? null : checkStoreName(storeName),
+  };
   const show = (k: keyof typeof errs) => (submitted || touched[k] ? errs[k] : null);
   const allAgreed = agree.age14 && agree.terms && agree.privacy;
   const blur = (k: string) => () => setTouched((s) => ({ ...s, [k]: true }));
@@ -57,12 +84,22 @@ export function SignupPage() {
     setFormError(null);
     if (errs.email || errs.password || errs.storeName) return;
     if (!allAgreed) return setFormError('errors.agreeRequired');
+    if (claimMode && !claimStoreOk) return setFormError('errors.claimInvalid');
     await run(async () => {
       try {
-        await signUp({ email, password, storeName, lang: currentLang(), category: category ?? 'other' });
+        const target = claimMode ? claimTarget.data! : null;
+        await signUp({
+          email,
+          password,
+          storeName: target ? target.storeName : storeName,
+          lang: currentLang(),
+          category: target ? target.category : category ?? 'other',
+          claim: claimMode && parsedClaim ? parsedClaim : undefined,
+        });
         navigate('/verify', { replace: true });
       } catch (err) {
-        setFormError(errorKey(err));
+        const c = (err as { code?: string }).code;
+        setFormError(claimMode && c === 'permission-denied' ? 'errors.claimInvalid' : errorKey(err));
       }
     });
   }
@@ -99,25 +136,48 @@ export function SignupPage() {
           hint={t('signup.passwordHint')}
           showStrength
         />
-        <TextField
-          label={t('signup.storeName')}
-          autoComplete="organization"
-          maxLength={LIMITS.storeName}
-          placeholder={t('signup.storeNamePlaceholder')}
-          value={storeName}
-          onChange={(e) => setStoreName(e.target.value)}
-          onBlur={blur('storeName')}
-          error={show('storeName')}
-          hint={t('signup.storeNameHint')}
-        />
+        {claimMode ? (
+          <>
+            <TextField
+              label={t('signup.claimLabel')}
+              autoComplete="off"
+              autoCapitalize="none"
+              value={claimInput}
+              placeholder="kjb9f5ep-ab23cd45"
+              onChange={(e) => setClaimInput(e.target.value)}
+              hint={claimHint}
+            />
+            <button type="button" className="text-btn" style={{ marginBottom: 16 }} onClick={() => setClaimMode(false)}>
+              {t('signup.claimCancel')}
+            </button>
+          </>
+        ) : (
+          <>
+          <TextField
+            label={t('signup.storeName')}
+            autoComplete="organization"
+            maxLength={LIMITS.storeName}
+            placeholder={t('signup.storeNamePlaceholder')}
+            value={storeName}
+            onChange={(e) => setStoreName(e.target.value)}
+            onBlur={blur('storeName')}
+            error={show('storeName')}
+            hint={t('signup.storeNameHint')}
+          />
 
-        <div className="field">
-          <span className="field__label" id="cat-label">
-            {t('signup.category')}
-          </span>
-          <CategoryPicker value={category} onChange={setCategory} label={t('signup.category')} />
-          <p className="field__hint">{t('signup.categoryHint')}</p>
-        </div>
+          <div className="field">
+            <span className="field__label" id="cat-label">
+              {t('signup.category')}
+            </span>
+            <CategoryPicker value={category} onChange={setCategory} label={t('signup.category')} />
+            <p className="field__hint">{t('signup.categoryHint')}</p>
+          </div>
+
+            <button type="button" className="text-btn" style={{ marginBottom: 16 }} onClick={() => setClaimMode(true)}>
+              {t('signup.claimToggle')}
+            </button>
+          </>
+        )}
 
         <fieldset className="panel" style={{ margin: '4px 0 20px', display: 'grid', gap: 4 }}>
           <legend className="sr-only">{t('signup.agreeAll')}</legend>

@@ -6,7 +6,11 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }                  // 익명 손님 포함
     function isAnon()   { return signedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous'; }
     function verified() { return signedIn() && request.auth.token.email_verified == true; }
-    function isAdmin()  { return signedIn() && request.auth.token.admin == true; }
+    // 운영자: 커스텀 클레임 또는 인증된 운영자 메일 계정 (서버 함수 없이 쓰려고 메일로도 지정)
+    function isAdmin()  {
+      return signedIn() && (request.auth.token.admin == true
+        || (verified() && request.auth.token.email == 'oasa741@gmail.com'));
+    }
     function d()        { return request.resource.data; }
     function changes(keys) { return d().diff(resource.data).affectedKeys().hasOnly(keys); }
     function str(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
@@ -26,6 +30,11 @@ service cloud.firestore {
         && getAfter(/databases/$(db)/documents/stores/$(d().storeCode)).data.ownerUid == uid;
       allow update: if signedIn() && request.auth.uid == uid && changes(['uiLang', 'agreed']);
       allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // ---------- 운영자가 현장에서 세팅한 가게 목록 ----------
+    match /adminStores/{code} {
+      allow read, write: if isAdmin();
     }
 
     // ---------- 가게 ----------
@@ -51,6 +60,15 @@ service cloud.firestore {
         && !exists(/databases/$(db)/documents/users/$(request.auth.uid))            // 계정당 가게 1개
         && getAfter(/databases/$(db)/documents/users/$(request.auth.uid)).data.storeCode == code;
 
+      // 운영자 현장 세팅: 주인 없는 가게를 바로 열어 두고, 사장님은 연결 코드로 나중에 넘겨받는다
+      allow create: if isAdmin()
+        && code.matches('^[23456789abcdefghjkmnpqrstuvwxyz]{8}$')
+        && d().keys().hasOnly(['storeName', 'intro', 'category', 'tone', 'ownerUid', 'lang', 'status',
+                               'acceptingQuestions', 'blockedWords', 'createdAt'])
+        && d().ownerUid == null && d().status == 'active'
+        && d().createdAt == request.time && validSettings()
+        && getAfter(/databases/$(db)/documents/stores/$(code)/private/claim).data.code is string;
+
       allow update: if
         (isOwner(code) && resource.data.status in ['pending', 'active']
           && changes(['storeName', 'intro', 'category', 'tone', 'lang', 'acceptingQuestions', 'blockedWords', 'status'])
@@ -58,7 +76,19 @@ service cloud.firestore {
           && (d().status == resource.data.status
               || (resource.data.status == 'pending' && d().status == 'active')
               || (resource.data.status == 'active' && d().status == 'deleted')))
-        || (isAdmin() && changes(['status']) && d().status in ['active', 'suspended']);
+        || (isAdmin() && changes(['status']) && d().status in ['active', 'suspended'])
+        // 연결 코드로 주인 없는 가게 넘겨받기 (가입 직후라 메일 인증 전이어도 된다)
+        || (resource.data.ownerUid == null && signedIn() && !isAnon()
+            && changes(['ownerUid', 'claimProof'])
+            && d().ownerUid == request.auth.uid
+            && d().claimProof == get(/databases/$(db)/documents/stores/$(code)/private/claim).data.code
+            && !exists(/databases/$(db)/documents/users/$(request.auth.uid))
+            && getAfter(/databases/$(db)/documents/users/$(request.auth.uid)).data.storeCode == code);
+
+      // 연결 코드: 운영자만 본다
+      match /private/{docId} {
+        allow read, write: if isAdmin();
+      }
 
       allow delete: if false;                                                       // 코드 재사용 금지
 

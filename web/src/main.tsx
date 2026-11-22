@@ -27,6 +27,9 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ de
 const misc = () => import('./pages/MiscPages');
 const LegalPage = lazy(() => misc().then((m) => ({ default: m.LegalPage })));
 const ContactPage = lazy(() => misc().then((m) => ({ default: m.ContactPage })));
+const adminPages = () => import('./pages/AdminPage');
+const AdminPage = lazy(() => adminPages().then((m) => ({ default: m.AdminPage })));
+const AdminStorePage = lazy(() => adminPages().then((m) => ({ default: m.AdminStorePage })));
 const NotFoundPage = lazy(() => misc().then((m) => ({ default: m.NotFoundPage })));
 
 const queryClient = new QueryClient({
@@ -63,6 +66,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/policy" element={<LegalPage kind="policy" />} />
                 <Route path="/rights" element={<LegalPage kind="rights" />} />
                 <Route path="/contact" element={<ContactPage />} />
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="/admin/s/:code" element={<AdminStorePage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>

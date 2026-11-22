@@ -12,6 +12,7 @@ import { ErrorBox } from '../components/ui/States';
 import { StoreIcon } from '../components/ui/StoreIcon';
 import { CategoryPicker, TonePicker } from '../components/ui/StorePickers';
 import { changePassword, deleteAccount } from '../lib/account';
+import { isAdminUser } from '../lib/admin';
 import { auth } from '../lib/firebase';
 import { errorKey, relativeTime } from '../lib/format';
 import { listBlocked, unblock } from '../lib/questions';
@@ -123,6 +124,13 @@ function Settings({ store }: { store: Store }) {
         <div className="menu-group">
           <Row to="/settings/account" label={t('settings.account')} value={auth.currentUser?.email} />
         </div>
+
+        {/* 운영자 계정에만: 매장에 가서 대신 세팅해 주는 화면 */}
+        {isAdminUser(auth.currentUser) && (
+          <div className="menu-group">
+            <Row to="/admin" label="현장 세팅 (운영자)" />
+          </div>
+        )}
 
         <div className="grow" />
         <Footer />

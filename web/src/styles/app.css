@@ -853,3 +853,16 @@ body.warm .topbar { background: #f3f2ef; }
 .action-icon { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; }
 .action-icon--ok { background: var(--mint-soft); color: var(--mint-ink); }
 .action-icon--warn { background: #fdf0e1; color: #a35a00; }
+
+/* 운영자 현장 세팅 */
+.admin-card { background: var(--surface); border-radius: 18px; padding: 18px; margin: 8px 0 24px; }
+.admin-card__head { display: flex; align-items: center; gap: 12px; }
+.admin-card__head b { font-size: var(--fs-16); }
+.admin-kv { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; margin: 16px 0 0; font-size: var(--fs-14); }
+.admin-kv dt { color: var(--muted); }
+.admin-kv dd { margin: 0; word-break: break-all; }
+.admin-pw { font-size: 20px; letter-spacing: 0.04em; font-family: ui-monospace, Menlo, monospace; }
+.admin-claim { display: grid; justify-items: center; margin-top: 16px; text-align: center; }
+.admin-claim__qr svg { width: 200px; height: 200px; display: block; margin-top: 8px; }
+.admin-claim__code { margin-top: 8px; font-family: ui-monospace, Menlo, monospace; font-size: 18px; font-weight: 700; letter-spacing: 0.04em; }
+.admin-claim__title { font-weight: 800; font-size: var(--fs-14); margin-bottom: 4px; color: #a35a00; }

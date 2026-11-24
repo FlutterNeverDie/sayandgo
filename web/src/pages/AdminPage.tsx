@@ -2,7 +2,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { doc, getDoc } from 'firebase/firestore';
 import QRCode from 'qrcode';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { AppMark } from '../components/ui/AppMark';
 import { useAuth } from '../app/auth';
 import { TextField } from '../components/ui/Fields';
 import { CopyIcon } from '../components/ui/Icons';
@@ -12,11 +13,15 @@ import { ErrorBox, Loading } from '../components/ui/States';
 import { PRESET_TONES, StoreIcon } from '../components/ui/StoreIcon';
 import { CategoryPicker, TonePicker } from '../components/ui/StorePickers';
 import {
+  cardLabel,
   claimToken,
   claimUrl,
+  createCards,
   feedbackCount,
   isAdminUser,
   listAdminStores,
+  listBlankCards,
+  parseCard,
   setupWithAccount,
   setupWithClaim,
   type AdminStore,
@@ -57,8 +62,12 @@ export function AdminPage() {
 }
 
 function AdminHome() {
-  const [creating, setCreating] = useState(false);
+  // 카드를 폰으로 찍고 "이 카드를 매장에 연결하기"로 들어오면 ?card=코드
+  const [params] = useSearchParams();
+  const cardParam = parseCard(params.get('card') ?? '');
+  const [creating, setCreating] = useState(!!cardParam);
   const list = useQuery({ queryKey: ['adminStores'], queryFn: listAdminStores, staleTime: 30_000 });
+  const cards = useQuery({ queryKey: ['blankCards'], queryFn: listBlankCards, staleTime: 30_000 });
   return (
     <>
       <PublicTopbar back />
@@ -71,12 +80,22 @@ function AdminHome() {
         </div>
 
         {creating ? (
-          <SetupForm onCancel={() => setCreating(false)} />
+          <SetupForm initialCard={cardParam} onCancel={() => setCreating(false)} />
         ) : (
           <button type="button" className="btn btn--black btn--lg btn--block" onClick={() => setCreating(true)}>
             새 매장 세팅하기
           </button>
         )}
+
+        <Link to="/admin/cards" className="admin-cards-link">
+          <span>
+            <b>빈 QR 카드</b>
+            <span className="field__hint" style={{ marginTop: 0 }}>
+              집에서 미리 뽑아 두고, 매장에서 상호만 연결해요
+            </span>
+          </span>
+          <span className="menu-row__value">{cards.data ? `남은 카드 ${cards.data.length}장` : ''} ›</span>
+        </Link>
 
         <section className="section" style={{ marginTop: 32 }}>
           <h2 className="section__title">세팅한 매장 {list.data ? list.data.length : ''}</h2>
@@ -117,9 +136,11 @@ function AdminRow({ s }: { s: AdminStore }) {
   );
 }
 
-function SetupForm({ onCancel }: { onCancel: () => void }) {
+function SetupForm({ initialCard, onCancel }: { initialCard: string | null; onCancel: () => void }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [cardText, setCardText] = useState(initialCard ? cardLabel(initialCard) : '');
+  const card = parseCard(cardText);
   const [mode, setMode] = useState<'account' | 'claim'>('account');
   const [storeName, setStoreName] = useState('');
   const [category, setCategory] = useState<StoreCategory | null>(null);
@@ -134,6 +155,7 @@ function SetupForm({ onCancel }: { onCancel: () => void }) {
     storeName: checkStoreName(storeName),
     intro: checkIntro(intro),
     email: mode === 'account' ? checkEmail(email) : null,
+    card: cardText.trim() && !card ? '카드 아래쪽의 8자리 번호를 확인해 주세요.' : null,
   };
   const show = (k: keyof typeof errs) => (submitted ? errs[k] : null);
 
@@ -141,17 +163,19 @@ function SetupForm({ onCancel }: { onCancel: () => void }) {
     e.preventDefault();
     setSubmitted(true);
     setFormError(null);
-    if (errs.storeName || errs.intro || errs.email) return;
-    const input = { storeName, category: category ?? 'other', tone, intro };
+    if (errs.storeName || errs.intro || errs.email || errs.card) return;
+    const input = { storeName, category: category ?? 'other', tone, intro, card };
     await run(async () => {
       try {
         if (mode === 'account') {
           const { code, password } = await setupWithAccount({ ...input, email });
           await qc.invalidateQueries({ queryKey: ['adminStores'] });
+          await qc.invalidateQueries({ queryKey: ['blankCards'] });
           navigate(`/admin/s/${code}`, { state: { password } });
         } else {
           const { code } = await setupWithClaim(input);
           await qc.invalidateQueries({ queryKey: ['adminStores'] });
+          await qc.invalidateQueries({ queryKey: ['blankCards'] });
           navigate(`/admin/s/${code}`);
         }
       } catch (err) {
@@ -161,7 +185,11 @@ function SetupForm({ onCancel }: { onCancel: () => void }) {
             ? '이미 가입된 이메일이에요. 연결 코드 방식으로 만들거나 다른 이메일을 써 주세요.'
             : c === 'auth/invalid-email'
               ? '이메일 형식을 확인해 주세요.'
-              : '만들지 못했어요. 잠시 뒤 다시 시도해 주세요.',
+              : c === 'card/unknown'
+                ? '운영자 화면에서 만든 카드가 아니에요. 카드 번호를 확인해 주세요.'
+                : c === 'card/used'
+                  ? '이미 다른 매장에 연결한 카드예요. 남은 카드를 써 주세요.'
+                  : '만들지 못했어요. 잠시 뒤 다시 시도해 주세요.',
         );
       }
     });
@@ -186,6 +214,17 @@ function SetupForm({ onCancel }: { onCancel: () => void }) {
           : '이메일 없이 가게만 먼저 열어요. 사장님이 나중에 연결 코드로 가입하면 가게가 넘어가요.'}
       </p>
 
+      <TextField
+        label="빈 QR 카드 번호 (선택)"
+        autoComplete="off"
+        autoCapitalize="none"
+        spellCheck={false}
+        value={cardText}
+        placeholder="예) abcd efgh"
+        onChange={(e) => setCardText(e.target.value)}
+        error={show('card')}
+        hint={card ? '이 카드의 QR이 바로 이 매장 QR이 돼요.' : '미리 뽑아 온 카드를 쓰면 번호를 넣어 주세요. 비워 두면 새 QR을 만들어요.'}
+      />
       {mode === 'account' && (
         <TextField
           label="사장님 이메일"
@@ -353,4 +392,123 @@ function AdminStore() {
   );
 
   return <Share store={s} back="/admin" top={top} />;
+}
+
+/** /admin/cards: 빈 QR 카드 만들기 · 인쇄 (A4 한 장에 10장, 명함 크기) */
+export function AdminCardsPage() {
+  return (
+    <RequireAdmin>
+      <AdminCards />
+    </RequireAdmin>
+  );
+}
+
+const CARDS_PER_SHEET = 10;
+
+function AdminCards() {
+  const qc = useQueryClient();
+  const toast = useToast();
+  const cards = useQuery({ queryKey: ['blankCards'], queryFn: listBlankCards, staleTime: 30_000 });
+  const [sheets, setSheets] = useState(1);
+  const { busy, run } = useLock();
+  const list = cards.data ?? [];
+
+  const make = () =>
+    run(async () => {
+      try {
+        await createCards(sheets * CARDS_PER_SHEET);
+        await qc.invalidateQueries({ queryKey: ['blankCards'] });
+        toast(`카드 ${sheets * CARDS_PER_SHEET}장을 만들었어요`);
+      } catch {
+        toast('만들지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+      }
+    });
+
+  // 10장씩 A4 한 장
+  const pages: typeof list[] = [];
+  for (let i = 0; i < list.length; i += CARDS_PER_SHEET) pages.push(list.slice(i, i + CARDS_PER_SHEET));
+
+  return (
+    <>
+      <div className="no-print">
+        <PublicTopbar back />
+      </div>
+      <main className="page cards-page">
+        <div className="no-print">
+          <div className="title-row" style={{ display: 'block' }}>
+            <h1 className="title">빈 QR 카드</h1>
+            <p className="subtitle" style={{ marginTop: 4 }}>
+              상호가 없는 QR 카드를 미리 뽑아 두세요. 매장에서 카드 번호로 세팅하면 그 카드가 바로 그 매장 QR이 돼요.
+            </p>
+          </div>
+
+          <ol className="cards-steps">
+            <li>여기서 카드를 만들고 A4로 인쇄해요 (명함 크기 10장, 스티커 용지도 돼요)</li>
+            <li>매장에서 카드 한 장을 폰 카메라로 찍고 <b>이 카드를 매장에 연결하기</b>를 눌러요</li>
+            <li>상호 · 업종만 넣으면 끝. 카드는 카운터나 테이블에 붙여 드려요</li>
+          </ol>
+
+          <div className="panel cards-make">
+            <span className="field__label">새로 만들기</span>
+            <div className="segmented" role="radiogroup" aria-label="장수">
+              {[1, 2, 3].map((n) => (
+                <button key={n} type="button" role="radio" aria-selected={sheets === n} onClick={() => setSheets(n)}>
+                  {n * CARDS_PER_SHEET}장
+                </button>
+              ))}
+            </div>
+            <button type="button" className="btn btn--black btn--block" onClick={make} disabled={busy}>
+              {busy ? '만드는 중' : `카드 ${sheets * CARDS_PER_SHEET}장 만들기`}
+            </button>
+          </div>
+
+          <div className="cards-bar">
+            <h2 className="section__title" style={{ margin: 0 }}>
+              남은 빈 카드 {cards.data ? `${list.length}장` : ''}
+            </h2>
+            {!!list.length && (
+              <button type="button" className="btn btn--line" onClick={() => window.print()}>
+                인쇄 · PDF 저장
+              </button>
+            )}
+          </div>
+          {cards.isError && <ErrorBox onRetry={() => cards.refetch()} />}
+          {cards.isLoading && <div className="skeleton" style={{ height: 120 }} />}
+          {cards.data?.length === 0 && <div className="empty">남은 카드가 없어요. 위에서 새로 만들어 주세요.</div>}
+        </div>
+
+        {pages.map((page, i) => (
+          <div key={i} className="card-sheet">
+            {page.map((c) => (
+              <BlankCardView key={c.code} code={c.code} />
+            ))}
+          </div>
+        ))}
+      </main>
+    </>
+  );
+}
+
+function BlankCardView({ code }: { code: string }) {
+  const qr = useQrSvg(storeUrl(code));
+  return (
+    <div className="blank-card">
+      <span className="blank-card__qr" dangerouslySetInnerHTML={{ __html: qr }} />
+      <div className="blank-card__text">
+        <span className="blank-card__brand">
+          <AppMark size={18} />
+          Say&amp;Go
+        </span>
+        <b className="blank-card__title">
+          고객의
+          <br />
+          소리함
+        </b>
+        <span className="blank-card__sub">불편했던 점, 바라는 점을 사장님께 익명으로 남겨 주세요</span>
+        <span className="blank-card__foot">
+          로그인 없이 · 익명<span className="blank-card__no">{cardLabel(code)}</span>
+        </span>
+      </div>
+    </div>
+  );
 }

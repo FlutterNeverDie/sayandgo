@@ -256,6 +256,8 @@
     "reportStore": "Report this place",
     "notFoundTitle": "Place not found",
     "notFoundDesc": "Check that the link is correct.",
+    "cardTitle": "Opening soon",
+    "cardDesc": "This place is still being set up. Please scan again a little later.",
     "pendingTitle": "Not open yet",
     "pendingDesc": "You can leave feedback once the owner finishes signing up.",
     "deletedTitle": "This place has closed its page",

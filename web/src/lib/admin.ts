@@ -3,15 +3,17 @@ import {
   collection,
   doc,
   getCountFromServer,
+  getDoc,
   getDocs,
   orderBy,
   query,
   serverTimestamp,
+  where,
   writeBatch,
   type Firestore,
 } from 'firebase/firestore';
 import { db, openSecondary } from './firebase';
-import { CODE_ALPHABET, generateStoreCode } from './storeCode';
+import { CODE_ALPHABET, CODE_RE, generateStoreCode } from './storeCode';
 import { verifyActionSettings, withContinueFallback } from './stores';
 import { TERMS_VERSION, type StoreCategory } from './types';
 
@@ -24,6 +26,8 @@ export interface SetupInput {
   category: StoreCategory;
   tone: string;
   intro: string;
+  /** 미리 뽑아 둔 빈 QR 카드 번호. 있으면 이 번호가 가게 코드가 된다 */
+  card?: string | null;
 }
 
 /** 운영자가 현장에서 세팅한 가게 (운영자만 보는 목록) */
@@ -74,8 +78,9 @@ function storeFields(input: SetupInput, ownerUid: string | null, status: 'pendin
   };
 }
 
-/** 코드가 겹치면 새 코드로 다시 (최대 3번) */
-async function withFreshCode<T>(make: (code: string) => Promise<T>): Promise<T> {
+/** 코드가 겹치면 새 코드로 다시 (최대 3번). 카드 번호가 있으면 그 번호 하나만 쓴다 */
+async function withFreshCode<T>(make: (code: string) => Promise<T>, card?: string | null): Promise<T> {
+  if (card) return make(card);
   for (let attempt = 0; ; attempt++) {
     try {
       return await make(generateStoreCode());
@@ -90,6 +95,7 @@ async function withFreshCode<T>(make: (code: string) => Promise<T>): Promise<T> 
  * 사장님은 받은 임시 비밀번호로 로그인하고, 메일 인증만 하면 피드백을 볼 수 있다.
  */
 export async function setupWithAccount(input: SetupInput & { email: string }) {
+  if (input.card) await assertCardFree(input.card);
   const password = tempPassword();
   const second = openSecondary();
   try {
@@ -106,7 +112,7 @@ export async function setupWithAccount(input: SetupInput & { email: string }) {
       });
       await b.commit();
       return code;
-    });
+    }, input.card);
     await withContinueFallback((withUrl) => sendEmailVerification(user, withUrl ? verifyActionSettings() : undefined)).catch(() => undefined);
     await signOut(second.auth);
 
@@ -122,6 +128,7 @@ export async function setupWithAccount(input: SetupInput & { email: string }) {
       claimCode: null,
       createdAt: serverTimestamp(),
     });
+    if (input.card) b.update(doc(db, 'cards', code), { used: true });
     await b.commit();
     return { code, password };
   } finally {
@@ -131,6 +138,7 @@ export async function setupWithAccount(input: SetupInput & { email: string }) {
 
 /** 방법 2: 주인 없는 가게를 바로 열고, 사장님이 나중에 가입하며 넘겨받을 연결 코드를 만든다 */
 export async function setupWithClaim(input: SetupInput) {
+  if (input.card) await assertCardFree(input.card);
   const claim = randomFrom(CODE_ALPHABET, 8);
   const code = await withFreshCode(async (code) => {
     const b = writeBatch(db);
@@ -145,9 +153,10 @@ export async function setupWithClaim(input: SetupInput) {
       claimCode: claim,
       createdAt: serverTimestamp(),
     });
+    if (input.card) b.update(doc(db, 'cards', code), { used: true });
     await b.commit();
     return code;
-  });
+  }, input.card);
   return { code, claim };
 }
 
@@ -172,4 +181,62 @@ export async function listAdminStores(): Promise<AdminStore[]> {
 export async function feedbackCount(code: string) {
   const snap = await getCountFromServer(collection(db, 'stores', code, 'questions'));
   return snap.data().count;
+}
+
+/* ---------- 빈 QR 카드: 집에서 미리 뽑아 두고, 매장에서 상호를 연결한다 ---------- */
+
+export interface BlankCard {
+  code: string;
+  createdAt: Date | null;
+}
+
+/** 카드 번호 표기: 4자씩 끊어 읽기 쉽게 (abcd efgh) */
+export const cardLabel = (code: string) => `${code.slice(0, 4)} ${code.slice(4)}`;
+
+/** 손으로 친 카드 번호 / 찍은 링크에서 카드 번호만 뽑는다 */
+export function parseCard(text: string): string | null {
+  const t = text.trim().toLowerCase();
+  const fromUrl = t.match(/\/q\/([a-z0-9]{8})/);
+  const raw = fromUrl ? fromUrl[1] : t.replace(/[^a-z0-9]/g, '');
+  return CODE_RE.test(raw) ? raw : null;
+}
+
+class CardError extends Error {
+  code: 'card/unknown' | 'card/used';
+  constructor(code: 'card/unknown' | 'card/used') {
+    super(code);
+    this.code = code;
+  }
+}
+
+/** 연결 전에: 내가 만든 카드인지, 이미 매장에 쓰였는지 */
+async function assertCardFree(card: string) {
+  const [c, st] = await Promise.all([getDoc(doc(db, 'cards', card)), getDoc(storeDoc(db, card))]);
+  if (!c.exists()) throw new CardError('card/unknown');
+  if (c.data().used || st.exists()) throw new CardError('card/used');
+}
+
+/** 빈 카드 n장 만들기 (가게 코드를 미리 잡아 둔다) */
+export async function createCards(n: number): Promise<string[]> {
+  const codes = new Set<string>();
+  while (codes.size < n) codes.add(generateStoreCode());
+  const b = writeBatch(db);
+  for (const code of codes) b.set(doc(db, 'cards', code), { used: false, createdAt: serverTimestamp() });
+  await b.commit();
+  return [...codes];
+}
+
+/** 아직 매장에 연결하지 않은 카드 (새로 만든 것부터) */
+export async function listBlankCards(): Promise<BlankCard[]> {
+  // used 하나만 조건으로 걸고 정렬은 여기서 (운영 DB에 복합 색인을 따로 만들지 않으려고)
+  const snap = await getDocs(query(collection(db, 'cards'), where('used', '==', false)));
+  return snap.docs
+    .map((d) => ({ code: d.id, createdAt: d.data({ serverTimestamps: 'estimate' }).createdAt?.toDate?.() ?? null }))
+    .sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0));
+}
+
+/** 손님이 연결 전 카드를 찍었을 때: 준비 중인 카드인지 (누구나 한 장씩은 볼 수 있다) */
+export async function isPendingCard(code: string) {
+  const snap = await getDoc(doc(db, 'cards', code));
+  return snap.exists() && snap.data().used === false;
 }

@@ -37,6 +37,17 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // ---------- 빈 QR 카드: 운영자가 미리 뽑아 두고 매장에서 연결한다 ----------
+    // 손님이 연결 전 카드를 찍으면 "준비 중"을 보여 주려고 한 장씩 읽기는 누구나 (목록은 운영자만)
+    match /cards/{code} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if isAdmin() && code.matches('^[23456789abcdefghjkmnpqrstuvwxyz]{8}$')
+        && d().keys().hasOnly(['used', 'createdAt']) && d().used == false && d().createdAt == request.time;
+      allow update: if isAdmin() && changes(['used']) && d().used == true;
+      allow delete: if false;
+    }
+
     // ---------- 가게 ----------
     match /stores/{code} {
       function validSettings() {

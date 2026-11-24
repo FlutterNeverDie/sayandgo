@@ -866,3 +866,34 @@ body.warm .topbar { background: #f3f2ef; }
 .admin-claim__qr svg { width: 200px; height: 200px; display: block; margin-top: 8px; }
 .admin-claim__code { margin-top: 8px; font-family: ui-monospace, Menlo, monospace; font-size: 18px; font-weight: 700; letter-spacing: 0.04em; }
 .admin-claim__title { font-weight: 800; font-size: var(--fs-14); margin-bottom: 4px; color: #a35a00; }
+
+/* ---------- 빈 QR 카드 (운영자) ---------- */
+.admin-cards-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface, #fff); color: inherit; text-decoration: none; }
+.admin-cards-link > span:first-child { display: grid; gap: 2px; min-width: 0; }
+.cards-steps { margin: 0 0 16px; padding-left: 20px; display: grid; gap: 6px; font-size: var(--fs-14); line-height: 1.5; }
+.cards-make { padding: 16px; display: grid; gap: 10px; margin-bottom: 24px; }
+.cards-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.card-sheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 12px; }
+
+/* 명함 크기 90 × 54mm. 안의 크기는 카드 폭 기준(cqw)이라 화면 · 인쇄가 같은 모양 */
+.blank-card { container-type: inline-size; aspect-ratio: 90 / 54; background: #fff; color: #15201d; border: 1px solid #dfe5e3; border-radius: 10px; overflow: hidden; display: grid; grid-template-columns: 46% 1fr; }
+.blank-card__qr { display: grid; place-items: center; padding: 5cqw 2cqw 5cqw 5cqw; }
+.blank-card__qr svg { width: 100%; height: auto; display: block; }
+.blank-card__text { display: flex; flex-direction: column; padding: 6cqw 5cqw 5cqw 3cqw; min-width: 0; }
+.blank-card__brand { display: inline-flex; align-items: center; gap: 1.6cqw; font-weight: 800; font-size: 3.8cqw; letter-spacing: -0.01em; }
+.blank-card__brand svg { width: 5cqw; height: 5cqw; }
+.blank-card__title { margin-top: 3.5cqw; font-size: 9.4cqw; line-height: 1.08; font-weight: 900; letter-spacing: -0.03em; }
+.blank-card__sub { margin-top: 2.6cqw; font-size: 3.3cqw; line-height: 1.4; color: #3d4845; word-break: keep-all; }
+.blank-card__foot { margin-top: auto; display: flex; justify-content: space-between; align-items: baseline; gap: 2cqw; font-size: 2.9cqw; font-weight: 700; color: #0b6b58; }
+.blank-card__no { font-family: ui-monospace, Menlo, monospace; font-weight: 600; color: #8a9692; letter-spacing: 0.02em; }
+
+@media print {
+  @page { size: A4; margin: 10mm 15mm; }
+  html, body { background: #fff !important; }
+  .no-print, .footer, .topbar, .toast-stack { display: none !important; }
+  .cards-page { padding: 0 !important; max-width: none !important; margin: 0 !important; }
+  .card-sheet { grid-template-columns: repeat(2, 90mm); grid-auto-rows: 54mm; gap: 0; margin: 0; break-after: page; page-break-after: always; }
+  .card-sheet:last-child { break-after: auto; page-break-after: auto; }
+  /* 자르는 선: 옅은 점선 */
+  .blank-card { width: 90mm; height: 54mm; aspect-ratio: auto; border: 0.2mm dashed #c4ccc9; border-radius: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

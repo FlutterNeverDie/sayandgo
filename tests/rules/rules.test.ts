@@ -507,3 +507,29 @@ describe('운영자 현장 세팅 · 연결 코드', () => {
     await assertSucceeds(updateDoc(doc(opMail(), 'stores/pppp2345'), { status: 'active' }));
   });
 });
+
+describe('빈 QR 카드', () => {
+  const CARD = 'cccc2345';
+  const op = () => env.authenticatedContext('op1', { email: 'oasa741@gmail.com', email_verified: true, firebase: { sign_in_provider: 'password' } }).firestore();
+  const make = (db: Firestore) => setDoc(doc(db, `cards/${CARD}`), { used: false, createdAt: serverTimestamp() });
+
+  it('운영자만 카드를 만든다', async () => {
+    await assertFails(make(owner()));
+    await assertFails(make(anon()));
+    await assertSucceeds(make(op()));
+  });
+  it('카드 한 장은 누구나 읽지만, 목록은 운영자만', async () => {
+    await make(op());
+    await assertSucceeds(getDoc(doc(anon(), `cards/${CARD}`)));
+    await assertFails(getDocs(collection(anon(), 'cards')));
+    await assertFails(getDocs(collection(owner(), 'cards')));
+    await assertSucceeds(getDocs(query(collection(op(), 'cards'), where('used', '==', false))));
+  });
+  it('쓴 카드는 되돌리거나 지울 수 없다', async () => {
+    await make(op());
+    await assertFails(updateDoc(doc(owner(), `cards/${CARD}`), { used: true }));
+    await assertSucceeds(updateDoc(doc(op(), `cards/${CARD}`), { used: true }));
+    await assertFails(updateDoc(doc(op(), `cards/${CARD}`), { used: false }));
+    await assertFails(deleteDoc(doc(op(), `cards/${CARD}`)));
+  });
+});

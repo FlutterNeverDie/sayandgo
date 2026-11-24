@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { QuestionItem } from '../components/question/QuestionItem';
@@ -23,6 +23,8 @@ import {
   reportStore,
   type Page,
 } from '../lib/questions';
+import { useAuth } from '../app/auth';
+import { isAdminUser, isPendingCard } from '../lib/admin';
 import { CODE_RE, storeUrl } from '../lib/storeCode';
 import { getStore } from '../lib/stores';
 import type { Question, Store } from '../lib/types';
@@ -55,6 +57,7 @@ export function StorePage() {
   if (valid && storeQuery.isLoading) return <><PublicTopbar /><Loading /></>;
   if (storeQuery.isError) return <><PublicTopbar /><Loading error onRetry={() => storeQuery.refetch()} /></>;
   const store = storeQuery.data;
+  if (valid && !store) return <MissingStore code={code} />;
   if (!valid || !store) return <StoreState title={t('store.notFoundTitle')} desc={t('store.notFoundDesc')} />;
   if (store.status === 'pending') return <StoreState title={t('store.pendingTitle')} desc={t('store.pendingDesc')} />;
   if (store.status === 'deleted') return <StoreState title={t('store.deletedTitle')} desc={t('store.deletedDesc')} />;
@@ -62,7 +65,29 @@ export function StorePage() {
   return <ActiveStore store={store} />;
 }
 
-function StoreState({ title, desc }: { title: string; desc: string }) {
+/** 없는 가게: 운영자가 미리 뽑아 둔 빈 QR 카드면 "준비 중", 운영자에게는 연결 버튼 */
+function MissingStore({ code }: { code: string }) {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const card = useQuery({ queryKey: ['card', code], queryFn: () => isPendingCard(code), staleTime: 60_000 });
+  if (card.isLoading) return <><PublicTopbar /><Loading /></>;
+  if (!card.data) return <StoreState title={t('store.notFoundTitle')} desc={t('store.notFoundDesc')} />;
+  return (
+    <StoreState
+      title={t('store.cardTitle')}
+      desc={t('store.cardDesc')}
+      action={
+        isAdminUser(user) && (
+          <Link to={`/admin?card=${code}`} className="btn btn--black btn--lg" style={{ marginTop: 8 }}>
+            이 카드를 매장에 연결하기
+          </Link>
+        )
+      }
+    />
+  );
+}
+
+function StoreState({ title, desc, action }: { title: string; desc: string; action?: ReactNode }) {
   return (
     <>
       <PublicTopbar />
@@ -73,6 +98,7 @@ function StoreState({ title, desc }: { title: string; desc: string }) {
           </span>
           <h1>{title}</h1>
           <p>{desc}</p>
+          {action}
           <Link to="/" className="btn btn--line" style={{ marginTop: 8 }}>
             {i18n.t('notFound.home')}
           </Link>

@@ -470,7 +470,7 @@ function AdminCards() {
             </button>
           </div>
 
-          <CardStylePicker design={style.design} copy={style.copy} onChange={changeStyle} />
+          <CardStylePicker design={style.design} copy={copy} sampleCode={list[0]?.code ?? 'sample00'} onChange={changeStyle} />
 
           <div className="cards-bar">
             <h2 className="section__title" style={{ margin: 0 }}>
@@ -525,14 +525,33 @@ function readCardPref(): { design: CardDesign; copy: CardCopy['id'] } {
   return { design: 'C', copy: 'voice' };
 }
 
-function CardStylePicker({ design, copy, onChange }: { design: CardDesign; copy: CardCopy['id']; onChange: (d: CardDesign, c: CardCopy['id']) => void }) {
+function CardStylePicker({
+  design,
+  copy,
+  sampleCode,
+  onChange,
+}: {
+  design: CardDesign;
+  copy: CardCopy;
+  sampleCode: string;
+  onChange: (d: CardDesign, c: CardCopy['id']) => void;
+}) {
   return (
     <div className="panel cards-make">
-      <span className="field__label">디자인</span>
-      <div className="segmented" role="radiogroup" aria-label="디자인">
+      <span className="field__label">디자인 (눌러서 고르기)</span>
+      {/* 4종을 한눈에: 지금 고른 제목으로 미리 보여 준다 */}
+      <div className="card-designs" role="radiogroup" aria-label="디자인">
         {CARD_DESIGNS.map((d) => (
-          <button key={d.id} type="button" role="radio" aria-selected={design === d.id} onClick={() => onChange(d.id, copy)}>
-            {d.label}
+          <button
+            key={d.id}
+            type="button"
+            role="radio"
+            aria-selected={design === d.id}
+            className="card-designs__item"
+            onClick={() => onChange(d.id, copy.id)}
+          >
+            <BlankCardView code={sampleCode} design={d.id} copy={copy} />
+            <span className="card-designs__label">{d.label}</span>
           </button>
         ))}
       </div>
@@ -541,7 +560,7 @@ function CardStylePicker({ design, copy, onChange }: { design: CardDesign; copy:
       </span>
       <div className="segmented segmented--stack" role="radiogroup" aria-label="제목">
         {CARD_COPIES.map((c) => (
-          <button key={c.id} type="button" role="radio" aria-selected={copy === c.id} onClick={() => onChange(design, c.id)}>
+          <button key={c.id} type="button" role="radio" aria-selected={copy.id === c.id} onClick={() => onChange(design, c.id)}>
             {c.title.join(' ')}
           </button>
         ))}

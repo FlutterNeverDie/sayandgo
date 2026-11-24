@@ -933,3 +933,9 @@ body.warm .topbar { background: #f3f2ef; }
 .segmented--stack button { text-align: left; padding: 0 14px; }
 /* 민트 바탕에서는 로고 칸을 흰색으로 (민트 위 민트는 안 보인다) */
 .bc--B .bc-mark rect { fill: #fff; }
+/* 빈 QR 카드 디자인 고르기: 4종을 2 × 2로 한눈에 */
+.card-designs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 4px 0 8px; }
+.card-designs__item { display: grid; gap: 6px; padding: 6px; border: 2px solid transparent; border-radius: 12px; background: transparent; cursor: pointer; text-align: center; font: inherit; color: var(--muted); }
+.card-designs__item .blank-card { border-radius: 6px; pointer-events: none; }
+.card-designs__item[aria-selected='true'] { border-color: var(--mint); background: var(--mint-soft); color: var(--text); font-weight: 700; }
+.card-designs__label { font-size: var(--fs-14); }

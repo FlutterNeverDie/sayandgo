@@ -4,6 +4,9 @@
   },
   "common": {
     "loading": "불러오는 중",
+    "loadingSlow": "조금만 기다려 주세요. 거의 다 됐어요.",
+    "opening": "가게를 여는 중",
+    "verifyDone": "인증을 확인하는 중",
     "retry": "다시 시도",
     "cancel": "취소",
     "close": "닫기",

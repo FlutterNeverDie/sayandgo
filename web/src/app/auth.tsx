@@ -1,6 +1,7 @@
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Navigate, useLocation } from 'react-router-dom';
 import { auth } from '../lib/firebase';
 import { activateStore, getMyStoreCode, getStore } from '../lib/stores';
@@ -58,6 +59,7 @@ export function useMyStore() {
 
 /** 인증까지 마친 사장님만 통과. 인증 직후 pending 가게는 여기서 active로 바꾼다. */
 export function RequireOwner({ children }: { children: (store: Store) => ReactNode }) {
+  const { t } = useTranslation();
   const { user, ready } = useAuth();
   const location = useLocation();
   const { store, code, isLoading, isError, missing, refetch } = useMyStore();
@@ -70,6 +72,8 @@ export function RequireOwner({ children }: { children: (store: Store) => ReactNo
     setActivating(true);
     activateStore(user, code)
       .then(() => qc.invalidateQueries({ queryKey: ['store', code] }))
+      // 실패하면 잠깐 쉬었다가 다시 (바로 다시 부르면 같은 오류로 계속 돈다)
+      .catch(() => new Promise((r) => setTimeout(r, 1500)))
       .finally(() => setActivating(false));
   }, [needsActivation, activating, user, code, qc]);
 
@@ -78,6 +82,7 @@ export function RequireOwner({ children }: { children: (store: Store) => ReactNo
   if (!user.emailVerified) return <Navigate to="/verify" replace />;
   if (isError) return <Loading error onRetry={refetch} />;
   if (missing) return <Loading error onRetry={refetch} />;
-  if (isLoading || !store || needsActivation) return <Loading />;
+  if (needsActivation) return <Loading label={t('common.opening')} />;
+  if (isLoading || !store) return <Loading />;
   return <>{children(store)}</>;
 }

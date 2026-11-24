@@ -4,6 +4,9 @@
   },
   "common": {
     "loading": "Loading",
+    "loadingSlow": "Hang on, almost there.",
+    "opening": "Opening your place",
+    "verifyDone": "Checking your verification",
     "retry": "Try again",
     "cancel": "Cancel",
     "close": "Close",

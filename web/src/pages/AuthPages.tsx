@@ -299,21 +299,45 @@ export function VerifyPage() {
     return () => clearInterval(tick);
   }, []);
 
-  // 다른 탭에서 링크를 눌렀을 수 있으니 화면이 보일 때 4초마다 확인
+  // 메일 링크를 누르고 돌아오면 바로 확인한다: 화면이 열릴 때 · 탭으로 돌아올 때 · 그 뒤 3초마다
+  const [confirming, setConfirming] = useState(false);
   useEffect(() => {
     if (!user) return;
+    let stopped = false;
+    let inFlight = false;
     const check = async () => {
-      if (document.hidden) return;
-      await user.reload().catch(() => undefined);
-      if (auth.currentUser?.emailVerified) navigate('/inbox', { replace: true });
+      if (document.hidden || stopped || inFlight) return;
+      inFlight = true;
+      try {
+        await user.reload().catch(() => undefined);
+        const u = auth.currentUser;
+        if (u?.emailVerified && !stopped) {
+          setConfirming(true);
+          // 서버 규칙이 보는 토큰에도 '인증됨'이 들어가게 새로 받아 둔다 (안 그러면 가게 열기가 한 번 막힌다)
+          await u.getIdToken(true).catch(() => undefined);
+          if (!stopped) navigate('/inbox', { replace: true });
+        }
+      } finally {
+        inFlight = false;
+      }
     };
-    const timer = setInterval(check, 4000);
-    return () => clearInterval(timer);
+    check();
+    const timer = setInterval(check, 3000);
+    const onBack = () => check();
+    document.addEventListener('visibilitychange', onBack);
+    window.addEventListener('focus', onBack);
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onBack);
+      window.removeEventListener('focus', onBack);
+    };
   }, [user, navigate]);
 
   if (!ready) return <Loading />;
   if (!user) return <Navigate to="/login" replace />;
   if (user.emailVerified) return <Navigate to="/inbox" replace />;
+  if (confirming) return <Loading label={t('common.verifyDone')} />;
 
   const resend = () =>
     run(async () => {
@@ -332,8 +356,10 @@ export function VerifyPage() {
   const checkNow = () =>
     run(async () => {
       await user!.reload().catch(() => undefined);
-      if (auth.currentUser?.emailVerified) navigate('/inbox', { replace: true });
-      else setMessage(t('verify.notYet'));
+      if (auth.currentUser?.emailVerified) {
+        await auth.currentUser.getIdToken(true).catch(() => undefined);
+        navigate('/inbox', { replace: true });
+      } else setMessage(t('verify.notYet'));
     });
 
   return (

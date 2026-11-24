@@ -75,7 +75,7 @@ function AdminHome() {
         <div className="title-row" style={{ display: 'block' }}>
           <h1 className="title">현장 세팅</h1>
           <p className="subtitle" style={{ marginTop: 4 }}>
-            매장에 가서 사장님 대신 가게를 만들고 QR을 바로 드려요.
+            매장에 가서 사장님 대신 등록하고 QR을 바로 드려요.
           </p>
         </div>
 
@@ -211,7 +211,7 @@ function SetupForm({ initialCard, onCancel }: { initialCard: string | null; onCa
       <p className="field__hint" style={{ marginBottom: 16 }}>
         {mode === 'account'
           ? '사장님 이메일로 계정을 만들고 임시 비밀번호를 드려요. 메일 인증만 하시면 돼요.'
-          : '이메일 없이 가게만 먼저 열어요. 사장님이 나중에 연결 코드로 가입하면 가게가 넘어가요.'}
+          : '이메일 없이 매장만 먼저 열어요. 사장님이 나중에 연결 코드로 가입하면 매장이 넘어가요.'}
       </p>
 
       <TextField
@@ -373,7 +373,7 @@ function AdminStore() {
         <div className="admin-claim">
           <p className="admin-claim__title">사장님 가입용 QR (손님용 아님)</p>
           <p className="field__hint" style={{ marginTop: 0 }}>
-            사장님 폰으로 이 QR을 찍으면 가입 화면이 열리고, 가입하면 이 가게가 사장님 것이 돼요.
+            사장님 폰으로 이 QR을 찍으면 가입 화면이 열리고, 가입하면 이 매장이 사장님 것이 돼요.
           </p>
           <span className="admin-claim__qr" dangerouslySetInnerHTML={{ __html: claimQr }} />
           <p className="admin-claim__code">{claimToken(code, claim!)}</p>

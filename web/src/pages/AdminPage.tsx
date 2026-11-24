@@ -3,7 +3,6 @@ import { doc, getDoc } from 'firebase/firestore';
 import QRCode from 'qrcode';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AppMark } from '../components/ui/AppMark';
 import { useAuth } from '../app/auth';
 import { EmailField, TextField } from '../components/ui/Fields';
 import { CopyIcon } from '../components/ui/Icons';
@@ -408,8 +407,18 @@ function AdminCards() {
   const toast = useToast();
   const cards = useQuery({ queryKey: ['blankCards'], queryFn: listBlankCards, staleTime: 30_000 });
   const [sheets, setSheets] = useState(1);
+  const [style, setStyle] = useState(readCardPref);
   const { busy, run } = useLock();
   const list = cards.data ?? [];
+  const copy = CARD_COPIES.find((c) => c.id === style.copy) ?? CARD_COPIES[0];
+  const changeStyle = (design: CardDesign, c: CardCopy['id']) => {
+    setStyle({ design, copy: c });
+    try {
+      localStorage.setItem(CARD_PREF_KEY, JSON.stringify({ design, copy: c }));
+    } catch {
+      /* 저장 못 해도 이번 화면에서는 바뀐다 */
+    }
+  };
 
   const make = () =>
     run(async () => {
@@ -460,6 +469,8 @@ function AdminCards() {
             </button>
           </div>
 
+          <CardStylePicker design={style.design} copy={style.copy} onChange={changeStyle} />
+
           <div className="cards-bar">
             <h2 className="section__title" style={{ margin: 0 }}>
               남은 빈 카드 {cards.data ? `${list.length}장` : ''}
@@ -478,7 +489,7 @@ function AdminCards() {
         {pages.map((page, i) => (
           <div key={i} className="card-sheet">
             {page.map((c) => (
-              <BlankCardView key={c.code} code={c.code} />
+              <BlankCardView key={c.code} code={c.code} design={style.design} copy={copy} />
             ))}
           </div>
         ))}
@@ -487,26 +498,106 @@ function AdminCards() {
   );
 }
 
-function BlankCardView({ code }: { code: string }) {
-  const qr = useQrSvg(storeUrl(code));
+/* 카드 디자인 · 문구 (docs/card-copy-options.html에서 고른 것) */
+type CardDesign = 'C' | 'B' | 'D' | 'A';
+const CARD_DESIGNS: { id: CardDesign; label: string }[] = [
+  { id: 'C', label: '다크' },
+  { id: 'B', label: '민트 반쪽' },
+  { id: 'D', label: '말풍선' },
+  { id: 'A', label: '기본' },
+];
+const CARD_COPIES = [
+  { id: 'voice', title: ['고객의', '소리함'], sub: ['불편했던 점, 바라는 점을', '사장님께 익명으로 남겨 주세요'] },
+  { id: 'word', title: ['사장님께', '한마디'], sub: ['좋았던 점도, 아쉬운 점도', '익명으로 편하게'] },
+  { id: 'today', title: ['오늘', '어떠셨어요?'], sub: ['좋았던 점, 아쉬운 점', '사장님께 바로 전해져요'] },
+] as const;
+type CardCopy = (typeof CARD_COPIES)[number];
+const CARD_PREF_KEY = 'sayandgo:cardStyle';
+
+function readCardPref(): { design: CardDesign; copy: CardCopy['id'] } {
+  try {
+    const v = JSON.parse(localStorage.getItem(CARD_PREF_KEY) ?? 'null');
+    if (v && CARD_DESIGNS.some((d) => d.id === v.design) && CARD_COPIES.some((c) => c.id === v.copy)) return v;
+  } catch {
+    /* 저장소를 못 쓰면 기본값 */
+  }
+  return { design: 'C', copy: 'voice' };
+}
+
+function CardStylePicker({ design, copy, onChange }: { design: CardDesign; copy: CardCopy['id']; onChange: (d: CardDesign, c: CardCopy['id']) => void }) {
   return (
-    <div className="blank-card">
-      <span className="blank-card__qr" dangerouslySetInnerHTML={{ __html: qr }} />
-      <div className="blank-card__text">
-        <span className="blank-card__brand">
-          <AppMark size={18} />
-          Say&amp;Go
-        </span>
-        <b className="blank-card__title">
-          고객의
-          <br />
-          소리함
-        </b>
-        <span className="blank-card__sub">불편했던 점, 바라는 점을 사장님께 익명으로 남겨 주세요</span>
-        <span className="blank-card__foot">
-          로그인 없이 · 익명<span className="blank-card__no">{cardLabel(code)}</span>
-        </span>
+    <div className="panel cards-make">
+      <span className="field__label">디자인</span>
+      <div className="segmented" role="radiogroup" aria-label="디자인">
+        {CARD_DESIGNS.map((d) => (
+          <button key={d.id} type="button" role="radio" aria-selected={design === d.id} onClick={() => onChange(d.id, copy)}>
+            {d.label}
+          </button>
+        ))}
       </div>
+      <span className="field__label" style={{ marginTop: 6 }}>
+        제목
+      </span>
+      <div className="segmented segmented--stack" role="radiogroup" aria-label="제목">
+        {CARD_COPIES.map((c) => (
+          <button key={c.id} type="button" role="radio" aria-selected={copy === c.id} onClick={() => onChange(design, c.id)}>
+            {c.title.join(' ')}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BlankCardView({ code, design, copy }: { code: string; design: CardDesign; copy: CardCopy }) {
+  const qr = useQrSvg(storeUrl(code));
+  const long = Math.max(...copy.title.map((x) => x.length)) >= 6;
+  const qrEl = <span className={`bc-qr${design === 'C' || design === 'B' ? ' bc-tile' : ''}`} dangerouslySetInnerHTML={{ __html: qr }} />;
+  const sub = (
+    <p className="bc-sub">
+      {copy.sub[0]}
+      <br />
+      {copy.sub[1]}
+    </p>
+  );
+  const title =
+    design === 'D' ? (
+      <div className="bc-bubble">
+        {copy.title[0]}
+        <br />
+        {copy.title[1]}
+      </div>
+    ) : (
+      <b className="bc-title">
+        {copy.title[0]}
+        <br />
+        {design === 'C' ? <em>{copy.title[1]}</em> : copy.title[1]}
+      </b>
+    );
+  const text = (
+    <div className="bc-text">
+      {title}
+      {sub}
+    </div>
+  );
+  return (
+    <div className={`blank-card bc--${design}${long ? ' bc--long' : ''}`}>
+      {design === 'B' ? (
+        <>
+          <div className="bc-side">{qrEl}</div>
+          {text}
+        </>
+      ) : design === 'A' ? (
+        <>
+          {qrEl}
+          {text}
+        </>
+      ) : (
+        <>
+          {text}
+          {qrEl}
+        </>
+      )}
     </div>
   );
 }

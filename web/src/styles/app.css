@@ -875,17 +875,37 @@ body.warm .topbar { background: #f3f2ef; }
 .cards-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .card-sheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 12px; }
 
-/* 명함 크기 90 × 54mm. 안의 크기는 카드 폭 기준(cqw)이라 화면 · 인쇄가 같은 모양 */
-.blank-card { container-type: inline-size; aspect-ratio: 90 / 54; background: #fff; color: #15201d; border: 1px solid #dfe5e3; border-radius: 10px; overflow: hidden; display: grid; grid-template-columns: 46% 1fr; }
-.blank-card__qr { display: grid; place-items: center; padding: 5cqw 2cqw 5cqw 5cqw; }
-.blank-card__qr svg { width: 100%; height: auto; display: block; }
-.blank-card__text { display: flex; flex-direction: column; padding: 6cqw 5cqw 5cqw 3cqw; min-width: 0; }
-.blank-card__brand { display: inline-flex; align-items: center; gap: 1.6cqw; font-weight: 800; font-size: 3.8cqw; letter-spacing: -0.01em; }
-.blank-card__brand svg { width: 5cqw; height: 5cqw; }
-.blank-card__title { margin-top: 3.5cqw; font-size: 9.4cqw; line-height: 1.08; font-weight: 900; letter-spacing: -0.03em; }
-.blank-card__sub { margin-top: 2.6cqw; font-size: 3.3cqw; line-height: 1.4; color: #3d4845; word-break: keep-all; }
-.blank-card__foot { margin-top: auto; display: flex; justify-content: space-between; align-items: baseline; gap: 2cqw; font-size: 2.9cqw; font-weight: 700; color: #0b6b58; }
-.blank-card__no { font-family: ui-monospace, Menlo, monospace; font-weight: 600; color: #8a9692; letter-spacing: 0.02em; }
+/* 명함 크기 90 × 54mm. 안의 크기는 카드 폭 기준(cqw)이라 화면 · 인쇄가 같은 모양 (시안: docs/card-copy-options.html) */
+.blank-card { container-type: inline-size; aspect-ratio: 90 / 54; background: #fff; color: #15201d; border: 1px solid #dfe5e3; border-radius: 10px; overflow: hidden; display: grid; align-items: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.bc-qr svg { width: 100%; height: auto; display: block; }
+.bc-tile { background: #fff; border-radius: 3cqw; padding: 2.2cqw; }
+.bc-title { display: block; font-weight: 900; letter-spacing: -0.035em; line-height: 1.08; white-space: nowrap; font-size: 10cqw; }
+.bc-title em { font-style: normal; color: #3ccfae; }
+.bc-sub { margin: 3.5cqw 0 0; font-size: 3.4cqw; line-height: 1.42; color: #3d4845; word-break: keep-all; }
+.bc--long .bc-title { font-size: 8.4cqw; }
+/* C 다크 */
+.bc--C { background: #15201d; grid-template-columns: 1fr 44%; }
+.bc--C .bc-text { padding: 0 2cqw 0 6cqw; }
+.bc--C .bc-title { color: #fff; }
+.bc--C .bc-sub { color: #b9c4c0; }
+.bc--C .bc-qr { margin: 5cqw 5cqw 5cqw 1cqw; }
+/* B 민트 반쪽 */
+.bc--B { grid-template-columns: 46% 1fr; align-items: stretch; }
+.bc--B .bc-side { background: #3ccfae; display: grid; place-items: center; padding: 4.5cqw; }
+.bc--B .bc-side .bc-qr { width: 100%; }
+.bc--B .bc-text { display: flex; flex-direction: column; justify-content: center; padding: 0 5cqw 0 5.5cqw; }
+/* D 말풍선 */
+.bc--D { grid-template-columns: 1fr 44%; }
+.bc--D .bc-text { padding: 0 1cqw 0 5.5cqw; }
+.bc-bubble { position: relative; display: inline-block; background: #3ccfae; color: #15201d; font-weight: 900; font-size: 6.6cqw; line-height: 1.15; letter-spacing: -0.03em; white-space: nowrap; padding: 3.2cqw 4.2cqw; border-radius: 4.5cqw; }
+.bc-bubble::after { content: ""; position: absolute; left: 5cqw; bottom: -2.6cqw; border-width: 2.8cqw 2.4cqw 0 0; border-style: solid; border-color: #3ccfae transparent transparent transparent; }
+.bc--long .bc-bubble { font-size: 6cqw; }
+.bc--D .bc-sub { margin-top: 5.2cqw; font-size: 3.3cqw; }
+.bc--D .bc-qr { padding: 5cqw 5cqw 5cqw 1cqw; }
+/* A 기본 */
+.bc--A { grid-template-columns: 46% 1fr; }
+.bc--A .bc-qr { padding: 5cqw 2cqw 5cqw 5cqw; }
+.bc--A .bc-text { padding: 0 5cqw 0 3cqw; }
 
 @media print {
   @page { size: A4; margin: 10mm 15mm; }
@@ -904,3 +924,6 @@ body.warm .topbar { background: #f3f2ef; }
 .mail-suggest__item { flex: none; display: inline-flex; align-items: center; height: 34px; padding: 0 12px; border: 1px solid var(--control); border-radius: 999px; background: var(--surface); color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .mail-suggest__item:active { background: var(--mint-soft); border-color: var(--mint); }
 .mail-suggest__at { color: var(--muted); font-weight: 500; margin-right: 1px; }
+/* 글자가 긴 선택지는 세로로 쌓는다 (빈 QR 카드 제목) */
+.segmented--stack { grid-auto-flow: row; }
+.segmented--stack button { text-align: left; padding: 0 14px; }

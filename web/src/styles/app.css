@@ -884,7 +884,7 @@ body.warm .topbar { background: #f3f2ef; }
 .cards-steps { margin: 0 0 16px; padding-left: 20px; display: grid; gap: 6px; font-size: var(--fs-14); line-height: 1.5; }
 .cards-make { padding: 16px; display: grid; gap: 10px; margin-bottom: 24px; }
 .cards-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-.card-sheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.card-sheet { display: none; }
 
 /* 명함 크기 90 × 54mm. 안의 크기는 카드 폭 기준(cqw)이라 화면 · 인쇄가 같은 모양 (시안: docs/card-copy-options.html) */
 .blank-card { container-type: inline-size; aspect-ratio: 90 / 54; background: #fff; color: #15201d; border: 1px solid #dfe5e3; border-radius: 10px; overflow: hidden; display: grid; align-items: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -923,14 +923,15 @@ body.warm .topbar { background: #f3f2ef; }
 .bc--A .bc-text { padding: 0 5cqw 0 3cqw; }
 
 @media print {
-  @page { size: A4; margin: 10mm 15mm; }
-  html, body { background: #fff !important; }
+  /* 아이폰 · 맥 기본 용지가 레터(279mm)이고 여백을 따로 잡아도 한 장에 들어가게 84 × 50.4mm (명함 비율 그대로) */
+  @page { size: A4; margin: 8mm 10mm; }
+  html, body, #root { background: #fff !important; min-height: 0 !important; height: auto !important; }
   .no-print, .footer, .topbar, .toast-stack { display: none !important; }
-  .cards-page { padding: 0 !important; max-width: none !important; margin: 0 !important; }
-  .card-sheet { grid-template-columns: repeat(2, 90mm); grid-auto-rows: 54mm; gap: 0; margin: 0; break-after: page; page-break-after: always; }
+  .cards-page { padding: 0 !important; max-width: none !important; margin: 0 !important; min-height: 0 !important; }
+  .card-sheet { display: grid; grid-template-columns: repeat(2, 84mm); grid-auto-rows: 50.4mm; justify-content: center; gap: 0; margin: 0; break-after: page; page-break-after: always; }
   .card-sheet:last-child { break-after: auto; page-break-after: auto; }
-  /* 자르는 선: 옅은 점선 */
-  .blank-card { width: 90mm; height: 54mm; aspect-ratio: auto; border: 0.2mm dashed #c4ccc9; border-radius: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* 자르는 선: 옅은 점선. 한 장이 페이지 사이에서 잘리지 않게 */
+  .blank-card { width: 84mm; height: 50.4mm; aspect-ratio: auto; border: 0.2mm dashed #c4ccc9; border-radius: 0; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
 /* ---------- 메일 주소 추천: 아이디만 치면 @naver.com 등을 눌러 채운다 ---------- */
@@ -950,3 +951,5 @@ body.warm .topbar { background: #f3f2ef; }
 .card-designs__item .blank-card { border-radius: 6px; pointer-events: none; }
 .card-designs__item[aria-selected='true'] { border-color: var(--mint); background: var(--mint-soft); color: var(--text); font-weight: 700; }
 .card-designs__label { font-size: var(--fs-14); }
+.cards-count { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.cards-count b { font-size: 30px; font-weight: 900; letter-spacing: -0.03em; }

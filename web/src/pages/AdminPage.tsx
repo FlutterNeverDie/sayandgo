@@ -512,7 +512,7 @@ const CARD_COPIES = [
   { id: 'word', title: ['사장님께', '한마디'], sub: ['좋았던 점도, 아쉬운 점도', '익명으로 편하게'] },
   { id: 'today', title: ['오늘', '어떠셨어요?'], sub: ['좋았던 점, 아쉬운 점', '사장님께 바로 전해져요'] },
   // 익명 강조: 손님이 망설이는 이유 1순위 "누가 썼는지 알면 어떡하지"에 바로 답한다
-  { id: 'anon', title: ['익명', '피드백'], sub: ['솔직한 한마디가', '가게를 더 좋게 만들어요'] },
+  { id: 'anon', title: ['익명', '피드백'], sub: ['솔직한 한마디가', '매장을 더 좋게 만들어요'] },
 ] as const;
 type CardCopy = (typeof CARD_COPIES)[number];
 const CARD_PREF_KEY = 'sayandgo:cardStyle';

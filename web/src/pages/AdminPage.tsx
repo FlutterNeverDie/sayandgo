@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../app/auth';
+import { AppMark } from '../components/ui/AppMark';
 import { EmailField, TextField } from '../components/ui/Fields';
 import { CopyIcon } from '../components/ui/Icons';
 import { PublicTopbar } from '../components/ui/Layout';
@@ -507,7 +508,7 @@ const CARD_DESIGNS: { id: CardDesign; label: string }[] = [
   { id: 'A', label: '기본' },
 ];
 const CARD_COPIES = [
-  { id: 'voice', title: ['고객의', '소리함'], sub: ['불편했던 점, 바라는 점을', '사장님께 익명으로 남겨 주세요'] },
+  { id: 'voice', title: ['고객의', '소리함'], sub: ['불편했던 점, 바라는 점', '익명으로 남겨 주세요'] },
   { id: 'word', title: ['사장님께', '한마디'], sub: ['좋았던 점도, 아쉬운 점도', '익명으로 편하게'] },
   { id: 'today', title: ['오늘', '어떠셨어요?'], sub: ['좋았던 점, 아쉬운 점', '사장님께 바로 전해져요'] },
 ] as const;
@@ -552,7 +553,18 @@ function CardStylePicker({ design, copy, onChange }: { design: CardDesign; copy:
 function BlankCardView({ code, design, copy }: { code: string; design: CardDesign; copy: CardCopy }) {
   const qr = useQrSvg(storeUrl(code));
   const long = Math.max(...copy.title.map((x) => x.length)) >= 6;
-  const qrEl = <span className={`bc-qr${design === 'C' || design === 'B' ? ' bc-tile' : ''}`} dangerouslySetInnerHTML={{ __html: qr }} />;
+  // QR 오른쪽 아래에 작은 로고 (QR 위에 겹치지 않게 바깥 여백에)
+  const qrEl = (
+    <span className="bc-qrbox">
+      <span className={`bc-qr${design === 'C' || design === 'B' ? ' bc-tile' : ''}`}>
+        <span className="bc-qr__svg" dangerouslySetInnerHTML={{ __html: qr }} />
+        <span className="bc-mark">
+          <AppMark size={12} />
+          Say&amp;Go
+        </span>
+      </span>
+    </span>
+  );
   const sub = (
     <p className="bc-sub">
       {copy.sub[0]}

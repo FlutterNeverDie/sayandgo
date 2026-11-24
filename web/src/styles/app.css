@@ -879,24 +879,23 @@ body.warm .topbar { background: #f3f2ef; }
 .blank-card { container-type: inline-size; aspect-ratio: 90 / 54; background: #fff; color: #15201d; border: 1px solid #dfe5e3; border-radius: 10px; overflow: hidden; display: grid; align-items: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .bc-qr { position: relative; display: block; }
 .bc-qr__svg svg { width: 100%; height: auto; display: block; }
-.bc-mark { position: absolute; top: 100%; right: 0; margin-top: 1.1cqw; display: inline-flex; align-items: center; gap: 0.9cqw; font-size: 2.7cqw; font-weight: 800; letter-spacing: -0.01em; color: #15201d; line-height: 1; white-space: nowrap; }
-.bc-mark svg { width: 3.3cqw; height: 3.3cqw; display: block; }
-.bc-tile .bc-mark { right: 0; }
+.bc-mark { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2.4cqw; display: inline-flex; align-items: center; gap: 1cqw; font-size: 3.1cqw; font-weight: 800; letter-spacing: -0.01em; color: #15201d; line-height: 1; white-space: nowrap; }
+.bc-mark svg { width: 3.8cqw; height: 3.8cqw; display: block; }
 .bc--C .bc-mark { color: #fff; }
 .bc-tile { background: #fff; border-radius: 3cqw; padding: 2.2cqw; }
 .bc-title { display: block; font-weight: 900; letter-spacing: -0.035em; line-height: 1.08; white-space: nowrap; font-size: 10cqw; }
 .bc-title em { font-style: normal; color: #3ccfae; }
-.bc-sub { margin: 3.5cqw 0 0; font-size: 3.4cqw; line-height: 1.42; color: #3d4845; word-break: keep-all; }
+.bc-sub { margin: 3.5cqw 0 0; font-size: 3.7cqw; font-weight: 600; line-height: 1.42; color: #2b3532; word-break: keep-all; white-space: nowrap; }
 .bc--long .bc-title { font-size: 8.4cqw; }
 /* C 다크 */
 .bc--C { background: #15201d; grid-template-columns: 1fr 44%; }
 .bc--C .bc-text { padding: 0 2cqw 0 6cqw; }
 .bc--C .bc-title { color: #fff; }
-.bc--C .bc-sub { color: #b9c4c0; }
-.bc--C .bc-qrbox { display: block; padding: 4cqw 5cqw 6cqw 1cqw; }
+.bc--C .bc-sub { color: #e1e8e5; }
+.bc--C .bc-qrbox { display: block; padding: 3cqw 5cqw 8cqw 1cqw; }
 /* B 민트 반쪽 */
 .bc--B { grid-template-columns: 46% 1fr; align-items: stretch; }
-.bc--B .bc-side { background: #3ccfae; display: grid; place-items: center; padding: 3.5cqw 4.5cqw 6cqw; }
+.bc--B .bc-side { background: #3ccfae; display: grid; place-items: center; padding: 3cqw 4.5cqw 8cqw; }
 .bc--B .bc-side .bc-qrbox { display: block; width: 100%; }
 .bc--B .bc-text { display: flex; flex-direction: column; justify-content: center; padding: 0 5cqw 0 5.5cqw; }
 /* D 말풍선 */
@@ -905,11 +904,11 @@ body.warm .topbar { background: #f3f2ef; }
 .bc-bubble { position: relative; display: inline-block; background: #3ccfae; color: #15201d; font-weight: 900; font-size: 6.6cqw; line-height: 1.15; letter-spacing: -0.03em; white-space: nowrap; padding: 3.2cqw 4.2cqw; border-radius: 4.5cqw; }
 .bc-bubble::after { content: ""; position: absolute; left: 5cqw; bottom: -2.6cqw; border-width: 2.8cqw 2.4cqw 0 0; border-style: solid; border-color: #3ccfae transparent transparent transparent; }
 .bc--long .bc-bubble { font-size: 6cqw; }
-.bc--D .bc-sub { margin-top: 5.2cqw; font-size: 3.3cqw; }
-.bc--D .bc-qrbox { display: block; padding: 4cqw 5cqw 6cqw 1cqw; }
+.bc--D .bc-sub { margin-top: 5.2cqw; }
+.bc--D .bc-qrbox { display: block; padding: 3cqw 5cqw 8cqw 1cqw; }
 /* A 기본 */
 .bc--A { grid-template-columns: 46% 1fr; }
-.bc--A .bc-qrbox { display: block; padding: 4cqw 2cqw 6cqw 5cqw; }
+.bc--A .bc-qrbox { display: block; padding: 3cqw 2cqw 8cqw 5cqw; }
 .bc--A .bc-text { padding: 0 5cqw 0 3cqw; }
 
 @media print {

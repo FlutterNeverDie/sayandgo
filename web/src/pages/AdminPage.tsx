@@ -6,7 +6,7 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'reac
 import { useAuth } from '../app/auth';
 import { AppMark } from '../components/ui/AppMark';
 import { EmailField, TextField } from '../components/ui/Fields';
-import { CopyIcon } from '../components/ui/Icons';
+import { CopyIcon, PlusIcon } from '../components/ui/Icons';
 import { PublicTopbar } from '../components/ui/Layout';
 import { useToast } from '../components/ui/Overlay';
 import { ErrorBox, Loading } from '../components/ui/States';
@@ -445,17 +445,17 @@ export function AdminCardsPage() {
 }
 
 
+/** A4 한 장에 8장 (명함 · 정사각 같음). + 한 번에 한 장 분량(8장)씩 만든다 */
+const CARDS_PER_SHEET = 8;
+
 function AdminCards() {
   const qc = useQueryClient();
   const toast = useToast();
   const cards = useQuery({ queryKey: ['blankCards'], queryFn: listBlankCards, staleTime: 30_000 });
-  const [sheets, setSheets] = useState(1);
   const [style, setStyle] = useState(readCardPref);
-  const [printAll, setPrintAll] = useState(false);
   const { busy, run } = useLock();
   const list = cards.data ?? [];
   const copy = CARD_COPIES.find((c) => c.id === style.copy) ?? CARD_COPIES[0];
-  const perSheet = CARD_SIZES.find((z) => z.id === style.size)?.perSheet ?? 8;
   const changeStyle = (patch: Partial<CardPref>) => {
     const next = { ...style, ...patch };
     setStyle(next);
@@ -469,24 +469,19 @@ function AdminCards() {
   const make = () =>
     run(async () => {
       try {
-        await createCards(sheets * perSheet);
+        await createCards(CARDS_PER_SHEET);
         await qc.invalidateQueries({ queryKey: ['blankCards'] });
-        setPrintAll(false);
-        toast(`카드 ${sheets * perSheet}장을 만들었어요`);
+        toast(`빈 QR ${CARDS_PER_SHEET}개를 만들었어요`);
       } catch {
         toast('만들지 못했어요. 잠시 뒤 다시 시도해 주세요.');
       }
     });
 
-  // 한 번에 만든 카드끼리 묶음 (같은 시각에 저장된다). 이미 뽑은 카드를 또 뽑지 않게 기본은 최근 묶음만 인쇄
+  // 인쇄는 가장 최근에 만든 묶음만 (한 번에 만든 카드는 같은 시각에 저장된다). 이미 뽑은 카드를 또 뽑지 않게
   const newest = list[0]?.createdAt?.getTime() ?? 0;
-  const latest = list.filter((c) => Math.abs((c.createdAt?.getTime() ?? 0) - newest) < 5000);
-  const hasOlder = latest.length < list.length;
-  const toPrint = printAll || !hasOlder ? list : latest;
-
-  // A4 한 장에 명함 8장 / 정사각 12장
+  const toPrint = list.filter((c) => Math.abs((c.createdAt?.getTime() ?? 0) - newest) < 5000);
   const pages: typeof list[] = [];
-  for (let i = 0; i < toPrint.length; i += perSheet) pages.push(toPrint.slice(i, i + perSheet));
+  for (let i = 0; i < toPrint.length; i += CARDS_PER_SHEET) pages.push(toPrint.slice(i, i + CARDS_PER_SHEET));
 
   return (
     <>
@@ -502,66 +497,49 @@ function AdminCards() {
             </p>
           </div>
 
-          <ol className="cards-steps">
-            <li>여기서 카드를 만들고 A4로 인쇄해요 (명함 크기는 한 장에 8장, 정사각은 12장. 스티커 용지도 돼요)</li>
-            <li>매장에서 카드 한 장을 폰 카메라로 찍고 <b>이 카드를 매장에 연결하기</b>를 눌러요</li>
-            <li>상호 · 업종만 넣으면 끝. 카드는 카운터나 테이블에 붙여 드려요</li>
-          </ol>
-
-          {/* 1. 남은 카드 수 + 필요할 때마다 더 만들기 */}
-          <div className="panel cards-make">
-            <div className="cards-count">
+          {/* 서버에 남은 빈 QR 수 + 더 만들기(+) */}
+          <div className="panel cards-stock">
+            <div>
               <span className="field__label" style={{ margin: 0 }}>
-                아직 연결 안 한 카드
+                남은 빈 QR
               </span>
-              {cards.isLoading ? (
-                <span className="skeleton" style={{ width: 64, height: 32 }} />
-              ) : (
-                <b>{list.length}장</b>
-              )}
+              <b className="cards-stock__n">{cards.isLoading ? '-' : `${list.length}개`}</b>
             </div>
-            {cards.isError && <ErrorBox onRetry={() => cards.refetch()} />}
-            <span className="field__label" style={{ marginTop: 8 }}>
-              더 만들기
-            </span>
-            <div className="segmented" role="radiogroup" aria-label="장수">
-              {[1, 2, 3].map((n) => (
-                <button key={n} type="button" role="radio" aria-selected={sheets === n} onClick={() => setSheets(n)}>
-                  {n * perSheet}장
-                </button>
-              ))}
-            </div>
-            <button type="button" className="btn btn--line btn--block" onClick={make} disabled={busy}>
-              {busy ? '만드는 중' : `카드 ${sheets * perSheet}장 더 만들기`}
+            <button
+              type="button"
+              className="cards-stock__add"
+              onClick={make}
+              disabled={busy}
+              aria-label={`빈 QR ${CARDS_PER_SHEET}개 더 만들기`}
+            >
+              <PlusIcon size={22} />
+              <span>{busy ? '만드는 중' : `${CARDS_PER_SHEET}개`}</span>
             </button>
           </div>
+          {cards.isError && <ErrorBox onRetry={() => cards.refetch()} />}
 
-          {/* 2. 디자인 · 제목 */}
+          {/* 크기 · 디자인 · 제목 */}
           <CardStylePicker pref={style} copy={copy} sampleCode={list[0]?.code ?? 'sample00'} onChange={changeStyle} />
 
-          {/* 3. 인쇄. 카드 자체는 화면에 늘어놓지 않고 인쇄할 때만 나온다 */}
-          {list.length > 0 && (
-            <div className="panel cards-make">
-              <span className="field__label">인쇄할 카드</span>
-              {hasOlder && (
-                <div className="segmented" role="radiogroup" aria-label="인쇄할 카드">
-                  <button type="button" role="radio" aria-selected={!printAll} onClick={() => setPrintAll(false)}>
-                    최근에 만든 {latest.length}장
-                  </button>
-                  <button type="button" role="radio" aria-selected={printAll} onClick={() => setPrintAll(true)}>
-                    남은 카드 전부 {list.length}장
-                  </button>
-                </div>
-              )}
-              <p className="field__hint" style={{ marginTop: 0 }}>
-                {toPrint.length}장 · A4 {pages.length}장으로 나와요. 같은 카드를 두 번 뽑으면 QR이 같은 카드가 두 장 생기니, 이미 뽑은 건 다시 뽑지 마세요.
-              </p>
+          {/* 인쇄: 카드 자체는 화면에 늘어놓지 않고 인쇄할 때만 나온다 */}
+          {list.length > 0 ? (
+            <div className="cards-print">
               <button type="button" className="btn btn--black btn--lg btn--block" onClick={() => window.print()}>
                 인쇄 · PDF 저장
               </button>
+              <p className="field__hint" style={{ textAlign: 'center' }}>
+                최근에 만든 {toPrint.length}개가 A4 {pages.length}장에 나와요. 새로 뽑으려면 + 로 먼저 만들어 주세요.
+              </p>
             </div>
+          ) : (
+            !cards.isLoading && <div className="empty">남은 빈 QR이 없어요. + 를 눌러 만들어 주세요.</div>
           )}
-          {cards.data?.length === 0 && <div className="empty">남은 카드가 없어요. 위에서 더 만들어 주세요.</div>}
+
+          <ol className="cards-steps">
+            <li>+ 로 빈 QR을 만들고 A4로 인쇄해요 (한 장에 8개, 스티커 용지도 돼요)</li>
+            <li>매장에서 카드 한 장을 폰 카메라로 찍고 <b>이 카드를 매장에 연결하기</b>를 눌러요</li>
+            <li>상호 · 업종만 넣으면 끝. 카드는 카운터나 테이블에 붙여 드려요</li>
+          </ol>
         </div>
 
         {pages.map((page, i) => (
@@ -592,11 +570,11 @@ const CARD_COPIES = [
   { id: 'anon', title: ['익명', '피드백'], sub: ['솔직한 한마디가', '매장을 더 좋게 만들어요'] },
 ] as const;
 type CardCopy = (typeof CARD_COPIES)[number];
-/** 명함 90 × 54mm (A4에 8장) · 정사각 50 × 50mm (A4에 12장, 테이블 · 계산대 스티커용) */
+/** 명함 90 × 54mm · 정사각 50 × 50mm (테이블 · 계산대 스티커용). 둘 다 A4에 8장 */
 type CardSize = 'card' | 'square';
-const CARD_SIZES: { id: CardSize; label: string; perSheet: number }[] = [
-  { id: 'card', label: '명함 9 × 5.4cm', perSheet: 8 },
-  { id: 'square', label: '정사각 5 × 5cm', perSheet: 12 },
+const CARD_SIZES: { id: CardSize; label: string }[] = [
+  { id: 'card', label: '명함 9 × 5.4cm' },
+  { id: 'square', label: '정사각 5 × 5cm' },
 ];
 type CardPref = { design: CardDesign; copy: CardCopy['id']; size: CardSize };
 const CARD_PREF_KEY = 'sayandgo:cardStyle';

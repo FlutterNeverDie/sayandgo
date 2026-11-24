@@ -88,3 +88,9 @@ export const ZoomIcon = () => (
     <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
   </svg>
 );
+
+export const PlusIcon = ({ size = 20 }: { size?: number }) => (
+  <svg {...base} width={size} height={size} strokeWidth={2}>
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+);

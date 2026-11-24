@@ -5,7 +5,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AppMark } from '../components/ui/AppMark';
 import { useAuth } from '../app/auth';
-import { TextField } from '../components/ui/Fields';
+import { EmailField, TextField } from '../components/ui/Fields';
 import { CopyIcon } from '../components/ui/Icons';
 import { PublicTopbar } from '../components/ui/Layout';
 import { useToast } from '../components/ui/Overlay';
@@ -226,13 +226,11 @@ function SetupForm({ initialCard, onCancel }: { initialCard: string | null; onCa
         hint={card ? '이 카드의 QR이 바로 이 매장 QR이 돼요.' : '미리 뽑아 온 카드를 쓰면 번호를 넣어 주세요. 비워 두면 새 QR을 만들어요.'}
       />
       {mode === 'account' && (
-        <TextField
+        <EmailField
           label="사장님 이메일"
-          type="email"
-          inputMode="email"
           autoComplete="off"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onValue={setEmail}
           error={show('email')}
         />
       )}

@@ -8,10 +8,12 @@ interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   hint?: ReactNode;
   error?: string | null;
+  /** 칸 바로 아래 (오류 · 안내보다 위)에 붙일 것: 메일 주소 추천 등 */
+  below?: ReactNode;
 }
 
 /** 라벨은 칸 위에, 규칙 안내와 오류는 칸 아래에 붙여 aria-describedby로 연결 */
-export function TextField({ label, hint, error, ...rest }: FieldProps) {
+export function TextField({ label, hint, error, below, ...rest }: FieldProps) {
   const id = useId();
   const { t } = useTranslation();
   return (
@@ -26,6 +28,7 @@ export function TextField({ label, hint, error, ...rest }: FieldProps) {
         aria-describedby={`${id}-hint ${id}-err`}
         {...rest}
       />
+      {below}
       {error && (
         <p className="field__error" id={`${id}-err`}>
           {t(error)}
@@ -37,6 +40,71 @@ export function TextField({ label, hint, error, ...rest }: FieldProps) {
         </p>
       )}
     </div>
+  );
+}
+
+/** 자주 쓰는 메일 (한국에서 많이 쓰는 순서) */
+const MAIL_DOMAINS = ['naver.com', 'gmail.com', 'daum.net', 'hanmail.net', 'kakao.com', 'nate.com', 'icloud.com', 'outlook.com'];
+
+/** 아이디만 치면 @naver.com 같은 주소를 눌러서 바로 채운다 */
+export function mailSuggestions(value: string): string[] {
+  const v = value.trim();
+  const at = v.indexOf('@');
+  const local = at < 0 ? v : v.slice(0, at);
+  if (!local || /\s/.test(local)) return [];
+  if (at < 0) return MAIL_DOMAINS.map((d) => `${local}@${d}`);
+  const typed = v.slice(at + 1).toLowerCase();
+  const list = MAIL_DOMAINS.filter((d) => d.startsWith(typed) && d !== typed);
+  return list.map((d) => `${local}@${d}`);
+}
+
+type EmailFieldProps = Omit<FieldProps, 'value' | 'onChange' | 'type' | 'below'> & {
+  value: string;
+  onValue: (v: string) => void;
+};
+
+export function EmailField({ value, onValue, onFocus, onBlur, ...rest }: EmailFieldProps) {
+  const [focused, setFocused] = useState(false);
+  const list = focused ? mailSuggestions(value) : [];
+  return (
+    <TextField
+      type="email"
+      inputMode="email"
+      autoCapitalize="none"
+      spellCheck={false}
+      {...rest}
+      value={value}
+      onChange={(e) => onValue(e.target.value)}
+      onFocus={(e) => {
+        setFocused(true);
+        onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        setFocused(false);
+        onBlur?.(e);
+      }}
+      below={
+        list.length > 0 && (
+          <div className="mail-suggest" role="listbox" aria-label="메일 주소 추천">
+            {list.map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="option"
+                aria-selected={false}
+                className="mail-suggest__item"
+                // 누르는 순간 칸이 포커스를 잃어 목록이 사라지지 않게
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onValue(m)}
+              >
+                <span className="mail-suggest__at">@</span>
+                {m.slice(m.indexOf('@') + 1)}
+              </button>
+            ))}
+          </div>
+        )
+      }
+    />
   );
 }
 

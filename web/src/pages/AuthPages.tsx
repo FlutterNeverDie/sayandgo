@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../app/auth';
 import { parseClaimToken } from '../lib/admin';
 import { AppMark } from '../components/ui/AppMark';
-import { PasswordField, TextField } from '../components/ui/Fields';
+import { EmailField, PasswordField, TextField } from '../components/ui/Fields';
 import { CategoryPicker } from '../components/ui/StorePickers';
 import type { StoreCategory } from '../lib/types';
 import { PublicTopbar } from '../components/ui/Layout';
@@ -115,13 +115,11 @@ export function SignupPage() {
       }
     >
       <form onSubmit={onSubmit} noValidate>
-        <TextField
+        <EmailField
           label={t('signup.email')}
-          type="email"
           autoComplete="email"
-          inputMode="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onValue={setEmail}
           onBlur={blur('email')}
           error={show('email')}
           hint={t('signup.emailHint')}
@@ -263,7 +261,7 @@ export function LoginPage() {
       }
     >
       <form onSubmit={onSubmit} noValidate>
-        <TextField label={t('signup.email')} type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <EmailField label={t('signup.email')} autoComplete="email" value={email} onValue={setEmail} />
         <PasswordField label={t('signup.password')} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {formError && (
           <p className="field__error" role="alert" style={{ marginBottom: 12 }}>
@@ -404,7 +402,7 @@ export function ResetPage() {
         </p>
       ) : (
         <form onSubmit={onSubmit} noValidate>
-          <TextField label={t('signup.email')} type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} />
+          <EmailField label={t('signup.email')} autoComplete="email" value={email} onValue={setEmail} error={error} />
           <button className="btn btn--primary btn--block" disabled={busy}>
             {t('reset.submit')}
           </button>

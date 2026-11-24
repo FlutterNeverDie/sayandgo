@@ -923,15 +923,16 @@ body.warm .topbar { background: #f3f2ef; }
 .bc--A .bc-text { padding: 0 5cqw 0 3cqw; }
 
 @media print {
-  /* 아이폰 · 맥 기본 용지가 레터(279mm)이고 여백을 따로 잡아도 한 장에 들어가게 84 × 50.4mm (명함 비율 그대로) */
-  @page { size: A4; margin: 8mm 10mm; }
+  /* 명함 크기 90 × 54mm, 카드 사이 6mm 띄워 한 장씩 자르기 쉽게. 2 × 4 = 8장.
+     아이폰 · 맥 기본 용지(레터 279mm)에 여백을 따로 잡아도 한 장에 들어간다 (세로 234mm) */
+  @page { size: A4; margin: 10mm; }
   html, body, #root { background: #fff !important; min-height: 0 !important; height: auto !important; }
   .no-print, .footer, .topbar, .toast-stack { display: none !important; }
   .cards-page { padding: 0 !important; max-width: none !important; margin: 0 !important; min-height: 0 !important; }
-  .card-sheet { display: grid; grid-template-columns: repeat(2, 84mm); grid-auto-rows: 50.4mm; justify-content: center; gap: 0; margin: 0; break-after: page; page-break-after: always; }
+  .card-sheet { display: grid; grid-template-columns: repeat(2, 90mm); grid-auto-rows: 54mm; justify-content: center; gap: 6mm; margin: 0; break-after: page; page-break-after: always; }
   .card-sheet:last-child { break-after: auto; page-break-after: auto; }
-  /* 자르는 선: 옅은 점선. 한 장이 페이지 사이에서 잘리지 않게 */
-  .blank-card { width: 84mm; height: 50.4mm; aspect-ratio: auto; border: 0.2mm dashed #c4ccc9; border-radius: 0; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* 자르는 선: 옅은 실선. 한 장이 페이지 사이에서 잘리지 않게 */
+  .blank-card { width: 90mm; height: 54mm; aspect-ratio: auto; border: 0.25mm solid #c4ccc9; border-radius: 0; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
 /* ---------- 메일 주소 추천: 아이디만 치면 @naver.com 등을 눌러 채운다 ---------- */

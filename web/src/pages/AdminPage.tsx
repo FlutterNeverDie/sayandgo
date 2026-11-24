@@ -392,7 +392,7 @@ function AdminStore() {
   return <Share store={s} back="/admin" top={top} />;
 }
 
-/** /admin/cards: 빈 QR 카드 만들기 · 인쇄 (A4 한 장에 10장, 명함 크기) */
+/** /admin/cards: 빈 QR 카드 만들기 · 인쇄 (A4 한 장에 8장, 명함 크기, 자르기 쉽게 사이를 띄움) */
 export function AdminCardsPage() {
   return (
     <RequireAdmin>
@@ -401,7 +401,7 @@ export function AdminCardsPage() {
   );
 }
 
-const CARDS_PER_SHEET = 10;
+const CARDS_PER_SHEET = 8;
 
 function AdminCards() {
   const qc = useQueryClient();
@@ -440,7 +440,7 @@ function AdminCards() {
   const hasOlder = latest.length < list.length;
   const toPrint = printAll || !hasOlder ? list : latest;
 
-  // 10장씩 A4 한 장
+  // 8장씩 A4 한 장
   const pages: typeof list[] = [];
   for (let i = 0; i < toPrint.length; i += CARDS_PER_SHEET) pages.push(toPrint.slice(i, i + CARDS_PER_SHEET));
 
@@ -459,7 +459,7 @@ function AdminCards() {
           </div>
 
           <ol className="cards-steps">
-            <li>여기서 카드를 만들고 A4로 인쇄해요 (한 장에 10장, 스티커 용지도 돼요)</li>
+            <li>여기서 카드를 만들고 A4로 인쇄해요 (한 장에 8장, 스티커 용지도 돼요)</li>
             <li>매장에서 카드 한 장을 폰 카메라로 찍고 <b>이 카드를 매장에 연결하기</b>를 눌러요</li>
             <li>상호 · 업종만 넣으면 끝. 카드는 카운터나 테이블에 붙여 드려요</li>
           </ol>

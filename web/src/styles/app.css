@@ -922,6 +922,27 @@ body.warm .topbar { background: #f3f2ef; }
 .bc--A .bc-qrbox { display: block; padding: 3cqw 2cqw 8cqw 5cqw; }
 .bc--A .bc-text { padding: 0 5cqw 0 3cqw; }
 
+/* ---------- 정사각 5 × 5cm: 제목 한 줄 → 큰 QR → 작은 로고 ---------- */
+.bc-sq { aspect-ratio: 1; display: block; }
+.bc-sq__in { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 7cqw 8cqw 6cqw; }
+.bc-sq .bc-title { font-size: 10cqw; line-height: 1.1; text-align: center; letter-spacing: -0.04em; }
+.bc-sq .bc-qrbox { display: block; width: 60cqw; padding: 0 0 9cqw; margin-top: 5cqw; }
+.bc-sq .bc-mark { margin-top: 2.6cqw; font-size: 4.2cqw; gap: 1.4cqw; }
+.bc-sq .bc-mark svg { width: 5cqw; height: 5cqw; }
+.bc-sq.bc--C .bc-tile { padding: 3cqw; border-radius: 4cqw; }
+.bc-sq.bc--C .bc-qrbox { width: 64cqw; }
+/* 민트 띠: 위쪽을 민트로 칠하고 제목을 올린다 */
+.bc-sq.bc--B .bc-sq__in { padding: 0 0 6cqw; justify-content: flex-start; align-items: stretch; }
+.bc-sq .bc-band { background: #3ccfae; text-align: center; padding: 6.5cqw 6cqw 5.5cqw; }
+.bc-sq.bc--B .bc-qrbox { align-self: center; margin-top: 6cqw; width: 56cqw; }
+.bc-sq.bc--B .bc-mark rect { fill: #3ccfae; }
+/* 말풍선: 꼬리를 가운데로 */
+.bc-sq .bc-bubble { padding: 2.6cqw 5cqw; border-radius: 5cqw; }
+.bc-sq .bc-bubble::after { left: 50%; transform: translateX(-50%); bottom: -3cqw; border-width: 3.2cqw 2.6cqw 0 2.6cqw; }
+.bc-sq.bc--D .bc-qrbox { margin-top: 6.5cqw; width: 56cqw; }
+/* 미리보기 2 × 2 정사각 */
+.card-designs--sq .blank-card { width: 78%; justify-self: center; }
+
 @media print {
   /* 명함 크기 90 × 54mm, 카드 사이 6mm 띄워 한 장씩 자르기 쉽게. 2 × 4 = 8장.
      아이폰 · 맥 기본 용지(레터 279mm)에 여백을 따로 잡아도 한 장에 들어간다 (세로 234mm) */
@@ -931,6 +952,9 @@ body.warm .topbar { background: #f3f2ef; }
   .cards-page { padding: 0 !important; max-width: none !important; margin: 0 !important; min-height: 0 !important; }
   .card-sheet { display: grid; grid-template-columns: repeat(2, 90mm); grid-auto-rows: 54mm; justify-content: center; gap: 6mm; margin: 0; break-after: page; page-break-after: always; }
   .card-sheet:last-child { break-after: auto; page-break-after: auto; }
+  /* 정사각 50 × 50mm: 3 × 4 = 12장 (세로 218mm, 레터에도 들어간다) */
+  .card-sheet--sq { grid-template-columns: repeat(3, 50mm); grid-auto-rows: 50mm; }
+  .card-sheet--sq .blank-card { width: 50mm; height: 50mm; }
   /* 자르는 선: 옅은 실선. 한 장이 페이지 사이에서 잘리지 않게 */
   .blank-card { width: 90mm; height: 54mm; aspect-ratio: auto; border: 0.25mm solid #c4ccc9; border-radius: 0; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

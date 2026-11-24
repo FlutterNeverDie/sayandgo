@@ -392,6 +392,49 @@ function AdminStore() {
   return <Share store={s} back="/admin" top={top} />;
 }
 
+/** 정사각 5 × 5cm: 작아서 아랫줄은 빼고 제목 한 줄 + 큰 QR + 작은 로고 */
+function SquareCardView({ qr, design, copy }: { qr: string; design: CardDesign; copy: CardCopy }) {
+  const line = copy.title.join(' ');
+  // 제목이 길면 글자를 줄여 한 줄에 (카드 폭의 약 80% 안)
+  const fontSize = `${Math.min(10.5, 80 / line.length)}cqw`;
+  const qrEl = (
+    <span className="bc-qrbox">
+      <span className={`bc-qr${design === 'C' ? ' bc-tile' : ''}`}>
+        <span className="bc-qr__svg" dangerouslySetInnerHTML={{ __html: qr }} />
+        <span className="bc-mark">
+          <AppMark size={12} />
+          Say&amp;Go
+        </span>
+      </span>
+    </span>
+  );
+  const title =
+    design === 'D' ? (
+      <div className="bc-bubble" style={{ fontSize }}>
+        {line}
+      </div>
+    ) : (
+      <b className="bc-title" style={{ fontSize }}>
+        {design === 'C' ? (
+          <>
+            {copy.title[0]} <em>{copy.title[1]}</em>
+          </>
+        ) : (
+          line
+        )}
+      </b>
+    );
+  return (
+    <div className={`blank-card bc-sq bc--${design}`}>
+      {/* 여백은 안쪽 칸에: 카드 자신의 padding에 cqw를 쓰면 카드가 아니라 화면 폭 기준으로 계산된다 */}
+      <div className="bc-sq__in">
+        {design === 'B' ? <div className="bc-band">{title}</div> : title}
+        {qrEl}
+      </div>
+    </div>
+  );
+}
+
 /** /admin/cards: 빈 QR 카드 만들기 · 인쇄 (A4 한 장에 8장, 명함 크기, 자르기 쉽게 사이를 띄움) */
 export function AdminCardsPage() {
   return (
@@ -401,7 +444,6 @@ export function AdminCardsPage() {
   );
 }
 
-const CARDS_PER_SHEET = 8;
 
 function AdminCards() {
   const qc = useQueryClient();
@@ -413,10 +455,12 @@ function AdminCards() {
   const { busy, run } = useLock();
   const list = cards.data ?? [];
   const copy = CARD_COPIES.find((c) => c.id === style.copy) ?? CARD_COPIES[0];
-  const changeStyle = (design: CardDesign, c: CardCopy['id']) => {
-    setStyle({ design, copy: c });
+  const perSheet = CARD_SIZES.find((z) => z.id === style.size)?.perSheet ?? 8;
+  const changeStyle = (patch: Partial<CardPref>) => {
+    const next = { ...style, ...patch };
+    setStyle(next);
     try {
-      localStorage.setItem(CARD_PREF_KEY, JSON.stringify({ design, copy: c }));
+      localStorage.setItem(CARD_PREF_KEY, JSON.stringify(next));
     } catch {
       /* 저장 못 해도 이번 화면에서는 바뀐다 */
     }
@@ -425,10 +469,10 @@ function AdminCards() {
   const make = () =>
     run(async () => {
       try {
-        await createCards(sheets * CARDS_PER_SHEET);
+        await createCards(sheets * perSheet);
         await qc.invalidateQueries({ queryKey: ['blankCards'] });
         setPrintAll(false);
-        toast(`카드 ${sheets * CARDS_PER_SHEET}장을 만들었어요`);
+        toast(`카드 ${sheets * perSheet}장을 만들었어요`);
       } catch {
         toast('만들지 못했어요. 잠시 뒤 다시 시도해 주세요.');
       }
@@ -440,9 +484,9 @@ function AdminCards() {
   const hasOlder = latest.length < list.length;
   const toPrint = printAll || !hasOlder ? list : latest;
 
-  // 8장씩 A4 한 장
+  // A4 한 장에 명함 8장 / 정사각 12장
   const pages: typeof list[] = [];
-  for (let i = 0; i < toPrint.length; i += CARDS_PER_SHEET) pages.push(toPrint.slice(i, i + CARDS_PER_SHEET));
+  for (let i = 0; i < toPrint.length; i += perSheet) pages.push(toPrint.slice(i, i + perSheet));
 
   return (
     <>
@@ -459,7 +503,7 @@ function AdminCards() {
           </div>
 
           <ol className="cards-steps">
-            <li>여기서 카드를 만들고 A4로 인쇄해요 (한 장에 8장, 스티커 용지도 돼요)</li>
+            <li>여기서 카드를 만들고 A4로 인쇄해요 (명함 크기는 한 장에 8장, 정사각은 12장. 스티커 용지도 돼요)</li>
             <li>매장에서 카드 한 장을 폰 카메라로 찍고 <b>이 카드를 매장에 연결하기</b>를 눌러요</li>
             <li>상호 · 업종만 넣으면 끝. 카드는 카운터나 테이블에 붙여 드려요</li>
           </ol>
@@ -483,17 +527,17 @@ function AdminCards() {
             <div className="segmented" role="radiogroup" aria-label="장수">
               {[1, 2, 3].map((n) => (
                 <button key={n} type="button" role="radio" aria-selected={sheets === n} onClick={() => setSheets(n)}>
-                  {n * CARDS_PER_SHEET}장
+                  {n * perSheet}장
                 </button>
               ))}
             </div>
             <button type="button" className="btn btn--line btn--block" onClick={make} disabled={busy}>
-              {busy ? '만드는 중' : `카드 ${sheets * CARDS_PER_SHEET}장 더 만들기`}
+              {busy ? '만드는 중' : `카드 ${sheets * perSheet}장 더 만들기`}
             </button>
           </div>
 
           {/* 2. 디자인 · 제목 */}
-          <CardStylePicker design={style.design} copy={copy} sampleCode={list[0]?.code ?? 'sample00'} onChange={changeStyle} />
+          <CardStylePicker pref={style} copy={copy} sampleCode={list[0]?.code ?? 'sample00'} onChange={changeStyle} />
 
           {/* 3. 인쇄. 카드 자체는 화면에 늘어놓지 않고 인쇄할 때만 나온다 */}
           {list.length > 0 && (
@@ -521,9 +565,9 @@ function AdminCards() {
         </div>
 
         {pages.map((page, i) => (
-          <div key={i} className="card-sheet">
+          <div key={i} className={`card-sheet${style.size === 'square' ? ' card-sheet--sq' : ''}`}>
             {page.map((c) => (
-              <BlankCardView key={c.code} code={c.code} design={style.design} copy={copy} />
+              <BlankCardView key={c.code} code={c.code} design={style.design} copy={copy} size={style.size} />
             ))}
           </div>
         ))}
@@ -548,34 +592,53 @@ const CARD_COPIES = [
   { id: 'anon', title: ['익명', '피드백'], sub: ['솔직한 한마디가', '매장을 더 좋게 만들어요'] },
 ] as const;
 type CardCopy = (typeof CARD_COPIES)[number];
+/** 명함 90 × 54mm (A4에 8장) · 정사각 50 × 50mm (A4에 12장, 테이블 · 계산대 스티커용) */
+type CardSize = 'card' | 'square';
+const CARD_SIZES: { id: CardSize; label: string; perSheet: number }[] = [
+  { id: 'card', label: '명함 9 × 5.4cm', perSheet: 8 },
+  { id: 'square', label: '정사각 5 × 5cm', perSheet: 12 },
+];
+type CardPref = { design: CardDesign; copy: CardCopy['id']; size: CardSize };
 const CARD_PREF_KEY = 'sayandgo:cardStyle';
 
-function readCardPref(): { design: CardDesign; copy: CardCopy['id'] } {
+function readCardPref(): CardPref {
   try {
     const v = JSON.parse(localStorage.getItem(CARD_PREF_KEY) ?? 'null');
-    if (v && CARD_DESIGNS.some((d) => d.id === v.design) && CARD_COPIES.some((c) => c.id === v.copy)) return v;
+    if (v && CARD_DESIGNS.some((d) => d.id === v.design) && CARD_COPIES.some((c) => c.id === v.copy))
+      return { design: v.design, copy: v.copy, size: CARD_SIZES.some((z) => z.id === v.size) ? v.size : 'card' };
   } catch {
     /* 저장소를 못 쓰면 기본값 */
   }
-  return { design: 'C', copy: 'voice' };
+  return { design: 'C', copy: 'voice', size: 'card' };
 }
 
 function CardStylePicker({
-  design,
+  pref,
   copy,
   sampleCode,
   onChange,
 }: {
-  design: CardDesign;
+  pref: CardPref;
   copy: CardCopy;
   sampleCode: string;
-  onChange: (d: CardDesign, c: CardCopy['id']) => void;
+  onChange: (patch: Partial<CardPref>) => void;
 }) {
+  const { design, size } = pref;
   return (
     <div className="panel cards-make">
-      <span className="field__label">디자인 (눌러서 고르기)</span>
+      <span className="field__label">크기</span>
+      <div className="segmented" role="radiogroup" aria-label="크기">
+        {CARD_SIZES.map((z) => (
+          <button key={z.id} type="button" role="radio" aria-selected={size === z.id} onClick={() => onChange({ size: z.id })}>
+            {z.label}
+          </button>
+        ))}
+      </div>
+      <span className="field__label" style={{ marginTop: 6 }}>
+        디자인 (눌러서 고르기)
+      </span>
       {/* 4종을 한눈에: 지금 고른 제목으로 미리 보여 준다 */}
-      <div className="card-designs" role="radiogroup" aria-label="디자인">
+      <div className={`card-designs${size === 'square' ? ' card-designs--sq' : ''}`} role="radiogroup" aria-label="디자인">
         {CARD_DESIGNS.map((d) => (
           <button
             key={d.id}
@@ -583,9 +646,9 @@ function CardStylePicker({
             role="radio"
             aria-selected={design === d.id}
             className="card-designs__item"
-            onClick={() => onChange(d.id, copy.id)}
+            onClick={() => onChange({ design: d.id })}
           >
-            <BlankCardView code={sampleCode} design={d.id} copy={copy} />
+            <BlankCardView code={sampleCode} design={d.id} copy={copy} size={size} />
             <span className="card-designs__label">{d.label}</span>
           </button>
         ))}
@@ -595,7 +658,7 @@ function CardStylePicker({
       </span>
       <div className="segmented segmented--stack" role="radiogroup" aria-label="제목">
         {CARD_COPIES.map((c) => (
-          <button key={c.id} type="button" role="radio" aria-selected={copy.id === c.id} onClick={() => onChange(design, c.id)}>
+          <button key={c.id} type="button" role="radio" aria-selected={copy.id === c.id} onClick={() => onChange({ copy: c.id })}>
             {c.title.join(' ')}
           </button>
         ))}
@@ -604,8 +667,9 @@ function CardStylePicker({
   );
 }
 
-function BlankCardView({ code, design, copy }: { code: string; design: CardDesign; copy: CardCopy }) {
+function BlankCardView({ code, design, copy, size = 'card' }: { code: string; design: CardDesign; copy: CardCopy; size?: CardSize }) {
   const qr = useQrSvg(storeUrl(code));
+  if (size === 'square') return <SquareCardView qr={qr} design={design} copy={copy} />;
   const long = Math.max(...copy.title.map((x) => x.length)) >= 6;
   // QR 오른쪽 아래에 작은 로고 (QR 위에 겹치지 않게 바깥 여백에)
   const qrEl = (

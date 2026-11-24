@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { doc, getDoc } from 'firebase/firestore';
 import QRCode from 'qrcode';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../app/auth';
 import { TextField } from '../components/ui/Fields';
 import { CopyIcon } from '../components/ui/Icons';
@@ -27,26 +27,16 @@ import { storeUrl } from '../lib/storeCode';
 import type { StoreCategory } from '../lib/types';
 import { useLock } from '../lib/useLock';
 import { checkEmail, checkIntro, checkStoreName, LIMITS } from '../lib/validation';
+import { NotFoundPage } from './MiscPages';
 import { Share } from './SharePage';
 
 /* 운영자 전용: 매장에 직접 가서 세팅해 주는 화면. 내부 도구라 한국어만 쓴다. */
 
 function RequireAdmin({ children }: { children: ReactNode }) {
   const { user, ready } = useAuth();
-  const location = useLocation();
   if (!ready) return <Loading />;
-  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
-  if (!isAdminUser(user))
-    return (
-      <>
-        <PublicTopbar back />
-        <main className="page page--fill">
-          <div className="center-state center-state--big">
-            <h1>운영자만 볼 수 있어요</h1>
-          </div>
-        </main>
-      </>
-    );
+  // 로그인 전이거나 운영자가 아니면 이 화면이 있다는 것도 드러내지 않는다 (운영자는 로그인 후 설정에서 들어온다)
+  if (!isAdminUser(user)) return <NotFoundPage />;
   return <>{children}</>;
 }
 

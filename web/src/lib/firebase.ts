@@ -45,7 +45,8 @@ if (usingEmulator) {
   // 에뮬레이터 전용: ?devLogin=1 이면 샘플 사장님으로 로그인 (scripts/seed-emulator.mjs의 계정)
   // ?devLogin=admin 이면 운영자 계정 (현장 세팅 시험용)
   const devLogin = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('devLogin') : null;
-  if (devLogin !== null) {
+  // import.meta.env.DEV: 운영 빌드에서는 이 코드와 테스트 비밀번호가 통째로 빠진다
+  if (import.meta.env.DEV && devLogin !== null) {
     const [email, pw] = devLogin === 'admin' ? ['oasa741@gmail.com', 'admin1234a'] : ['demo@sayandgo.test', 'coffee2024'];
     import('firebase/auth').then(({ signInWithEmailAndPassword }) => signInWithEmailAndPassword(auth, email, pw).catch(() => undefined));
   }
